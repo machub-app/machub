@@ -14,6 +14,13 @@ enum WhiskyStatus: Equatable, Sendable {
     case outdated(WhiskyInstall, missing: [String])
     case notFound(searched: [URL])
     case invalidCustomPath(URL, reason: String)
+
+    var install: WhiskyInstall? {
+        switch self {
+        case .ready(let install), .outdated(let install, _): install
+        case .notFound, .invalidCustomPath: nil
+        }
+    }
 }
 
 /// Finds a usable WhiskyCmd. Never trusts a path or an app name: a candidate is accepted

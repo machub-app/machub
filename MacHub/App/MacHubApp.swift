@@ -16,12 +16,33 @@ enum Main {
 
 struct MacHubApp: App {
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
+    @State private var navigation = AppNavigation()
+
+    init() {
+        // Steam artwork is large and reused across rows, hero and backdrop: keep it on disk between launches.
+        URLCache.shared = URLCache(memoryCapacity: 128 << 20, diskCapacity: 1 << 30)
+    }
 
     var body: some Scene {
         WindowGroup {
-            DiagnosticsView()
-                .frame(minWidth: 640, minHeight: 480)
+            // Dark by use scene: played in the evening, artwork-first, like a TV app; light would wash the art out.
+            RootView(navigation: navigation)
+                .frame(minWidth: 1100, minHeight: 720)
+                .preferredColorScheme(.dark)
                 .appLanguage(language)
+        }
+        .defaultSize(width: 1440, height: 900)
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") { navigation.selection = .settings }
+                    .keyboardShortcut(",")
+            }
+            CommandMenu("Go") {
+                Button("Home") { navigation.selection = .home }.keyboardShortcut("1")
+                Button("Library") { navigation.selection = .library }.keyboardShortcut("2")
+                Button("Search") { navigation.selection = .search }.keyboardShortcut("3")
+                Button("Find…") { navigation.selection = .search }.keyboardShortcut("f")
+            }
         }
     }
 }

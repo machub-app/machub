@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T22:00:59+00:00",
+  "title": "Design System: MacHub",
+  "platform": "macOS 15+ SwiftUI (dark only). Values are SwiftUI points; CSS in components is a 1 pt = 1 px preview approximation.",
+  "extensions": {
+    "colorMeta": {
+      "theatre-ground": {
+        "role": "neutral",
+        "displayName": "Theatre Ground",
+        "canonical": "Color(red: 0.043, green: 0.043, blue: 0.051) // Theme.ground",
+        "tonalRamp": [
+          "#0B0B0D",
+          "#242426",
+          "#3F3F42",
+          "#5D5D60",
+          "#7D7D80",
+          "#9E9EA1",
+          "#C4C4C7",
+          "#EEEEF1"
+        ]
+      },
+      "house-surface": {
+        "role": "neutral",
+        "displayName": "House Surface",
+        "canonical": "Color.white.opacity(0.06) // Theme.surface; composites to #1A1A1C on the ground",
+        "tonalRamp": [
+          "#121214",
+          "#1A1A1C",
+          "#1F1F20",
+          "#232325",
+          "#2D2D2F",
+          "#373739",
+          "#464647",
+          "#59595A"
+        ]
+      },
+      "house-surface-raised": {
+        "role": "neutral",
+        "displayName": "House Surface Raised",
+        "canonical": "Color.white.opacity(0.10) // Theme.surfaceRaised; composites to #232325",
+        "tonalRamp": [
+          "#121214",
+          "#1A1A1C",
+          "#1F1F20",
+          "#232325",
+          "#2D2D2F",
+          "#373739",
+          "#464647",
+          "#59595A"
+        ]
+      },
+      "house-stroke": {
+        "role": "neutral",
+        "displayName": "House Stroke",
+        "canonical": "Color.white.opacity(0.10) // Theme.stroke",
+        "tonalRamp": [
+          "#121214",
+          "#1A1A1C",
+          "#1F1F20",
+          "#232325",
+          "#2D2D2F",
+          "#373739",
+          "#464647",
+          "#59595A"
+        ]
+      },
+      "screen-white": {
+        "role": "neutral",
+        "displayName": "Screen White",
+        "canonical": "Color(white: 0.96) // Theme.textPrimary",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C4C4C4",
+          "#EEEEEE"
+        ]
+      },
+      "aisle-grey": {
+        "role": "neutral",
+        "displayName": "Aisle Grey",
+        "canonical": "Color(white: 0.66) // Theme.textSecondary",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C4C4C4",
+          "#EEEEEE"
+        ]
+      },
+      "projector-red": {
+        "role": "primary",
+        "displayName": "Projector Red",
+        "canonical": "Color(red: 0.898, green: 0.035, blue: 0.078) // Theme.play",
+        "tonalRamp": [
+          "#1F0000",
+          "#4B0102",
+          "#7D0005",
+          "#B2030C",
+          "#E81318",
+          "#FF6457",
+          "#FFABA0",
+          "#FFE9E5"
+        ]
+      },
+      "graphite": {
+        "role": "secondary",
+        "displayName": "Graphite",
+        "canonical": "AccentColor.colorset sRGB (0.420, 0.408, 0.400)",
+        "tonalRamp": [
+          "#0D0B09",
+          "#262322",
+          "#423F3D",
+          "#605D5B",
+          "#807C7A",
+          "#A19E9B",
+          "#C7C3C1",
+          "#F1EEEB"
+        ]
+      },
+      "compat-great": {
+        "role": "tertiary",
+        "displayName": "Runs great",
+        "canonical": "Color(red: 0.19, green: 0.82, blue: 0.35) + checkmark.seal.fill",
+        "tonalRamp": [
+          "#001002",
+          "#002D0A",
+          "#004E18",
+          "#027227",
+          "#059737",
+          "#09BE48",
+          "#4EE76E",
+          "#C9FFCE"
+        ]
+      },
+      "compat-playable": {
+        "role": "tertiary",
+        "displayName": "Playable",
+        "canonical": "Color(red: 1.0, green: 0.84, blue: 0.04) + checkmark.circle.fill",
+        "tonalRamp": [
+          "#0F0B00",
+          "#2C2301",
+          "#4C3F02",
+          "#6F5C00",
+          "#947B02",
+          "#BB9C07",
+          "#E6C10D",
+          "#FFEFB3"
+        ]
+      },
+      "compat-issues": {
+        "role": "tertiary",
+        "displayName": "Known issues",
+        "canonical": "Color(red: 1.0, green: 0.62, blue: 0.04) + exclamationmark.triangle.fill",
+        "tonalRamp": [
+          "#140800",
+          "#361D00",
+          "#5C3601",
+          "#845002",
+          "#AF6B05",
+          "#DD8809",
+          "#FFB25C",
+          "#FEEBD8"
+        ]
+      },
+      "compat-unsupported": {
+        "role": "tertiary",
+        "displayName": "Won't run",
+        "canonical": "Color(red: 1.0, green: 0.27, blue: 0.23) + xmark.octagon.fill",
+        "tonalRamp": [
+          "#1F0000",
+          "#4B0102",
+          "#7D0004",
+          "#B2020A",
+          "#E42421",
+          "#FE6557",
+          "#FEABA0",
+          "#FEE9E6"
+        ]
+      },
+      "compat-unknown": {
+        "role": "tertiary",
+        "displayName": "Untested",
+        "canonical": "Theme.textSecondary + questionmark.circle",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C4C4C4",
+          "#EEEEEE"
+        ]
+      },
+      "logo-plate": {
+        "role": "neutral",
+        "displayName": "Logo Plate",
+        "canonical": "Color(white: 0.93).opacity(0.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C4C4C4",
+          "#EEEEEE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (logo fallback)",
+        "purpose": "Each title's Steam logo art is the display voice; SF Pro Expanded Heavy 52 pt only when logo art is unavailable. Theme.titleFont(52).",
+        "swiftUI": ".system(size: 52, weight: .heavy).width(.expanded)"
+      },
+      "headline": {
+        "displayName": "Page Title",
+        "purpose": "Library and Search page titles.",
+        "swiftUI": "Theme.titleFont(34)"
+      },
+      "title": {
+        "displayName": "Row / Section Heading",
+        "purpose": "Row headings, detail section headings, empty-state heading.",
+        "swiftUI": ".title2.weight(.bold)"
+      },
+      "summary": {
+        "displayName": "Summary",
+        "purpose": "Hero summary (3 lines, 520 pt) and detail About text.",
+        "swiftUI": ".title3"
+      },
+      "action": {
+        "displayName": "Action",
+        "purpose": "Play and secondary capsule button labels.",
+        "swiftUI": ".system(size: 15, weight: .semibold)"
+      },
+      "card-name": {
+        "displayName": "Card Name",
+        "purpose": "Single line under each card.",
+        "swiftUI": ".headline"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Info panel values, settings rows.",
+        "swiftUI": ".body"
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Meta line, PlayStatus captions, full compatibility badge (semibold).",
+        "swiftUI": ".callout"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Compact badges, Demo data tag, sidebar status headline.",
+        "swiftUI": ".caption.weight(.semibold)"
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-lift",
+        "value": ".shadow(color: .black.opacity(0.55), radius: 18, y: 10)",
+        "css": "0 10px 36px rgba(0,0,0,0.55)",
+        "purpose": "Only while a card is hovered or focused, Reduce Motion off."
+      },
+      {
+        "name": "logo-on-art",
+        "value": ".shadow(color: .black.opacity(0.5), radius: 12, y: 4)",
+        "css": "0 4px 24px rgba(0,0,0,0.5)",
+        "purpose": "Light logo art placed directly over artwork."
+      },
+      {
+        "name": "logo-plate",
+        "value": ".shadow(color: .black.opacity(0.35), radius: 16, y: 6)",
+        "css": "0 6px 32px rgba(0,0,0,0.35)",
+        "purpose": "Under the light Logo Plate behind dark logo art."
+      },
+      {
+        "name": "floating-glass",
+        "value": "macOS 26: .glassEffect(.regular, in: .rect(cornerRadius: r)); earlier: .background(.ultraThinMaterial, in: .rect(cornerRadius: r))",
+        "css": "backdrop-filter: blur(20px) saturate(1.4); background: rgba(40,40,44,0.45)",
+        "purpose": "Material, not shadow: only controls floating over artwork (featured strip 14, page dots 12, flask disc 12 on a 24 pt circle, bottle chip 6)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "card-lift",
+        "value": ".spring(response: 0.3, dampingFraction: 0.8); scale 1.035 anchor .bottom",
+        "purpose": "Card hover/focus lift. Disabled under Reduce Motion; focus ring (3 pt white) still shows."
+      },
+      {
+        "name": "button-press",
+        "value": ".easeOut(duration: 0.15); scale 0.97",
+        "purpose": "Capsule action buttons while pressed."
+      },
+      {
+        "name": "hero-dwell",
+        "value": "9 s, .linear progress bar 0→1",
+        "purpose": "Hero auto-advance; hover pauses and rewinds; off under Reduce Motion."
+      },
+      {
+        "name": "hero-crossfade",
+        "value": ".easeInOut(duration: 0.6), .opacity transition",
+        "purpose": "Hero slide change (art and text column)."
+      },
+      {
+        "name": "ambient-crossfade",
+        "value": ".easeInOut(duration: 0.8), .opacity transition",
+        "purpose": "Ambient backdrop follows the spotlighted title."
+      },
+      {
+        "name": "artwork-load",
+        "value": ".easeOut(duration: 0.3)",
+        "purpose": "AsyncImage phase change when Steam artwork arrives."
+      },
+      {
+        "name": "row-page",
+        "value": ".easeInOut(duration: 0.45)",
+        "purpose": "Row pager scroll (3 landscape / 5 portrait cards per step)."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "window-min",
+        "value": "1100 x 720 pt"
+      },
+      {
+        "name": "window-default",
+        "value": "1440 x 900 pt"
+      },
+      {
+        "name": "sidebar",
+        "value": "190-260 pt (ideal 210)"
+      },
+      {
+        "name": "hero-strip",
+        "value": "ViewThatFits: 112x52 pt thumbs -> 84x39 pt thumbs -> page dots"
+      },
+      {
+        "name": "grid-column",
+        "value": "adaptive 168-210 pt"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Play Button",
+      "kind": "button",
+      "refersTo": "button-play",
+      "description": "The only Projector Red element. Live when a real Whisky install can launch the title.",
+      "html": "<button class=\"ds-btn-play\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M4 2.5v11l9-5.5z\" fill=\"currentColor\"/></svg><span>Play</span></button>",
+      "css": ".ds-btn-play{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 22px;border:none;border-radius:999px;background:#E50914;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .15s ease-out;outline:none}.ds-btn-play:hover{background:rgba(229,9,20,.88)}.ds-btn-play:active{transform:scale(.97)}.ds-btn-play:focus-visible{box-shadow:0 0 0 4px #0B0B0D,0 0 0 6.5px #fff}"
+    },
+    {
+      "name": "Play Button (disabled)",
+      "kind": "button",
+      "refersTo": "button-play",
+      "description": "Demo or unlaunchable title: fill at 35%, control at 55%, with the reason beneath.",
+      "html": "<div class=\"ds-play-off\"><button class=\"ds-btn-play-off\" disabled><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M4 2.5v11l9-5.5z\" fill=\"currentColor\"/></svg><span>Play</span></button><p class=\"ds-play-status\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"6.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M8 7v4.5M8 4.6v.1\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg><span>Demo title. Install it in a Whisky bottle to play.</span></p></div>",
+      "css": ".ds-play-off{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;background:#0B0B0D;padding:16px;display:inline-flex;flex-direction:column;gap:12px}.ds-btn-play-off{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 22px;border:none;border-radius:999px;background:rgba(229,9,20,.35);color:#fff;font-size:15px;font-weight:600;opacity:.55;width:max-content}.ds-play-status{display:flex;align-items:center;gap:6px;margin:0;color:#A8A8A8;font-size:12px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Details, Steam page, Show files: House Surface Raised capsule.",
+      "html": "<button class=\"ds-btn-secondary\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"6.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M8 7v4.5M8 4.6v.1\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg><span>Details</span></button>",
+      "css": ".ds-btn-secondary{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 22px;border:none;border-radius:999px;background:rgba(255,255,255,.10);color:#F5F5F5;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .15s ease-out;outline:none}.ds-btn-secondary:hover{background:rgba(255,255,255,.088)}.ds-btn-secondary:active{transform:scale(.97)}.ds-btn-secondary:focus-visible{box-shadow:0 0 0 4px #0B0B0D,0 0 0 6.5px #fff}"
+    },
+    {
+      "name": "Compatibility Badge (verified)",
+      "kind": "chip",
+      "refersTo": "badge-compat-verified",
+      "description": "Real verdict: tint at 14% fill, symbol plus label.",
+      "html": "<span class=\"ds-badge-verified\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"7\" fill=\"currentColor\"/><path d=\"M4.8 8.2l2.1 2.1 4.3-4.6\" fill=\"none\" stroke=\"#0B0B0D\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>Runs great</span></span>",
+      "css": ".ds-badge-verified{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:rgba(48,209,89,.14);color:#30D159;font-size:12px;font-weight:600}"
+    },
+    {
+      "name": "Compatibility Badge (demo)",
+      "kind": "chip",
+      "refersTo": "badge-compat-demo",
+      "description": "Illustrative demo value: outlined at 45% tint, leading grey flask, never filled.",
+      "html": "<span class=\"ds-badge-demo\"><span class=\"ds-flask\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M6 1.5h4M6.6 1.5v4.6L2.6 13a1 1 0 0 0 .9 1.5h9a1 1 0 0 0 .9-1.5L9.4 6.1V1.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/></svg></span><svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"7\" fill=\"currentColor\"/><path d=\"M4.8 8.2l2.1 2.1 4.3-4.6\" fill=\"none\" stroke=\"#0B0B0D\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>Runs great</span></span>",
+      "css": ".ds-badge-demo{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;border:1px solid rgba(48,209,89,.45);background:transparent;color:#30D159;font-size:12px;font-weight:600}.ds-flask{color:#A8A8A8;display:inline-flex}"
+    },
+    {
+      "name": "Demo Data Tag",
+      "kind": "chip",
+      "refersTo": "tag-demo",
+      "description": "Marks demo rows, the Library heading and the hero meta line.",
+      "html": "<span class=\"ds-tag-demo\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M6 1.5h4M6.6 1.5v4.6L2.6 13a1 1 0 0 0 .9 1.5h9a1 1 0 0 0 .9-1.5L9.4 6.1V1.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/></svg><span>Demo data</span></span>",
+      "css": ".ds-tag-demo{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:999px;border:1px solid rgba(255,255,255,.10);color:#A8A8A8;font-size:10px;font-weight:600}"
+    },
+    {
+      "name": "Title Card (portrait, demo)",
+      "kind": "card",
+      "refersTo": "card-portrait",
+      "description": "176x264 pt artwork, 10 pt corners, glass flask disc, name and compact outlined badge; lifts on hover/focus.",
+      "html": "<button class=\"ds-card\"><div class=\"ds-card-art\"><span class=\"ds-card-flask\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M6 1h4v1.2H9.4v3.9l4 6.9A1 1 0 0 1 12.5 15h-9a1 1 0 0 1-.9-1.5l4-6.9V2.2H6z\" fill=\"currentColor\"/></svg></span></div><div class=\"ds-card-name\">Assetto Corsa</div><span class=\"ds-card-badge\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"7\" fill=\"currentColor\"/><path d=\"M4.8 8.2l2.1 2.1 4.3-4.6\" fill=\"none\" stroke=\"#0B0B0D\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>Runs great</span></span></button>",
+      "css": ".ds-card{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:176px;padding:0;border:none;background:none;cursor:pointer;text-align:left;transform-origin:bottom center;transition:transform .3s cubic-bezier(.34,1.3,.64,1);outline:none}.ds-card-art{position:relative;width:176px;height:264px;margin-bottom:4px;border-radius:10px;background:linear-gradient(160deg,#7FB6E0 0%,#C9D8E4 45%,#B2030C 75%,#1F0000 100%);transition:box-shadow .3s}.ds-card-flask{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#F5F5F5;background:rgba(40,40,44,.45);backdrop-filter:blur(20px) saturate(1.4)}.ds-card-name{color:#F5F5F5;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:176px}.ds-card-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 6px;border-radius:999px;border:1px solid rgba(48,209,89,.45);color:#30D159;font-size:10px;font-weight:600}.ds-card:hover,.ds-card:focus-visible{transform:scale(1.035)}.ds-card:hover .ds-card-art,.ds-card:focus-visible .ds-card-art{box-shadow:0 10px 36px rgba(0,0,0,.55)}.ds-card:focus-visible .ds-card-art{outline:3px solid #fff;outline-offset:2px}.ds-card:active{opacity:.8}@media (prefers-reduced-motion:reduce){.ds-card:hover,.ds-card:focus-visible{transform:none}.ds-card:hover .ds-card-art{box-shadow:none}}"
+    },
+    {
+      "name": "Featured Strip",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Liquid Glass tray of hero thumbnails; current one bordered white with the 9 s dwell progress bar.",
+      "html": "<div class=\"ds-strip\"><button class=\"ds-thumb ds-thumb-on\" aria-current=\"true\"><span class=\"ds-prog\"><span></span></span></button><button class=\"ds-thumb\"></button><button class=\"ds-thumb\"></button></div>",
+      "css": ".ds-strip{display:inline-flex;gap:10px;padding:8px;border-radius:14px;background:rgba(40,40,44,.45);backdrop-filter:blur(20px) saturate(1.4)}.ds-thumb{position:relative;width:112px;height:52px;border-radius:7px;border:none;background:linear-gradient(120deg,#3F3F42,#7D0005);opacity:.6;cursor:pointer;padding:0;outline:none;transition:opacity .2s}.ds-thumb:hover{opacity:.85}.ds-thumb:focus-visible{box-shadow:0 0 0 2px #fff}.ds-thumb-on{opacity:1;box-shadow:inset 0 0 0 2px #fff}.ds-prog{position:absolute;left:8px;right:8px;bottom:7px;height:3px;border-radius:2px;background:rgba(255,255,255,.25);overflow:hidden}.ds-prog span{display:block;height:100%;background:#fff;transform-origin:left;animation:ds-dwell 9s linear infinite}@keyframes ds-dwell{from{transform:scaleX(0)}to{transform:scaleX(1)}}@media (prefers-reduced-motion:reduce){.ds-prog span{animation:none;transform:scaleX(0)}}"
+    },
+    {
+      "name": "Whisky Status Chip",
+      "kind": "nav",
+      "refersTo": "panel",
+      "description": "Foot of the sidebar: state dot in a compatibility tint, real Whisky version and bottle count; opens Settings.",
+      "html": "<button class=\"ds-status\"><span class=\"ds-dot\"></span><span class=\"ds-status-text\"><b>Whisky 3.7.0</b><small>No bottles yet</small></span></button>",
+      "css": ".ds-status{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;display:flex;align-items:center;gap:8px;width:220px;padding:10px;border:none;border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;text-align:left;outline:none}.ds-status:hover{background:rgba(255,255,255,.10)}.ds-status:focus-visible{box-shadow:0 0 0 3px #6B6866}.ds-dot{width:8px;height:8px;border-radius:50%;background:#FF9E0A;flex:none}.ds-status-text{display:flex;flex-direction:column;gap:1px}.ds-status-text b{color:#F5F5F5;font-size:10px;font-weight:600}.ds-status-text small{color:#A8A8A8;font-size:10px}"
+    },
+    {
+      "name": "Ambient Backdrop",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Signature move: the spotlighted title's hero art, blurred (80), saturated 1.25, darkened 0.15, at 22% over Theatre Ground under a vertical ground gradient; cross-fades 0.8 s.",
+      "html": "<div class=\"ds-ambient\"><div class=\"ds-ambient-art\"></div><div class=\"ds-ambient-veil\"></div><span class=\"ds-ambient-label\">Ambient backdrop</span></div>",
+      "css": ".ds-ambient{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;position:relative;width:320px;height:200px;border-radius:14px;overflow:hidden;background:#0B0B0D}.ds-ambient-art{position:absolute;inset:-40px;background:radial-gradient(circle at 30% 40%,#E81318,transparent 55%),radial-gradient(circle at 75% 30%,#7FB6E0,transparent 50%);filter:blur(40px) saturate(1.25) brightness(.85);opacity:.22;transition:opacity .8s ease-in-out}.ds-ambient:hover .ds-ambient-art{opacity:.3}.ds-ambient-veil{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(11,11,13,.7),transparent 33%,rgba(11,11,13,.85) 66%,#0B0B0D)}.ds-ambient-label{position:absolute;left:16px;bottom:14px;color:#A8A8A8;font-size:12px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Screening Room",
+    "overview": "MacHub is a dark theatre for a game library. The house lights are down: a warm near-black ground, surfaces that are nothing more than white breathed onto it at 6 to 10 percent, and native macOS chrome that stays out of the way. The colour in the room comes from the screen, which is each title's own Steam artwork: full-bleed in the hero, cropped into cards in the rows, and blurred into the whole window ground behind everything. The interface supplies only one colour of its own, the projector red of Play, and a set of honest compatibility signals.\n\nThe system is native first. It is a SwiftUI `NavigationSplitView` with the system floating sidebar, system pickers, a grouped `Form` for Settings, SF Symbols for every icon, and the graphite accent for every system control. The custom layer is narrow and deliberate: the hero, the cards, the compatibility badge, the demo treatment, and the ambient backdrop. The app forces dark appearance (`.preferredColorScheme(.dark)`), because light would wash the artwork out.\n\nHonesty is visual. Demo content is always outlined and marked with a flask; it is never filled the way a verified state is filled. Play is only red when it can really launch something; otherwise it dims and a plain sentence beneath it says why.",
+    "keyCharacteristics": [
+      "Near-black warm ground; white-alpha surfaces; no tinted greys.",
+      "The artwork carries the colour. Each title's Steam logo art is the display voice.",
+      "One interface colour, projector red, reserved for Play.",
+      "Five compatibility states, each a colour plus an SF Symbol plus a word.",
+      "Demo data is outlined, flasked and tagged, never filled.",
+      "Liquid Glass only on controls floating over artwork.",
+      "The ambient backdrop: the focused title's art bleeds, blurred, into the whole window."
+    ],
+    "rules": [
+      {
+        "name": "The One Red Rule",
+        "body": "Projector Red fills the Play button and nothing else. No red headings, red badges, red focus rings or red hover states. \"Won't run\" uses its own warmer red-orange (#FF453B), never #E50914.",
+        "section": "colors"
+      },
+      {
+        "name": "The House Lights Rule",
+        "body": "Surfaces are white at 6% or 10% over the ground, never an opaque grey and never tinted. Depth in the content area comes from alpha, the artwork and the scrims.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three-Part Signal Rule",
+        "body": "A compatibility state is always tint plus SF Symbol plus label. If one of the three is missing, it is not a compatibility state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Borrowed Marquee Rule",
+        "body": "A title's name is shown in its own logo art wherever the hero or detail page names it. SF Pro Expanded is the fallback and the voice of MacHub's own page titles, never a replacement for available logo art.",
+        "section": "typography"
+      },
+      {
+        "name": "The Light Plate Rule",
+        "body": "Logo art whose visible pixels average below 0.35 luminance (alpha-weighted, sampled on a 24 × 24 grid) sits on the Logo Plate: 18 pt × 12 pt padding, 14 pt corners, soft shadow. Light logos sit directly on the art with a soft drop shadow. Dark two-tone wordmarks such as Assetto Corsa's must stay readable over any artwork.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Gutter Rule",
+        "body": "Content aligns to the 44 pt gutter. A custom page with a second left edge is off-system.",
+        "section": "layout"
+      },
+      {
+        "name": "The Glass Over Art Rule",
+        "body": "Glass is for controls sitting on artwork. Panels on the ground use House Surface; glass never fills a plain panel.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Lift Is a Response Rule",
+        "body": "Cards and panels cast no shadow at rest. The card shadow exists only while the card is lifted; the only resting shadows are the soft ones that separate logo art from the artwork behind it.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do reserve Projector Red (#E50914) for the Play button's fill.",
+      "Do build every surface as white at 6% (House Surface) or 10% (House Surface Raised) over Theatre Ground, and every hairline as white at 10%.",
+      "Do show compatibility as tint + SF Symbol + label, using the five `Compatibility` cases and nothing else.",
+      "Do mark every piece of demo content with all three demo devices: outlined badge, flask disc on the card, \"Demo data\" tag on the row or page.",
+      "Do let each title's Steam logo art carry its name in the hero and on detail, on the Logo Plate when it is dark.",
+      "Do use the two card sizes (landscape 296 × 138 pt, portrait 176 × 264 pt) with 10 pt corners, and align content to the 44 pt gutter.",
+      "Do use `floatingGlass(cornerRadius:)` (Liquid Glass on macOS 26, `.ultraThinMaterial` before) for controls over artwork.",
+      "Do honour Reduce Motion: no card lift, no hero auto-advance; the focus ring still shows.",
+      "Do keep native controls native (sidebar, pickers, grouped Form, toolbar search) and let them take the graphite accent.",
+      "Do put the reason under a disabled Play button in plain words."
+    ],
+    "donts": [
+      "Don't use #E50914 for anything but Play: not for \"Won't run\", errors, focus, headings or brand marks.",
+      "Don't give demo values a filled badge; filled means verified.",
+      "Don't introduce opaque or tinted grey panels, borders around cards, or resting shadows on cards and panels.",
+      "Don't put Liquid Glass or material on panels that sit on the ground.",
+      "Don't replace available logo art with typeset names, or set dark logo art straight onto dark artwork.",
+      "Don't add a light appearance; the window is dark by design.",
+      "Don't convey compatibility with colour alone."
+    ]
+  }
+}

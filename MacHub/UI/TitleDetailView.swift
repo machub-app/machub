@@ -1,0 +1,171 @@
+import SwiftUI
+
+struct TitleDetailView: View {
+    let title: Title
+    @Environment(LibraryStore.self) private var store
+    @AppStorage("showDemoTitles") private var showDemo = true
+    @State private var viewportHeight: CGFloat = 900
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 40) {
+                backdrop
+                HStack(alignment: .top, spacing: 48) {
+                    VStack(alignment: .leading, spacing: 28) {
+                        about
+                        compatibility
+                    }
+                    .frame(maxWidth: 640, alignment: .leading)
+                    InfoPanel(title: title)
+                        .frame(width: 330)
+                }
+                .padding(.horizontal, Theme.gutter)
+
+                TitleRow(heading: "More like this", titles: similar, style: .landscape, isDemo: similar.allSatisfy(\.isDemo))
+            }
+            .padding(.bottom, 48)
+        }
+        .scrollIndicators(.never)
+        .ignoresSafeArea(edges: .top)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewportHeight = $0 }
+        .toolbar(removing: .title)
+        .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+        .onAppear { store.spotlight = title }
+    }
+
+    private var backdrop: some View {
+        ZStack(alignment: .bottomLeading) {
+            ArtworkImage(title: title, artwork: .hero)
+                .overlay {
+                    LinearGradient(stops: [.init(color: .black.opacity(0.8), location: 0),
+                                           .init(color: .clear, location: 0.62)],
+                                   startPoint: .leading, endPoint: .trailing)
+                }
+                .fadeOutBottom(from: 0.5)
+            VStack(alignment: .leading, spacing: 18) {
+                LogoArt(title: title, maxHeight: 120)
+                MetaLine(title: title)
+                HStack(spacing: 12) {
+                    PlayButton(title: title)
+                        .keyboardShortcut(.defaultAction)
+                    if let appID = title.steamAppID {
+                        Link(destination: URL(string: "https://store.steampowered.com/app/\(appID)")!) {
+                            Label("Steam page", systemImage: "arrow.up.right.square")
+                        }
+                        .buttonStyle(SecondaryActionStyle())
+                    }
+                    if let path = title.installPath {
+                        Button {
+                            NSWorkspace.shared.activateFileViewerSelecting([URL(filePath: path)])
+                        } label: {
+                            Label("Show files", systemImage: "folder")
+                        }
+                        .buttonStyle(SecondaryActionStyle())
+                    }
+                }
+                PlayStatus(title: title)
+            }
+            .padding(.leading, Theme.gutter)
+            .padding(.bottom, 36)
+        }
+        .frame(height: min(max(viewportHeight * 0.6, 440), 660))
+        .frame(maxWidth: .infinity)
+        .clipped()
+    }
+
+    private var about: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("About").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
+            Group {
+                if let summary = title.summary {
+                    Text(verbatim: summary)
+                } else {
+                    Text("Description not loaded yet. Store details arrive in a later step.")
+                }
+            }
+                .font(.title3)
+                .foregroundStyle(Theme.textPrimary.opacity(0.85))
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var compatibility: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Compatibility").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: title.compatibility.symbol)
+                    .font(.system(size: 26))
+                    .foregroundStyle(title.compatibility.tint)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title.compatibility.label).font(.headline).foregroundStyle(Theme.textPrimary)
+                    Text(compatibilityNote).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.surface, in: .rect(cornerRadius: 12))
+        }
+    }
+
+    private var compatibilityNote: LocalizedStringKey {
+        title.isDemo
+            ? "Illustrative value for the demo. MacHub has no compatibility data source yet."
+            : "Not tested yet. Compatibility reports arrive in a later step."
+    }
+
+    private var similar: [Title] {
+        store.titles(includeDemo: showDemo)
+            .filter { $0.id != title.id && $0.kind == title.kind && !Set($0.genres).isDisjoint(with: title.genres) }
+    }
+}
+
+private struct InfoPanel: View {
+    let title: Title
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            row("Developer", title.developer.map { Text(verbatim: $0) })
+            row("Publisher", title.publisher.map { Text(verbatim: $0) })
+            row("Released", title.releaseYear.map { Text(verbatim: String($0)) })
+            if !title.genres.isEmpty {
+                rowView("Genres") { GenreList(genres: title.genres) }
+            }
+            row("Type", title.kind == .game ? Text("Game") : Text("Windows software"))
+            row("Source", title.isDemo ? Text("Demo data") : Text("Whisky"))
+            row("Bottle", title.bottle.map { Text(verbatim: $0) })
+            row("Steam App ID", title.steamAppID.map { Text(verbatim: String($0)) })
+            row("Install folder", title.installPath.map { Text(verbatim: $0) }, monospaced: true)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 6)
+        .background(Theme.surface, in: .rect(cornerRadius: 14))
+    }
+
+    private func rowView(_ label: LocalizedStringKey, @ViewBuilder value: () -> some View) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label).foregroundStyle(Theme.textSecondary)
+            Spacer(minLength: 16)
+            value().foregroundStyle(Theme.textPrimary)
+        }
+        .padding(.vertical, 12)
+        .overlay(alignment: .bottom) { Rectangle().fill(Theme.stroke).frame(height: 1) }
+    }
+
+    @ViewBuilder
+    private func row(_ label: LocalizedStringKey, _ value: Text?, monospaced: Bool = false) -> some View {
+        if let value {
+            HStack(alignment: .firstTextBaseline) {
+                Text(label).foregroundStyle(Theme.textSecondary)
+                Spacer(minLength: 16)
+                value
+                    .foregroundStyle(Theme.textPrimary)
+                    .font(monospaced ? .callout.monospaced() : .body)
+                    .multilineTextAlignment(.trailing)
+                    .textSelection(.enabled)
+            }
+            .padding(.vertical, 12)
+            .overlay(alignment: .bottom) { Rectangle().fill(Theme.stroke).frame(height: 1) }
+        }
+    }
+}
