@@ -1,0 +1,41 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Language" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Langue" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "言語" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "语言" } }
+      }
+    },
+    "Library" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Bibliothèque" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ライブラリ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "游戏库" } }
+      }
+    },
+    "Play" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Jouer" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "プレイ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开始游戏" } }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réglages" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "設定" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置" } }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Système" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "システム" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "跟随系统" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
