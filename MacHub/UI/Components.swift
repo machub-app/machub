@@ -329,14 +329,13 @@ struct PlayButton: View {
             .buttonStyle(SecondaryActionStyle())
             .disabled(store.launchStates[title.id] == .installRequested)
         case .play, .unavailable:
+            let state = store.launchStates[title.id]
             Button {
                 Task { await store.launch(title) }
             } label: {
-                switch store.launchStates[title.id] {
-                case .launching:
+                switch state {
+                case .launching, .waitingForGame:
                     HStack(spacing: 8) { ProgressView().controlSize(.small).tint(.white); Text("Starting…") }
-                case .handedToSteam:
-                    Label("Sent to Steam", systemImage: "checkmark")
                 case .running:
                     Label("Running", systemImage: "play.circle.fill")
                 default:
@@ -344,40 +343,83 @@ struct PlayButton: View {
                 }
             }
             .buttonStyle(PrimaryActionStyle())
-            .disabled(store.action(for: title) != .play || [.launching, .running].contains(store.launchStates[title.id]))
+            .disabled(store.action(for: title) != .play || state.isBusy)
         }
     }
 }
 
-/// One honest line under the action row: why Play is (un)available, or what just happened.
+extension LibraryStore.LaunchState? {
+    var isBusy: Bool {
+        switch self {
+        case .launching?, .waitingForGame?, .running?: true
+        default: false
+        }
+    }
+}
+
+/// One honest line under the action row: why Play is (un)available, or what was actually observed.
 struct PlayStatus: View {
     let title: Title
     @Environment(LibraryStore.self) private var store
 
     var body: some View {
         if let caption {
-            Label {
-                Text(caption).fixedSize(horizontal: false, vertical: true)
-            } icon: {
-                Image(systemName: isError ? "exclamationmark.triangle.fill" : "info.circle")
+            VStack(alignment: .leading, spacing: 8) {
+                Label {
+                    Text(caption).fixedSize(horizontal: false, vertical: true)
+                } icon: {
+                    Image(systemName: symbol)
+                }
+                .font(.callout)
+                .foregroundStyle(isError ? Compatibility.issues.tint : (isRunning ? Compatibility.great.tint : Theme.textSecondary))
+                if let log {
+                    Button {
+                        NSWorkspace.shared.open(URL(filePath: log))
+                    } label: {
+                        Label("Show Wine log", systemImage: "doc.text.magnifyingglass")
+                    }
+                    .buttonStyle(.link)
+                    .font(.callout)
+                }
             }
-            .font(.callout)
-            .foregroundStyle(isError ? Compatibility.issues.tint : Theme.textSecondary)
             .frame(maxWidth: 560, alignment: .leading)
         }
     }
 
     private var isError: Bool {
-        if case .failed = store.launchStates[title.id] { true } else { false }
+        switch store.launchStates[title.id] {
+        case .failed?, .notStarted?, .crashedAtStart?: true
+        default: false
+        }
+    }
+
+    private var isRunning: Bool {
+        if case .running? = store.launchStates[title.id] { true } else { false }
+    }
+
+    private var symbol: String {
+        isError ? "exclamationmark.triangle.fill" : (isRunning ? "checkmark.circle.fill" : "info.circle")
+    }
+
+    private var log: String? {
+        switch store.launchStates[title.id] {
+        case .failed(_, let log)?, .notStarted(let log)?, .crashedAtStart(_, let log)?: log
+        default: nil
+        }
     }
 
     private var caption: LocalizedStringKey? {
         switch store.launchStates[title.id] {
-        case .failed(let message): return "Couldn't start: \(message)"
-        case .handedToSteam: return "Steam received the launch request. MacHub doesn't check yet whether the game window opened."
+        case .failed(let message, _): return "Couldn't start: \(message)"
+        case .notStarted: return "No process of the game appeared within 3 minutes. The Wine log may explain why."
+        case .waitingForGame: return "Steam received the launch request. MacHub is watching for the game's own process…"
+        case .running(let exe?): return "Running: macOS sees \(exe) from the game's folder."
+        case .running(nil): return "Running."
+        case .closed: return "The game has closed."
+        case .crashedAtStart(let seconds, _): return "The game started, then closed after \(seconds) s: it most likely crashed at startup. See the requirements and the Wine log."
         case .installRequested: return "Steam for Windows was asked to install this game in the bottle. Follow the download in Steam."
         case .exited(let code): return "The program closed (exit code \(code))."
-        case .running, .launching: return nil
+        case .launching: return nil
         case nil: break
         }
         if title.isDemo { return "Demo title. Install it in a Whisky bottle to play." }

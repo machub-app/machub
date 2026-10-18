@@ -149,7 +149,11 @@ private struct SteamSettingsSection: View {
                 HStack(spacing: 12) {
                     SteamAvatar(account: account, size: 44)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(verbatim: account.personaName ?? "—").font(.headline)
+                        if let name = account.displayName {
+                            Text(verbatim: name).font(.headline)
+                        } else {
+                            Text("Community profile not set up").font(.headline)
+                        }
                         Text(verbatim: "SteamID64 \(account.steamID64)").font(.callout.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
                         Text("Verified by Steam on \(account.verifiedAt.formatted(date: .abbreviated, time: .shortened))")
                             .font(.caption).foregroundStyle(.secondary)
@@ -160,6 +164,13 @@ private struct SteamSettingsSection: View {
                     }
                 }
                 LabeledContent("Profile visibility") { Text(account.visibility.label) }
+                if account.visibility == .notSetUp {
+                    Text("Your sign-in is valid, but this account has no Steam Community profile yet, so Steam publishes no name or avatar. Optional: set one up on Steam.")
+                        .font(.callout).foregroundStyle(.secondary)
+                    Link(destination: URL(string: "https://steamcommunity.com/my/edit/info")!) {
+                        Label("Set up my Steam profile", systemImage: "arrow.up.right.square")
+                    }
+                }
                 HStack {
                     Button("Sign in again") { Task { await steam.signIn() } }.disabled(steam.isBusy)
                     Button("Disconnect Steam", role: .destructive) { steam.signOut() }
@@ -206,7 +217,7 @@ private struct SteamSettingsSection: View {
         } header: {
             Text("Owned games (optional)")
         } footer: {
-            Text("Signing in doesn't need a key. Steam only returns the list of games you own through its official Web API (IPlayerService/GetOwnedGames), which requires your personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine). MacHub keeps it in the macOS Keychain only and never writes it to files or logs. Your profile's “Game details” must also be public.")
+            Text("Signing in doesn't need a key. Steam only returns the list of games you own through its official Web API (IPlayerService/GetOwnedGames), which requires your personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine). Steam returns the games visible to the key's owner, so your own key covers your own account. MacHub keeps it in the macOS Keychain only and never writes it to files or logs.")
         }
     }
 
@@ -235,6 +246,7 @@ extension SteamAccount.Visibility {
         case .friendsOnly: "Friends only"
         case .private: "Private"
         case .unknown: "Unknown"
+        case .notSetUp: "Not set up"
         }
     }
 }

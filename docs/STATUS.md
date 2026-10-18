@@ -1,60 +1,124 @@
-# Status
+# MacHub : état du projet
 
-Plan : étapes A → E (faisabilité avant interface). Rien n'est marqué « fait » sans preuve.
+Dernier audit : 18/10/2026. Règle : rien n'est marqué « vérifié » sans preuve. L'historique des étapes précédentes est dans git (`fad1f69` et antérieurs).
+Branche : `steam/library` (commit `fad1f69` + correctifs du profil non commités), base `main` @ `35b3883`.
 
-## Fait (avec preuve)
+## Vérifié (preuve à l'appui)
 
-| Tâche | Preuve |
+| Fonction | Preuve |
 |---|---|
-| A1 Diagnostics de la machine | Plan v2, §1 |
-| A2 Procédure d'installation | `docs/SETUP.md` |
-| B1 Projet Xcode (macOS 15, Swift 6, non sandboxé, Swift Testing) | `xcodebuild … test` → `** TEST SUCCEEDED **`, 13/13 tests, 0 warning Swift |
-| B2 `WhiskyLocator` + contrôle de capacités + lecture des bouteilles (lecture seule) | Tests sur fixtures ; `MacHub --diagnose` sur cette machine affiche « Whisky 2.3.5 too old, missing games, launch », 0 bouteille enregistrée, 6 dossiers orphelins sans `drive_c` ; empreinte du conteneur Whisky identique avant et après ; capture `docs/diagnostics-b2.png` |
-| B3 `WhiskyCLI` : `games`, `launch`, `run`, `bottles` + erreurs typées (`invalidInvocation` 64, `failure` 1, `programExit(code, log)`, `timedOut`, `unexpectedOutput`) | 10 tests sur fixtures (JSON du fork, stderr réel « bottle doesn't exist », bruit avant le JSON, séparateur `--`) ; suite complète 23/23 |
-| A3 (partiel) Fork réel | `docs/SETUP.md` § A3 ; MacHub le détecte `ready` ; tests d'intégration opt-in `RealWhiskyTests` 2/2 (erreurs typées vérifiées sur le vrai CLI ; le test `games` passe à vide, faute de bouteille) ; suite unitaire 25/25 |
-| B5 Spike de localisation (en/fr/ja/zh-Hans) | Captures `docs/spike-l10n/*.png` : `Text("…")` et `LocalizedStringResource` suivent la langue choisie ; `String(localized:)` reste en langue système (« Réglages » partout, ton Mac étant en français). Décision : sélecteur dans l'app → `.environment(\.locale)` + `.id`, `String(localized:)` interdit dans l'UI |
-| D (1re tranche) Interface : barre latérale native, accueil (hero + rangées), bibliothèque (grille, filtres, tri), recherche, fiche titre, réglages | App lancée sur ce Mac et capturée : `.impeccable/review/{home,library,detail,settings,home-en,home-ja}.png` ; 30/30 tests (dont `LibraryTests` : les titres de démo ne sont jamais lançables) |
-| D6 (partiel) Localisation de l'interface | Toutes les chaînes extraites par le compilateur sont dans le catalogue (vérifié : 0 manquante), y compris 22 genres, en fr / ja / zh-Hans ; captures FR, EN, JA |
-| Système visuel documenté | `DESIGN.md` + `.impeccable/design.json` (jetons SwiftUI, composants, règles) écrits à partir du code réel |
-| Revue de design Impeccable (2 tours, le maximum) | 1er verdict « fix » (8 points), 2e verdict : 5 résolus, 2 partiels, 2 régressions ; dernier lot appliqué (logo sur plaque claire, un seul repère de démo par carte, identifiant court des bouteilles), vérifié sur les captures |
+| Compilation (macOS 15, Swift 6) | `xcodebuild` OK, 0 warning Swift |
+| Tests | **61/61** unitaires ; **7/7** intégration en direct (5 Steam, 2 Whisky) |
+| Connexion Steam OpenID 2.0 | Connexion réelle réussie : compte enregistré avec date de vérification ; SteamID identique au compte du client Steam du Mac (`loginusers.vdf`). Assertions vérifiées localement puis par `check_authentication` |
+| Profil public | Lu en direct. Ton profil Communauté n'est **pas configuré** : pas de nom ni d'avatar publiés, affiché comme tel (« Profil Communauté non configuré ») |
+| Catalogue | Vitrine, recherche paginée (50 par page), fiches (FR, prix, Metacritic, captures, version Mac native), cache disque, pacing, états 429 / hors ligne |
+| Détection Whisky | Fork 3.7.0 `ready`, Wine 3.1.1, DXMT 0.80, DXVK 1.10.3 |
+| Erreurs du CLI Whisky | Codes 64 / 1 typés et vérifiés sur le vrai `WhiskyCmd` |
+| Localisation | en / fr / ja / zh-Hans, 0 chaîne manquante |
 
-## Steam (tranche « bibliothèque connectée »)
+## Spike P0-3 « MacHub Steam » (18/10/2026, en cours)
 
-| Élément | Source réelle | Preuve |
+| Étape | Résultat |
+|---|---|
+| `whisky create "MacHub Steam"` | ✅ bouteille enregistrée (Windows 10) ; WhiskyCmd lit bien le registre `com.franke.Whisky` |
+| Téléchargement de `SteamSetup.exe` (CDN Valve) | ✅ 2 380 800 octets, exécutable PE avec bloc Authenticode « Valve Corp. » / DigiCert (signature non vérifiée cryptographiquement sur macOS) |
+| 1er `whisky run … /S` | ❌ « d3d11.dll n'existe pas » : **`create` n'initialise pas le préfixe Wine** (le message de Whisky dit d'ouvrir l'app) |
+| Initialisation du préfixe | ✅ `wine64 wineboot --init` avec l'environnement de `whisky shellenv` (800 fichiers dans `system32`). **Bug WhiskyCmd** : le `PATH` de `shellenv` contient `Application\ Support` entre guillemets, donc inutilisable ; contournement : chemin absolu de `wine64` |
+| `SteamSetup.exe /S` | ✅ `Steam.exe` installé ; mise à jour automatique de 238 Mo terminée (« Verification complete ») |
+| Ouverture de Steam | ✅ fenêtre « Se connecter à Steam » créée et rendue (capturée), mais **ouverte en arrière-plan** : macOS ne laisse pas un processus d'arrière-plan prendre le focus |
+| Connexion de l'utilisateur | ✅ Steam pour Windows connecté (`Success`) avec **un seul compte, identique au SteamID vérifié par OpenID** (`loginusers.vdf` + `userdata` de la bouteille). Fenêtre ramenée au premier plan via System Events |
+| `steam://install/244210` | ✅ dialogue d'installation de Steam (42,08 Go annoncés), confirmé par toi ; Steam proposer l'installation prouve que **le jeu est possédé** |
+| Téléchargement | ✅ 14,37 Go téléchargés, 44,95 Go sur disque, `StateFlags = 4` à 11:10 (≈ 30 min, jusqu'à 106 Mbps). **Leçon** : le manifest n'est pas mis à jour pendant le téléchargement ; la progression se lit dans `steamapps/downloading/<id>` + `logs/content_log.txt` (débit) |
+| Détection par MacHub | ✅ `whisky games` → `244210 Assetto Corsa` ; `.exe` détectés (`AssettoCorsa.exe`, `acs.exe`, …) ; fiche : « Installé », « Exécutable détecté », **Jouer activé**. **Bug réel corrigé** : WhiskyCmd renvoie `appId` sous forme de chaîne (`"244210"`), et MacHub attendait un nombre (test d'intégration en échec puis vert) |
+| Lancement vérifié (P1-3) | ✅ implémenté : MacHub surveille les processus Wine (exécutable au chemin Windows situé dans le dossier du jeu ; Steam, web helper et `_CommonRedist` exclus). États : En cours / Fermé / **Planté au lancement** (< 15 s) / Aucun processus en 3 min, avec un lien vers le log Wine |
+| **Bug WhiskyCmd `launch`** | ❌ renvoie `{"status":"launched"}` (exit 0), mais **Steam ne reçoit jamais `-applaunch`** (absent de `console_log.txt` ; le log Whisky ne contient qu'un `reg import`). MacHub passe désormais par `whisky run … steam.exe -- -applaunch <id>` : vérifié, Steam journalise `LaunchApp` → `Game process added` |
+| Faux positif corrigé | Le premier détecteur acceptait mon propre shell de surveillance (dont les arguments contenaient « \\assettocorsa\\ » et « .exe ») et affichait « En cours » à tort. Il exige maintenant que l'exécutable lui-même soit un chemin Windows. Test de régression ajouté |
+| **Premier lancement réel** | ⚠️ `AssettoCorsa.exe` (le lanceur) démarre puis s'arrête au bout de **2 s** (journal de Steam : 10:23:01 → 10:23:03). MacHub affiche « planté au lancement ». Cause capturée avec `run --follow` : `System.TypeLoadException: Could not load file or assembly 'CEF3, Version=49.0.0.0'`. Le lanceur est une app **.NET** (en-tête CLR) avec un assembly mixte C++/CLI, que **Wine-Mono 10.4.1 ne sait pas charger**. `acs.exe` (le jeu) n'est pas .NET |
+| .NET Framework 4.8 | ✅ installé avec ton accord (`winetricks -q dotnet48`, celui de Whisky, 11:24 → 11:28, exit 0). Registre : `Version 4.8.03761`, `Release 528049`. Steam pour Windows arrêté proprement avant (`-shutdown`). winetricks avait laissé la bouteille en Windows 7 ; **remise en Windows 10** (`winecfg -v win10`), conforme au réglage Whisky |
+| **Lancement d'Assetto Corsa depuis MacHub** | ✅ **le lanceur tourne** : MacHub affiche « En cours : macOS voit AssettoCorsa.exe », confirmé par `ps` (2 processus, > 28 s), par Steam (`Game process added` sans `removed`) et par une fenêtre « Assetto Corsa Launcher » visible (capture `.impeccable/review/ac-launcher.png`). Steam était arrêté : la requête `-applaunch` l'a démarré, reconnecté automatiquement, puis a lancé le jeu |
+| Jeu en piste (`acs.exe`) | ⏳ **non vérifié**. Tu as indiqué qu'une course avait démarré, mais à 11:31:42 aucun processus `acs.exe` n'existait et aucun `Documents/Assetto Corsa/logs/log.txt` (écrit par `acs.exe` dès le lancement) n'était présent ; le lanceur venait d'être prêt (« UI Ready » à 11:31:28). Surveillance en cours (`build/acs-watch.log`) |
+
+Leçons pour P1-1 : enchaîner `create` → `wineboot --init` → installation silencieuse → lancement de Steam ; rappeler à l'utilisateur d'amener l'app « wine » au premier plan.
+
+## Implémenté, jamais exécuté en conditions réelles (faute de bouteille)
+
+`whisky games` → jeux installés ; détection des `.exe` ; Jouer (`whisky launch`) ; Installer (`steam://install` dans une bouteille Steam) ; logiciels importés (`whisky run`) ; épingles Whisky ; historique local.
+
+## Partiel
+
+- **Jeux possédés** : seulement avec ta clé Web API, et aucune clé n'est enregistrée. Sans clé, la liste complète est impossible (voir les décisions).
+- **Lancement** : chaîne complète vérifiée jusqu'au processus du jeu ; Assetto Corsa plante encore au lancement (cause connue, voir le spike). Les logs Whisky ne contiennent que des en-têtes : la vraie erreur ne s'obtient qu'avec `run --follow` (à intégrer à MacHub, P2).
+- **Trousseau** : en développement, la signature ad hoc change à chaque build, donc macOS peut redemander l'accès.
+
+## Démo
+
+`DemoLibrary` (21 titres, compatibilité indicative) : **désactivée par défaut**, toujours étiquetée.
+
+## Bloqué
+
+| Blocage | Cause exacte | Débloqué par |
 |---|---|---|
-| Connexion | Steam **OpenID 2.0** dans le navigateur système → retour sur un récepteur `127.0.0.1:<port aléatoire>` (loopback uniquement, `GET /callback` seulement) → contrôles locaux (state, return_to, op_endpoint, champs signés, nonce < 5 min, `claimed_id == identity`, SteamID64 au format 7656119…) → **vérification directe auprès de Steam** (`check_authentication` → `is_valid:true`). Aucun mot de passe ni jeton ; `loginusers.vdf` n'est jamais traité comme une authentification | `SteamOpenIDTests` (9 assertions altérées refusées), `LoopbackServerTests` (vrai aller-retour HTTP) ; Steam accepte le realm loopback (redirection vers son formulaire, vérifiée par curl). **Connexion de bout en bout non encore faite : elle demande que tu te connectes toi-même** |
-| Profil | `steamcommunity.com/profiles/<id>/?xml=1` (public, sans clé) : nom, avatar, visibilité | `RealSteamTests.publicProfile` (en direct) |
-| Jeux possédés | `IPlayerService/GetOwnedGames` officiel ; **exige ta clé Web API** (401 sans, vérifié). Clé dans le **Trousseau** uniquement, jamais dans un fichier, un log ni une clé de cache. Profil privé → message explicite | `ownedGamesWithoutKeyIsUnauthorized` (en direct), `ownedGamesAndPrivateProfiles` |
-| Catalogue | Recherche du Store (`search/results?json=1`, 50 par page, chargement progressif), `featuredcategories`, `appdetails`. **Aucune API officielle ouverte ne liste tout le catalogue** : `ISteamApps/GetAppList` a été retiré (404), `IStoreService/GetAppList` exige une clé (403). Recherche à la demande, cache disque (1 h vitrine, 15 min recherche, 24 h fiches), espacement de 350 ms par hôte, 429 → message, hors ligne → cache périmé affiché comme tel | `RealSteamTests` (5/5 en direct), `searchPagesDiffer` |
-| Installés | `whisky games <bouteille>` + détection des `.exe` (racine + 1 niveau, installateurs exclus) | `executableScannerSkipsInstallers` ; aucune bouteille aujourd'hui |
-| Logiciels | Imports manuels (`.exe` + bouteille, `software.json`) et programmes épinglés dans Whisky (`Metadata.plist` → `info.pins`, lecture seule) ; lancement `whisky run` | Code réel, **pas encore exécuté** (aucune bouteille) |
-| Récents | Historique local de lancement (`history.json`) | Code réel |
-| Jouer | Uniquement si installé + exécutable détecté + Whisky prêt. Sinon : « Installer dans « Steam » » (`steam://install/<id>` dans la bouteille, si Steam Windows y est), ou bouton désactivé + raison + panneau **Prérequis** | `storeAndOwnedTitlesNeverLaunch`, `installedWithoutExecutableIsNotLaunchable` |
-| Compatibilité | Toujours « Non vérifiée » pour les vrais titres (aucune source). Seule info réelle : version Mac native signalée par Steam (`platforms.mac`) | Capture Cyberpunk 2077 |
-| Démo | Désactivée par défaut, toujours étiquetée si on la réactive | `demoTitlesAreNeverLaunchable` |
+| Session de jeu non vérifiée | Le lanceur fonctionne ; la course (`acs.exe`, DX11 via DXMT) reste à essayer | Toi : lancer une session depuis le lanceur |
+| Liste complète des jeux possédés | Seule API officielle : `GetOwnedGames`, avec clé ; OAuth Steam réservé aux partenaires Valve ; la page publique des jeux exige une connexion | Ta clé (facultative), ou un proxy serveur (P3, profils publics uniquement) |
 
-Tests : **54/54** unitaires + **5/5** intégration Steam en direct + 2/2 intégration Whisky. Captures : `.impeccable/review/{home,discover,library,software,settings,detail,detail-new,search}.png`.
+## Décisions d'architecture
 
-## Reste à faire
+1. **Identité** : OpenID 2.0 avec récepteur loopback ; jamais de mot de passe ni de jeton ; `loginusers.vdf` n'est pas une preuve d'identité.
+2. **Clé Web API** : facultative, propre à l'utilisateur, stockée dans le Trousseau. D'après la doc de Valve, Steam renvoie les jeux « visibles pour vous », donc le propriétaire de la clé voit ses propres jeux. Pas de clé dans l'app : les conditions de Valve exigent qu'elle reste confidentielle. Pas de serveur pour l'instant.
+3. **Fichiers de jeu et licences** : uniquement via **Steam pour Windows dans une bouteille gérée par MacHub** (« MacHub Steam »). Pas de SteamCMD (il faudrait manipuler tes identifiants), pas de téléchargement direct. Jeux Mac natifs → Steam pour Mac.
+4. **Progression d'installation** : lue dans `appmanifest_<id>.acf` (`StateFlags`, octets) ; désinstallation via `steam://uninstall` (MacHub ne supprime rien lui-même).
+5. **Compatibilité** : « Non vérifiée » tant qu'aucune source n'existe. Les limites (anti-triche, DX12 / GPTK, lanceurs tiers) sont affichées, jamais cachées.
 
-- **A3 en pause** (17/10/2026) : la bouteille `Steam` n'existe pas encore pour le fork. `whisky list` est vide et `BottleVM.plist` a `paths = []`, inchangé depuis 23:11. On reprend quand `whisky list` l'affiche : il faudra alors rejouer `games` sur cette bouteille (`TEST_RUNNER_MACHUB_INTEGRATION=1 xcodebuild … test -only-testing:MacHubTests/RealWhiskyTests`).
-- **À faire par toi** : te connecter une fois via « Se connecter avec Steam » (vérifie OpenID de bout en bout), puis, si tu veux tes jeux possédés, coller ta clé Web API dans Réglages et rendre publics les « Détails des jeux ».
-- Bloqué par Whisky : la bouteille `Steam` (aucune n'existe dans le fork), donc « Installés », le vrai Jouer, « Installer dans la bouteille », les logiciels, A3 et B4.
-- Les endpoints du Store (recherche, vitrine, fiches) ne sont pas documentés par Valve : ils peuvent changer ; les erreurs sont gérées et le cache sert de repli.
-- Jaquettes des jeux récents : Steam ne les expose qu'en petit format dans la recherche (231×87, affichées entières sur fond flouté) ; la fiche détaillée charge les grandes images.
-- Les messages d'erreur techniques (Whisky, HTTP) restent en anglais.
-- D3 : détection du processus du jeu après `launch` (état « en cours »).
-- C : comptes Steam locaux, jeux possédés (clé API), métadonnées store, cache hors ligne.
-- Écarts relevés par le documenteur Impeccable, non corrigés : fiche titre sans l'ombrage en haut à droite du hero d'accueil (ciel blanc) ; Réglages utilisent `.green/.orange/.red` système au lieu des teintes de compatibilité ; « Augmenter le contraste » promis dans PRODUCT.md mais pas implémenté.
-- B4 : banc d'essai sur une bouteille dédiée `MacHub-Test` (🔒 sur autorisation).
-- C, D, E : voir le plan.
+## Tests de l'audit (18/10/2026)
 
-## Limites connues
+- **Réussis** :
+  - unitaires 55/55 ;
+  - intégration Steam 5/5 (vitrine, pages de recherche distinctes, fiche d'Assetto Corsa, profil public, 401 sans clé) ;
+  - intégration Whisky 2/2 (erreurs typées) ;
+  - compte OpenID enregistré = compte du Mac ;
+  - XML du profil « not set up » ;
+  - page publique des jeux → redirection vers la connexion (alternative sans clé inexistante) ;
+  - CDN `SteamSetup.exe` → 200 (2,38 Mo) ;
+  - `whisky run --command` disponible ;
+  - données locales : 5 apps lancées avec ce compte, dont **Assetto Corsa (244210)**.
+- **Échoués** : aucun.
+- **Impossibles (prérequis manquants)** : installation, lancement et vérification d'un jeu ; logiciels et épingles ; liste des jeux possédés (pas de clé).
 
-- Le JSON de `games` et de `launch` n'a pas encore été observé sur le vrai fork (aucune bouteille) ; les erreurs, elles, l'ont été.
-- `launch` ne rend la main qu'à la fin de `-applaunch` ; l'état « en cours » de l'UI devra s'appuyer sur la détection du processus du jeu (D3).
-- Localisation vérifiée au lancement de l'app sur macOS 26 seulement. La bascule à chaud via le sélecteur (même mécanisme `.id`) n'a pas été observée, faute de pilotage de l'UI. macOS 15 n'est pas disponible ici pour test.
-- Survol, focus clavier et états de lancement non capturés (pas de pilotage de l'UI) ; vérifiés dans le code seulement. Raccourcis présents : ⌘1/⌘2/⌘3, ⌘F, ⌘, ; ←/→ sur le hero ; Entrée = Jouer sur la fiche (pas sur l'accueil, pour ne pas entrer en conflit avec la carte focalisée).
-- Le focus clavier des cartes (`.focusable(interactions: .activate)`) n'a pas été testé avec l'Accès clavier complet activé.
-- `--open <écran>` est un argument de lancement réservé aux builds Debug (captures).
-- Le runtime n'est vérifié que par la présence de `Libraries/Wine/bin/wine` ; Wine n'a pas été exécuté.
+## Actions qui te reviennent
+
+1. Autoriser le spike P0-3 : création de la bouteille « MacHub Steam » + téléchargement de `SteamSetup.exe` officiel.
+2. Te connecter dans la **fenêtre de Steam pour Windows** que MacHub ouvrira (jamais dans MacHub).
+3. Valider l'installation d'Assetto Corsa (≈ 15 Go ; 237 Go libres) et confirmer que la fenêtre du jeu s'affiche.
+4. *(Facultatif)* Créer une clé sur steamcommunity.com/dev/apikey et la coller dans Réglages.
+5. *(Facultatif)* Configurer ton profil Communauté Steam (nom, avatar).
+
+## Prochaines tâches
+
+**P0**
+- P0-3 : spike « MacHub Steam » avec Assetto Corsa : bouteille, Steam silencieux, ta connexion, installation, lancement.
+
+**P1**
+- P1-1 : assistant « Préparer l'environnement ».
+- P1-2 : installer avec progression réelle (parseur ACF).
+- P1-3 : **lancement vérifié** (surveillance du processus).
+- P1-4 : rangée sans clé « Lancés avec ce compte sur ce Mac » + clé guidée avec bouton « Tester ».
+- P1-5 : jeux Mac natifs via Steam pour Mac.
+- P1-6 : désinstaller via Steam.
+
+**P2**
+- Log Wine accessible.
+- Erreurs techniques localisées.
+- Notifications.
+- Developer ID et notarisation.
+- Profils de compatibilité curés.
+- Manette.
+- Bascule de langue à chaud.
+
+**P3**
+- Mods d'Assetto Corsa non destructifs.
+- Proxy serveur.
+- Epic / GOG.
+- Assistant GPTK.
+- Sparkle.
+
+**Reportés volontairement** : mods, proxy et sources de compatibilité, tant qu'un jeu n'a pas été lancé et vérifié.

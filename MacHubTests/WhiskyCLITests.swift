@@ -17,12 +17,12 @@ private func cli(expecting arguments: [String]? = nil, reply: ProcessResult) -> 
 }
 
 @Suite struct WhiskyCLITests {
-    // Shape from frankea WhiskyCmd `games --json`: pretty-printed, sorted keys.
+    // Verbatim shape of WhiskyCmd 3.7.0 `games --json` (2026-10-18): appId is a STRING.
     @Test func decodesInstalledGames() async throws {
         let json = """
         [
           {
-            "appId" : 244210,
+            "appId" : "244210",
             "installPath" : "/Users/me/Library/Containers/com.franke.Whisky/Bottles/X/drive_c/Program Files (x86)/Steam/steamapps/common/assettocorsa",
             "name" : "Assetto Corsa"
           }
@@ -33,6 +33,17 @@ private func cli(expecting arguments: [String]? = nil, reply: ProcessResult) -> 
         #expect(games.count == 1)
         #expect(games.first?.appId == 244210)
         #expect(games.first?.installPath.hasSuffix("common/assettocorsa") == true)
+    }
+
+    @Test func launchConfirmationWithStringAppID() throws {
+        let json = #"{"appId":"244210","bottle":"MacHub Steam","status":"launched"}"#
+        #expect(try JSONDecoder().decode(LaunchConfirmation.self, from: Data(json.utf8))
+            == LaunchConfirmation(appId: 244210, bottle: "MacHub Steam", status: "launched"))
+    }
+
+    @Test func numericAppIDIsAlsoAccepted() throws {
+        let json = #"[{"appId":244210,"installPath":"/x","name":"Assetto Corsa"}]"#
+        #expect(try JSONDecoder().decode([SteamGame].self, from: Data(json.utf8)).first?.appId == 244210)
     }
 
     @Test func emptyLibraryIsNotAnError() async throws {
@@ -97,5 +108,42 @@ private func cli(expecting arguments: [String]? = nil, reply: ProcessResult) -> 
         await #expect(throws: WhiskyError.timedOut(seconds: 150)) {
             try await slow.launch(appId: 1, bottle: "Steam")
         }
+    }
+}
+
+@Suite struct ProcessWatchTests {
+    // Shape of real `ps -axo pid=,command=` lines for Wine processes (observed 2026-10-18).
+    let ps = """
+      52590 C:\\windows\\system32\\services.exe
+      52693 C:\\Program Files (x86)\\Steam\\steam.exe
+      52702 C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe -nocrashdialog
+      60001 C:\\Program Files (x86)\\Steam\\steamapps\\common\\assettocorsa\\_CommonRedist\\DirectX\\Jun2010\\DXSETUP.exe /silent
+      60002 C:\\Program Files (x86)\\Steam\\steamapps\\common\\assettocorsa\\AssettoCorsa.exe
+      60003 C:\\Program Files (x86)\\Steam\\steamapps\\common\\AssettoCorsa\\acs.exe -race
+      60004 C:\\Program Files (x86)\\Steam\\steamapps\\common\\othergame\\game.exe
+      47974 /Users/me/Library/Application Support/Steam/Steam.AppBundle/Steam/Contents/MacOS/steam_osx
+    """
+
+    @Test func findsOnlyTheGamesOwnProcesses() {
+        let found = ProcessWatch.matches(in: ps, installFolder: "assettocorsa")
+        #expect(found == [.init(pid: 60002, executable: "AssettoCorsa.exe"), .init(pid: 60003, executable: "acs.exe")])
+    }
+
+    @Test func steamAloneIsNotAGame() {
+        let onlySteam = ps.split(separator: "\n").filter { !$0.contains("assettocorsa") && !$0.contains("AssettoCorsa") }.joined(separator: "\n")
+        #expect(ProcessWatch.matches(in: onlySteam, installFolder: "assettocorsa").isEmpty)
+    }
+
+    @Test func textInAnotherProcessArgumentsNeverCounts() {
+        // Real false positive of 2026-10-18: a monitoring shell whose arguments mention the folder and ".exe".
+        let shell = #"  56863 /bin/zsh -c n=$(ps -axo pid=,command= | grep -i 'common\\assettocorsa\\' | sed -E 's/.*\\([^\\]+\.exe).*/\1/')"#
+        let launcherArg = #"  70000 C:\Program Files (x86)\Steam\steam.exe -applaunch 244210 C:\x\common\assettocorsa\acs.exe"#
+        #expect(ProcessWatch.matches(in: shell, installFolder: "assettocorsa").isEmpty)
+        #expect(ProcessWatch.matches(in: launcherArg, installFolder: "assettocorsa").isEmpty)
+    }
+
+    @Test func redistributableInstallersDoNotCount() {
+        let redist = "  1 C:\\Steam\\steamapps\\common\\assettocorsa\\_CommonRedist\\vcredist\\2015\\vc_redist.x64.exe /q"
+        #expect(ProcessWatch.matches(in: redist, installFolder: "assettocorsa").isEmpty)
     }
 }

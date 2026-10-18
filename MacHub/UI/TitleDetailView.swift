@@ -159,7 +159,12 @@ private struct InfoPanel: View {
             row("Publisher", title.publisher.map { Text(verbatim: $0) })
             row("Released", title.releaseYear.map { Text(verbatim: String($0)) })
             if !title.genres.isEmpty {
-                rowView("Genres") { GenreList(genres: title.genres) }
+                rowView("Genres") {
+                    // One genre per line: long localized genres never break mid-word.
+                    VStack(alignment: .trailing, spacing: 4) {
+                        ForEach(title.genres, id: \.self) { Text(LocalizedStringKey($0)) }
+                    }
+                }
             }
             row("Type", title.kind == .game ? Text("Game") : Text("Windows software"))
             row("Source", title.isDemo ? Text("Demo data") : nil)

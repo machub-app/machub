@@ -7,13 +7,20 @@ import Observation
 final class LibraryStore {
     enum LaunchState: Equatable {
         case launching
-        /// WhiskyCmd handed the request to Steam. The game process itself is not verified yet.
-        case handedToSteam
-        /// A Windows program started with `whisky run` and hasn't exited.
-        case running
+        /// Steam received the launch request; MacHub is watching for the game's own process.
+        case waitingForGame
+        /// A process of the title was actually seen (games: from its install folder; software: our own child).
+        case running(String?)
+        /// The game's processes were seen, then disappeared.
+        case closed
+        /// A Windows program started with `whisky run` exited with this code.
         case exited(Int32)
         case installRequested
-        case failed(String)
+        /// No process of the game appeared in time.
+        case notStarted(log: String?)
+        /// The game's process appeared, then vanished within seconds: almost certainly a crash at startup.
+        case crashedAtStart(seconds: Int, log: String?)
+        case failed(String, log: String?)
     }
 
     enum OwnedState: Equatable {
@@ -112,8 +119,9 @@ final class LibraryStore {
         defer { isLoading = false }
         async let store: Void = refreshFeatured()
         async let owned: Void = refreshOwned()
+        async let profile: Void = steam.refreshProfile()
         await refreshWhisky(customPath: customPath)
-        _ = await (store, owned)
+        _ = await (store, owned, profile)
     }
 
     func refreshWhisky(customPath: String?) async {
@@ -191,16 +199,35 @@ final class LibraryStore {
         launchStates[title.id] = .launching
         recordLaunch(title)
         do {
-            if title.kind == .game, let appID = title.steamAppID {
-                _ = try await cli.launch(appId: appID, bottle: bottle)
-                launchStates[title.id] = .handedToSteam
+            if title.kind == .game, let appID = title.steamAppID, let path = title.installPath {
+                // `whisky launch` (3.7.0) reports "launched" without ever reaching Steam (verified 2026-10-18),
+                // so ask the bottle's Steam directly. If Steam isn't running yet, this call *becomes* the
+                // client and only returns when Steam quits: never await it.
+                Task.detached {
+                    _ = try? await cli.run(#"C:\Program Files (x86)\Steam\steam.exe"#, bottle: bottle,
+                                           arguments: ["-applaunch", String(appID)], timeout: 24 * 3600)
+                }
+                launchStates[title.id] = .waitingForGame
+                let folder = URL(filePath: path).lastPathComponent
+                guard let found = await ProcessWatch.waitForStart(installFolder: folder, interval: .milliseconds(500)) else {
+                    launchStates[title.id] = .notStarted(log: ProcessWatch.latestWineLog()?.path)
+                    return
+                }
+                let started = ContinuousClock.now
+                launchStates[title.id] = .running(found.first?.executable)
+                await ProcessWatch.waitForExit(installFolder: folder, interval: .seconds(1))
+                let lived = Int((ContinuousClock.now - started).components.seconds)
+                launchStates[title.id] = lived < 15
+                    ? .crashedAtStart(seconds: lived, log: ProcessWatch.latestWineLog()?.path)
+                    : .closed
             } else if let path = title.installPath {
-                launchStates[title.id] = .running
+                launchStates[title.id] = .running(URL(filePath: path).lastPathComponent)
                 let result = try await cli.run(path, bottle: bottle, timeout: 24 * 3600)
                 launchStates[title.id] = .exited(result.status)
             }
         } catch {
-            launchStates[title.id] = .failed(Self.describe(error))
+            let log: String? = if case WhiskyError.programExit(_, let path)? = error as? WhiskyError { path } else { ProcessWatch.latestWineLog()?.path }
+            launchStates[title.id] = .failed(Self.describe(error), log: log)
         }
     }
 
@@ -213,7 +240,7 @@ final class LibraryStore {
                 #"C:\Program Files (x86)\Steam\steam.exe"#, bottle: bottle, arguments: ["steam://install/\(appID)"], timeout: 24 * 3600
             )
         } catch {
-            launchStates[title.id] = .failed(Self.describe(error))
+            launchStates[title.id] = .failed(Self.describe(error), log: nil)
         }
     }
 

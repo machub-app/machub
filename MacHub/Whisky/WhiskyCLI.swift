@@ -4,6 +4,27 @@ struct SteamGame: Decodable, Equatable, Sendable {
     let appId: Int
     let name: String
     let installPath: String
+
+    init(appId: Int, name: String, installPath: String) {
+        self.appId = appId
+        self.name = name
+        self.installPath = installPath
+    }
+
+    /// WhiskyCmd 3.7.0 emits `"appId" : "244210"` (a string); accept a number too.
+    init(from decoder: Decoder) throws {
+        enum Keys: String, CodingKey { case appId, name, installPath }
+        let c = try decoder.container(keyedBy: Keys.self)
+        if let number = try? c.decode(Int.self, forKey: .appId) {
+            appId = number
+        } else if let text = try? c.decode(String.self, forKey: .appId), let number = Int(text) {
+            appId = number
+        } else {
+            throw DecodingError.dataCorruptedError(forKey: .appId, in: c, debugDescription: "appId is neither a number nor a numeric string")
+        }
+        name = try c.decode(String.self, forKey: .name)
+        installPath = try c.decode(String.self, forKey: .installPath)
+    }
 }
 
 struct LaunchConfirmation: Decodable, Equatable, Sendable {
@@ -11,6 +32,21 @@ struct LaunchConfirmation: Decodable, Equatable, Sendable {
     let bottle: String
     /// `launched` means Wine started `steam.exe -applaunch`, NOT that the game is running.
     let status: String
+
+    init(appId: Int, bottle: String, status: String) {
+        self.appId = appId
+        self.bottle = bottle
+        self.status = status
+    }
+
+    /// Same tolerance as SteamGame: WhiskyCmd may emit appId as a string.
+    init(from decoder: Decoder) throws {
+        enum Keys: String, CodingKey { case appId, bottle, status }
+        let c = try decoder.container(keyedBy: Keys.self)
+        appId = (try? c.decode(Int.self, forKey: .appId)) ?? Int((try? c.decode(String.self, forKey: .appId)) ?? "") ?? 0
+        bottle = try c.decode(String.self, forKey: .bottle)
+        status = try c.decode(String.self, forKey: .status)
+    }
 }
 
 enum WhiskyError: Error, Equatable {

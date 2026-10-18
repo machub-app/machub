@@ -106,6 +106,23 @@ import Testing
         #expect(profile.avatarURL?.absoluteString == "https://avatars.fastly.steamstatic.com/c5d5_full.jpg")
     }
 
+    @Test func profileNeverSetUp() throws {
+        // Verbatim shape returned on 2026-10-18 for an account without a Community profile.
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?><profile>
+        <steamID64>76561198000000000</steamID64>
+        <steamID><![CDATA[]]></steamID>
+        <vacBanned>0</vacBanned>
+        <privacyMessage>This user has not yet set up their Steam Community profile.<br />If you know this person, encourage them.</privacyMessage>
+        </profile>
+        """
+        let profile = try #require(SteamProfile.parse(Data(xml.utf8)))
+        #expect(profile.personaName == nil && profile.avatarURL == nil)
+        #expect(profile.visibility == .notSetUp)
+        let account = SteamAccount(steamID64: "76561198000000000", personaName: "", verifiedAt: .now)
+        #expect(account.displayName == nil)
+    }
+
     @Test func errorPageIsNotAProfile() {
         #expect(SteamProfile.parse(Data("<response><error>The specified profile could not be found.</error></response>".utf8)) == nil)
     }

@@ -3,13 +3,20 @@ import Security
 
 /// A Steam account proven by a verified OpenID sign-in. Not a secret: SteamID64 and public profile only.
 struct SteamAccount: Codable, Equatable, Sendable {
-    enum Visibility: String, Codable, Sendable { case `public`, friendsOnly, `private`, unknown }
+    enum Visibility: String, Codable, Sendable {
+        case `public`, friendsOnly, `private`, unknown
+        /// The account never created its Steam Community profile: Steam publishes no name, avatar or privacy.
+        case notSetUp
+    }
 
     let steamID64: String
     var personaName: String?
     var avatarURL: URL?
     var visibility: Visibility = .unknown
     let verifiedAt: Date
+
+    /// Public name, or nil when Steam has none (empty names are never shown).
+    var displayName: String? { personaName.flatMap { $0.isEmpty ? nil : $0 } }
 
     private static let storageKey = "steamAccount"
 
@@ -48,10 +55,11 @@ struct SteamProfile: Equatable, Sendable {
         case "public": .public
         case "friendsonly": .friendsOnly
         case "private": .private
-        default: .unknown
+        default: v["privacyMessage"] != nil ? .notSetUp : .unknown
         }
+        let name = v["steamID"].flatMap { $0.isEmpty ? nil : $0 }
         return SteamProfile(
-            steamID64: v["steamID64"], personaName: v["steamID"],
+            steamID64: v["steamID64"], personaName: name,
             avatarURL: v["avatarFull"].flatMap(URL.init(string:)), visibility: visibility
         )
     }
@@ -62,7 +70,7 @@ private final class ProfileXMLDelegate: NSObject, XMLParserDelegate {
     private var depth = 0
     private var current: String?
     private var buffer = ""
-    private let wanted: Set = ["steamID64", "steamID", "avatarFull", "privacyState"]
+    private let wanted: Set = ["steamID64", "steamID", "avatarFull", "privacyState", "privacyMessage"]
 
     func parser(_ parser: XMLParser, didStartElement name: String, namespaceURI: String?, qualifiedName: String?, attributes: [String: String] = [:]) {
         depth += 1

@@ -733,6 +733,28 @@
         }
       }
     },
+    "Community profile not set up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil Communauté non configuré"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コミュニティプロフィール未設定"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "社区资料未设置"
+          }
+        }
+      }
+    },
     "Compatibility": {
       "localizations": {
         "fr": {
@@ -2760,6 +2782,28 @@
         }
       }
     },
+    "No process of the game appeared within 3 minutes. The Wine log may explain why.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun processus du jeu n'est apparu en 3 minutes. Le log Wine peut expliquer pourquoi."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 分以内にゲームのプロセスが見つかりませんでした。Wine のログで原因を確認できます。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 分钟内没有出现游戏进程。Wine 日志可能说明原因。"
+          }
+        }
+      }
+    },
     "No programs yet": {
       "localizations": {
         "fr": {
@@ -2919,7 +2963,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non configurée"
+            "value": "Non configuré"
           }
         },
         "ja": {
@@ -2931,7 +2975,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "未配置"
+            "value": "未设置"
           }
         }
       }
@@ -3882,6 +3926,50 @@
         }
       }
     },
+    "Running.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En cours."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "実行中。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行中。"
+          }
+        }
+      }
+    },
+    "Running: macOS sees %@ from the game's folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En cours : macOS voit %@ lancé depuis le dossier du jeu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "実行中：macOS がゲームフォルダの %@ を検出しています。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行中：macOS 检测到游戏目录中的 %@。"
+          }
+        }
+      }
+    },
     "Runs great": {
       "localizations": {
         "fr": {
@@ -4190,6 +4278,28 @@
         }
       }
     },
+    "Set up my Steam profile": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurer mon profil Steam"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam プロフィールを設定"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置我的 Steam 资料"
+          }
+        }
+      }
+    },
     "Settings": {
       "localizations": {
         "fr": {
@@ -4252,6 +4362,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示"
+          }
+        }
+      }
+    },
+    "Show Wine log": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le log Wine"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine のログを表示"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示 Wine 日志"
           }
         }
       }
@@ -4454,24 +4586,24 @@
         }
       }
     },
-    "Signing in doesn't need a key. Steam only returns the list of games you own through its official Web API (IPlayerService/GetOwnedGames), which requires your personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine). MacHub keeps it in the macOS Keychain only and never writes it to files or logs. Your profile's “Game details” must also be public.": {
+    "Signing in doesn't need a key. Steam only returns the list of games you own through its official Web API (IPlayerService/GetOwnedGames), which requires your personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine). Steam returns the games visible to the key's owner, so your own key covers your own account. MacHub keeps it in the macOS Keychain only and never writes it to files or logs.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La connexion n'a pas besoin de clé. Steam ne fournit la liste de vos jeux que via son Web API officielle (IPlayerService/GetOwnedGames), qui exige votre clé personnelle sur steamcommunity.com/dev/apikey (pour le domaine, « localhost » convient). MacHub la garde uniquement dans le Trousseau macOS et ne l'écrit jamais dans des fichiers ou des journaux. Les « Détails des jeux » de votre profil doivent aussi être publics."
+            "value": "La connexion n'a pas besoin de clé. Steam ne fournit la liste de vos jeux que via son Web API officielle (IPlayerService/GetOwnedGames), qui exige votre clé personnelle sur steamcommunity.com/dev/apikey (pour le domaine, « localhost » convient). Steam renvoie les jeux visibles par le propriétaire de la clé : votre propre clé couvre donc votre propre compte. MacHub la garde uniquement dans le Trousseau macOS et ne l'écrit jamais dans des fichiers ou des journaux."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "サインインにキーは不要です。所有ゲームの一覧は Steam 公式 Web API（IPlayerService/GetOwnedGames）からのみ取得でき、steamcommunity.com/dev/apikey で発行する個人用キーが必要です（ドメインは「localhost」で構いません）。MacHub はキーを macOS のキーチェーンにのみ保存し、ファイルやログには書き込みません。プロフィールの「ゲームの詳細」も公開にする必要があります。"
+            "value": "サインインにキーは不要です。所有ゲームの一覧は Steam 公式 Web API（IPlayerService/GetOwnedGames）からのみ取得でき、steamcommunity.com/dev/apikey で発行する個人用キーが必要です（ドメインは「localhost」で構いません）。Steam はキーの所有者に見えるゲームを返すため、自分のキーなら自分のアカウントのゲームを取得できます。MacHub はキーを macOS のキーチェーンにのみ保存し、ファイルやログには書き込みません。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "登录不需要密钥。Steam 只通过官方 Web API（IPlayerService/GetOwnedGames）提供你拥有的游戏列表，这需要你在 steamcommunity.com/dev/apikey 获取的个人密钥（域名填写“localhost”即可）。MacHub 只把它保存在 macOS 钥匙串中，绝不写入文件或日志。你资料中的“游戏详情”也必须设为公开。"
+            "value": "登录不需要密钥。Steam 只通过官方 Web API（IPlayerService/GetOwnedGames）提供你拥有的游戏列表，这需要你在 steamcommunity.com/dev/apikey 获取的个人密钥（域名填写“localhost”即可）。Steam 会返回密钥所有者可见的游戏，因此你自己的密钥可以覆盖你自己的账户。MacHub 只把它保存在 macOS 钥匙串中，绝不写入文件或日志。"
           }
         }
       }
@@ -5029,6 +5161,28 @@
         }
       }
     },
+    "Steam received the launch request. MacHub is watching for the game's own process…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam a reçu la demande de lancement. MacHub guette le processus du jeu…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam が起動リクエストを受け取りました。MacHub がゲームのプロセスを確認しています…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam 已收到启动请求。MacHub 正在等待游戏进程出现…"
+          }
+        }
+      }
+    },
     "Steam refused the Web API key. Check or replace it in Settings.": {
       "localizations": {
         "fr": {
@@ -5289,6 +5443,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "按需搜索 Steam 商店。在 Steam 上并不代表游戏能在 Whisky 下运行。"
+          }
+        }
+      }
+    },
+    "The game has closed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu s'est fermé."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームが終了しました。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "游戏已关闭。"
+          }
+        }
+      }
+    },
+    "The game started, then closed after %lld s: it most likely crashed at startup. See the requirements and the Wine log.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le jeu a démarré puis s'est fermé au bout de %lld s : il a très probablement planté au lancement. Voir les prérequis et le log Wine."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームは起動しましたが %lld 秒で終了しました。起動時にクラッシュした可能性が高いです。必要条件と Wine のログを確認してください。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "游戏已启动，但 %lld 秒后关闭：很可能在启动时崩溃。请查看前提条件和 Wine 日志。"
           }
         }
       }
@@ -6021,6 +6219,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "你的游戏库为空"
+          }
+        }
+      }
+    },
+    "Your sign-in is valid, but this account has no Steam Community profile yet, so Steam publishes no name or avatar. Optional: set one up on Steam.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta connexion est valide, mais ce compte n'a pas encore de profil Communauté Steam : Steam ne publie donc ni nom ni avatar. Facultatif : configure-le sur Steam."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サインインは有効ですが、このアカウントにはまだ Steam コミュニティのプロフィールがないため、名前やアバターは公開されていません。任意で Steam で設定できます。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录有效，但此账户还没有 Steam 社区资料，因此 Steam 不会公开名称或头像。可选：在 Steam 上设置。"
           }
         }
       }

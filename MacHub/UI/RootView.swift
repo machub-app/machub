@@ -81,7 +81,12 @@ struct RootView: View {
         .environment(store)
         .environment(discover)
         .environment(navigation)
-        .task(id: customPath) { await store.refresh(customPath: customPath) }
+        .task(id: customPath) {
+            await store.refresh(customPath: customPath)
+            #if DEBUG
+            playFromLaunchArgument()
+            #endif
+        }
         .onChange(of: store.steam.account) { Task { await store.refreshOwned() } }
         .onChange(of: store.steam.hasAPIKey) { Task { await store.refreshOwned() } }
         .onChange(of: navigation.searchFocusRequest) { searchFocused = true }
@@ -95,6 +100,16 @@ struct RootView: View {
     }
 
     #if DEBUG
+    /// Debug-only: `--play <steam app id>` opens the installed title and runs the same launch path as its Play button.
+    private func playFromLaunchArgument() {
+        let args = CommandLine.arguments
+        guard let i = args.firstIndex(of: "--play"), i + 1 < args.count, let appID = Int(args[i + 1]),
+              let title = store.library.first(where: { $0.steamAppID == appID && $0.canLaunch })
+        else { return }
+        path.append(title)
+        Task { await store.launch(title) }
+    }
+
     /// Debug-only deep link for screenshots: `--open discover|library|software|settings|title:<steam id>|search:<text>`.
     private func openFromLaunchArgument() {
         let args = CommandLine.arguments
@@ -211,8 +226,10 @@ private struct SteamAccountChip: View {
                 SteamAvatar(account: steam.account, size: 22)
                 VStack(alignment: .leading, spacing: 1) {
                     if let account = steam.account {
-                        Text(verbatim: account.personaName ?? account.steamID64)
-                            .font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
+                        Group {
+                            if let name = account.displayName { Text(verbatim: name) } else { Text("Steam account") }
+                        }
+                        .font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
                         Text("Steam connected").font(.caption2).foregroundStyle(Theme.textSecondary)
                     } else {
                         Text("Steam").font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
