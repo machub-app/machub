@@ -26,7 +26,7 @@ extension Compatibility {
         case .playable: "Playable"
         case .issues: "Known issues"
         case .unsupported: "Won't run"
-        case .unknown: "Untested"
+        case .unknown: "Not verified"
         }
     }
 

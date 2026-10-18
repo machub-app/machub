@@ -1,13 +1,14 @@
 import SwiftUI
 
 enum SidebarItem: Hashable, CaseIterable {
-    case home, library, search, settings
+    case home, discover, library, software, settings
 
     var label: LocalizedStringKey {
         switch self {
         case .home: "Home"
+        case .discover: "Discover"
         case .library: "Library"
-        case .search: "Search"
+        case .software: "Software"
         case .settings: "Settings"
         }
     }
@@ -15,68 +16,100 @@ enum SidebarItem: Hashable, CaseIterable {
     var symbol: String {
         switch self {
         case .home: "house"
+        case .discover: "sparkles.rectangle.stack"
         case .library: "square.grid.2x2"
-        case .search: "magnifyingglass"
+        case .software: "macwindow"
         case .settings: "gearshape"
         }
     }
 }
 
-/// Sidebar selection, owned by the app so menu commands (⌘1–3, ⌘F, ⌘,) can drive it.
+/// Sidebar selection and search focus, owned by the app so menu commands (⌘1–4, ⌘F, ⌘,) can drive them.
 @MainActor @Observable
 final class AppNavigation {
     var selection: SidebarItem? = .home
+    var searchFocusRequest = 0
 }
 
 struct RootView: View {
     @Bindable var navigation: AppNavigation
     @State private var store = LibraryStore()
+    @State private var discover = DiscoverModel()
     @State private var path = NavigationPath()
+    @State private var query = ""
+    @FocusState private var searchFocused: Bool
     @AppStorage("whiskyCmdPath") private var customPath = ""
 
     var body: some View {
         NavigationSplitView {
             List(selection: $navigation.selection) {
-                ForEach([SidebarItem.home, .library, .search], id: \.self) { item in
+                ForEach([SidebarItem.home, .discover, .library, .software], id: \.self) { item in
                     Label(item.label, systemImage: item.symbol).tag(item)
                 }
                 Section {
                     Label(SidebarItem.settings.label, systemImage: SidebarItem.settings.symbol).tag(SidebarItem.settings)
                 }
             }
-            .navigationSplitViewColumnWidth(min: 190, ideal: 210, max: 260)
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
             .safeAreaInset(edge: .bottom) {
-                WhiskyStatusChip { navigation.selection = .settings }
-                    .padding(12)
+                VStack(spacing: 8) {
+                    SteamAccountChip { navigation.selection = .settings }
+                    WhiskyStatusChip { navigation.selection = .settings }
+                }
+                .padding(12)
             }
         } detail: {
             NavigationStack(path: $path) {
-                page
-                    .navigationDestination(for: Title.self) { TitleDetailView(title: $0) }
+                Group {
+                    if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                        page
+                    } else {
+                        GlobalSearchView(query: query) {
+                            discover.term = query
+                            query = ""
+                            navigation.selection = .discover
+                            Task { await discover.reload() }
+                        }
+                    }
+                }
+                .navigationDestination(for: Title.self) { TitleDetailView(title: $0) }
             }
             .background { AmbientBackdrop(title: store.spotlight) }
         }
+        .searchable(text: $query, placement: .toolbar, prompt: Text("Search games and software"))
+        .searchFocused($searchFocused)
         .environment(store)
+        .environment(discover)
+        .environment(navigation)
         .task(id: customPath) { await store.refresh(customPath: customPath) }
+        .onChange(of: store.steam.account) { Task { await store.refreshOwned() } }
+        .onChange(of: store.steam.hasAPIKey) { Task { await store.refreshOwned() } }
+        .onChange(of: navigation.searchFocusRequest) { searchFocused = true }
         #if DEBUG
         .onAppear(perform: openFromLaunchArgument)
         #endif
-        .onChange(of: navigation.selection) { path = NavigationPath() }
+        .onChange(of: navigation.selection) {
+            path = NavigationPath()
+            query = ""
+        }
     }
 
     #if DEBUG
-    /// Debug-only deep link for screenshots: `--open library|search|settings|title:<id>`.
+    /// Debug-only deep link for screenshots: `--open discover|library|software|settings|title:<steam id>|search:<text>`.
     private func openFromLaunchArgument() {
         let args = CommandLine.arguments
         guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return }
         let target = args[i + 1]
         switch target {
+        case "discover": navigation.selection = .discover
         case "library": navigation.selection = .library
-        case "search": navigation.selection = .search
+        case "software": navigation.selection = .software
         case "settings": navigation.selection = .settings
         default:
-            if target.hasPrefix("title:"), let title = DemoLibrary.titles.first(where: { $0.id == String(target.dropFirst(6)) }) {
-                path.append(title)
+            if target.hasPrefix("title:"), let id = Int(target.dropFirst(6)) {
+                path.append(Title(id: Title.steamID(id), name: "", kind: .game, steamAppID: id))
+            } else if target.hasPrefix("search:") {
+                query = String(target.dropFirst(7))
             }
         }
     }
@@ -86,8 +119,9 @@ struct RootView: View {
     private var page: some View {
         switch navigation.selection ?? .home {
         case .home: HomeView()
+        case .discover: DiscoverView()
         case .library: LibraryView()
-        case .search: SearchView()
+        case .software: SoftwareView()
         case .settings: SettingsView()
         }
     }
@@ -161,6 +195,55 @@ private struct WhiskyStatusChip: View {
     private var detail: LocalizedStringKey {
         guard case .ready = store.report?.status else { return "Open Settings for details" }
         let bottles = store.registeredBottles.count
-        return bottles == 0 ? "No bottles yet" : "\(bottles) bottle(s) · \(store.realTitles.count) game(s)"
+        return bottles == 0 ? "No bottles yet" : "\(bottles) bottle(s) · \(store.installedTitles.count) game(s)"
+    }
+}
+
+/// Who is signed in to Steam, at the foot of the sidebar. Only a verified OpenID sign-in shows a name.
+private struct SteamAccountChip: View {
+    let action: () -> Void
+    @Environment(LibraryStore.self) private var store
+
+    var body: some View {
+        let steam = store.steam
+        Button(action: action) {
+            HStack(spacing: 8) {
+                SteamAvatar(account: steam.account, size: 22)
+                VStack(alignment: .leading, spacing: 1) {
+                    if let account = steam.account {
+                        Text(verbatim: account.personaName ?? account.steamID64)
+                            .font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
+                        Text("Steam connected").font(.caption2).foregroundStyle(Theme.textSecondary)
+                    } else {
+                        Text("Steam").font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
+                        Text(steam.isBusy ? "Waiting for the browser…" : "Not connected").font(.caption2).foregroundStyle(Theme.textSecondary)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(10)
+            .background(Theme.surface, in: .rect(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .help("Steam account settings")
+    }
+}
+
+struct SteamAvatar: View {
+    let account: SteamAccount?
+    var size: CGFloat = 28
+
+    var body: some View {
+        Group {
+            if let url = account?.avatarURL {
+                AsyncImage(url: url) { image in image.resizable().aspectRatio(contentMode: .fill) } placeholder: { Theme.surfaceRaised }
+            } else {
+                Image(systemName: account == nil ? "person.crop.circle.badge.questionmark" : "person.crop.circle.fill")
+                    .resizable().aspectRatio(contentMode: .fit).foregroundStyle(Theme.textSecondary)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(.rect(cornerRadius: size * 0.22))
+        .accessibilityHidden(true)
     }
 }

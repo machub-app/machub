@@ -18,23 +18,31 @@ Plan : étapes A → E (faisabilité avant interface). Rien n'est marqué « fai
 | Système visuel documenté | `DESIGN.md` + `.impeccable/design.json` (jetons SwiftUI, composants, règles) écrits à partir du code réel |
 | Revue de design Impeccable (2 tours, le maximum) | 1er verdict « fix » (8 points), 2e verdict : 5 résolus, 2 partiels, 2 régressions ; dernier lot appliqué (logo sur plaque claire, un seul repère de démo par carte, identifiant court des bouteilles), vérifié sur les captures |
 
-## Ce qui est réel vs démo dans l'interface
+## Steam (tranche « bibliothèque connectée »)
 
-| Élément | Réel | Démo |
+| Élément | Source réelle | Preuve |
 |---|---|---|
-| Statut Whisky (pied de barre latérale, Réglages) | ✅ lu en direct via `WhiskyLocator` / `DiagnosticsReport` | |
-| Rangée « Installés dans Whisky » | ✅ alimentée par `whisky games <bouteille>` ; aujourd'hui un état vide réel (aucune bouteille) | |
-| Bouton Jouer sur un jeu installé | ⚠️ code réel (`whisky launch`), **jamais exécuté** faute de bouteille ; affiche « Envoyé à Steam », jamais « en cours » | |
-| Jaquettes, héros, logos | ✅ CDN public Steam par App ID (vérifié 200 pour les 18 App ID utilisés) | |
-| Les 21 titres affichés aujourd'hui | | 🧪 `DemoLibrary` : noms, studios et années réels ; compatibilité **indicative** ; badge « Données de démo » partout ; Jouer désactivé ; masquables dans Réglages |
-| Résumés des titres de démo | | 🧪 rédigés pour la démo, en anglais (contenu, pas interface) |
-| Compatibilité | | 🧪 aucune source de données ; les vrais jeux affichent « Non testé » |
-| Mods, profils de bouteille, import d'.exe | ❌ pas encore construits (phases suivantes) | |
+| Connexion | Steam **OpenID 2.0** dans le navigateur système → retour sur un récepteur `127.0.0.1:<port aléatoire>` (loopback uniquement, `GET /callback` seulement) → contrôles locaux (state, return_to, op_endpoint, champs signés, nonce < 5 min, `claimed_id == identity`, SteamID64 au format 7656119…) → **vérification directe auprès de Steam** (`check_authentication` → `is_valid:true`). Aucun mot de passe ni jeton ; `loginusers.vdf` n'est jamais traité comme une authentification | `SteamOpenIDTests` (9 assertions altérées refusées), `LoopbackServerTests` (vrai aller-retour HTTP) ; Steam accepte le realm loopback (redirection vers son formulaire, vérifiée par curl). **Connexion de bout en bout non encore faite : elle demande que tu te connectes toi-même** |
+| Profil | `steamcommunity.com/profiles/<id>/?xml=1` (public, sans clé) : nom, avatar, visibilité | `RealSteamTests.publicProfile` (en direct) |
+| Jeux possédés | `IPlayerService/GetOwnedGames` officiel ; **exige ta clé Web API** (401 sans, vérifié). Clé dans le **Trousseau** uniquement, jamais dans un fichier, un log ni une clé de cache. Profil privé → message explicite | `ownedGamesWithoutKeyIsUnauthorized` (en direct), `ownedGamesAndPrivateProfiles` |
+| Catalogue | Recherche du Store (`search/results?json=1`, 50 par page, chargement progressif), `featuredcategories`, `appdetails`. **Aucune API officielle ouverte ne liste tout le catalogue** : `ISteamApps/GetAppList` a été retiré (404), `IStoreService/GetAppList` exige une clé (403). Recherche à la demande, cache disque (1 h vitrine, 15 min recherche, 24 h fiches), espacement de 350 ms par hôte, 429 → message, hors ligne → cache périmé affiché comme tel | `RealSteamTests` (5/5 en direct), `searchPagesDiffer` |
+| Installés | `whisky games <bouteille>` + détection des `.exe` (racine + 1 niveau, installateurs exclus) | `executableScannerSkipsInstallers` ; aucune bouteille aujourd'hui |
+| Logiciels | Imports manuels (`.exe` + bouteille, `software.json`) et programmes épinglés dans Whisky (`Metadata.plist` → `info.pins`, lecture seule) ; lancement `whisky run` | Code réel, **pas encore exécuté** (aucune bouteille) |
+| Récents | Historique local de lancement (`history.json`) | Code réel |
+| Jouer | Uniquement si installé + exécutable détecté + Whisky prêt. Sinon : « Installer dans « Steam » » (`steam://install/<id>` dans la bouteille, si Steam Windows y est), ou bouton désactivé + raison + panneau **Prérequis** | `storeAndOwnedTitlesNeverLaunch`, `installedWithoutExecutableIsNotLaunchable` |
+| Compatibilité | Toujours « Non vérifiée » pour les vrais titres (aucune source). Seule info réelle : version Mac native signalée par Steam (`platforms.mac`) | Capture Cyberpunk 2077 |
+| Démo | Désactivée par défaut, toujours étiquetée si on la réactive | `demoTitlesAreNeverLaunchable` |
+
+Tests : **54/54** unitaires + **5/5** intégration Steam en direct + 2/2 intégration Whisky. Captures : `.impeccable/review/{home,discover,library,software,settings,detail,detail-new,search}.png`.
 
 ## Reste à faire
 
 - **A3 en pause** (17/10/2026) : la bouteille `Steam` n'existe pas encore pour le fork. `whisky list` est vide et `BottleVM.plist` a `paths = []`, inchangé depuis 23:11. On reprend quand `whisky list` l'affiche : il faudra alors rejouer `games` sur cette bouteille (`TEST_RUNNER_MACHUB_INTEGRATION=1 xcodebuild … test -only-testing:MacHubTests/RealWhiskyTests`).
-- Bloqué par Whisky : la bouteille `Steam` (aucune n'existe dans le fork), donc la rangée « Installés », le vrai Jouer, A3 et B4.
+- **À faire par toi** : te connecter une fois via « Se connecter avec Steam » (vérifie OpenID de bout en bout), puis, si tu veux tes jeux possédés, coller ta clé Web API dans Réglages et rendre publics les « Détails des jeux ».
+- Bloqué par Whisky : la bouteille `Steam` (aucune n'existe dans le fork), donc « Installés », le vrai Jouer, « Installer dans la bouteille », les logiciels, A3 et B4.
+- Les endpoints du Store (recherche, vitrine, fiches) ne sont pas documentés par Valve : ils peuvent changer ; les erreurs sont gérées et le cache sert de repli.
+- Jaquettes des jeux récents : Steam ne les expose qu'en petit format dans la recherche (231×87, affichées entières sur fond flouté) ; la fiche détaillée charge les grandes images.
+- Les messages d'erreur techniques (Whisky, HTTP) restent en anglais.
 - D3 : détection du processus du jeu après `launch` (état « en cours »).
 - C : comptes Steam locaux, jeux possédés (clé API), métadonnées store, cache hors ligne.
 - Écarts relevés par le documenteur Impeccable, non corrigés : fiche titre sans l'ombrage en haut à droite du hero d'accueil (ciel blanc) ; Réglages utilisent `.green/.orange/.red` système au lieu des teintes de compatibilité ; « Augmenter le contraste » promis dans PRODUCT.md mais pas implémenté.

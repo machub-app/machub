@@ -39,9 +39,11 @@ struct MacHubApp: App {
             }
             CommandMenu("Go") {
                 Button("Home") { navigation.selection = .home }.keyboardShortcut("1")
-                Button("Library") { navigation.selection = .library }.keyboardShortcut("2")
-                Button("Search") { navigation.selection = .search }.keyboardShortcut("3")
-                Button("Find…") { navigation.selection = .search }.keyboardShortcut("f")
+                Button("Discover") { navigation.selection = .discover }.keyboardShortcut("2")
+                Button("Library") { navigation.selection = .library }.keyboardShortcut("3")
+                Button("Software") { navigation.selection = .software }.keyboardShortcut("4")
+                Divider()
+                Button("Find…") { navigation.searchFocusRequest += 1 }.keyboardShortcut("f")
             }
         }
     }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Steam artwork for a title. Falls back to a monogram plate when there is no App ID or the image fails.
+/// Steam artwork for a title: the CDN library asset, then the store's own capsule, then a monogram plate.
 struct ArtworkImage: View {
     let title: Title
     let artwork: Artwork
@@ -11,7 +11,7 @@ struct ArtworkImage: View {
                 AsyncImage(url: artwork.url(appID: appID), transaction: Transaction(animation: .easeOut(duration: 0.3))) { phase in
                     switch phase {
                     case .success(let image): image.resizable().aspectRatio(contentMode: .fill)
-                    case .failure: MonogramPlate(title: title)
+                    case .failure: fallback
                     default: Theme.surface
                     }
                 }
@@ -21,6 +21,41 @@ struct ArtworkImage: View {
         }
         .clipped()
         .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private var fallback: some View {
+        if artwork == .hero, let background = title.backgroundURL {
+            AsyncImage(url: background) { phase in
+                if case .success(let image) = phase { image.resizable().aspectRatio(contentMode: .fill) } else { capsule }
+            }
+        } else {
+            capsule
+        }
+    }
+
+    /// Store capsules are small and landscape: shown whole on a blurred copy of themselves, never stretched.
+    @ViewBuilder
+    private var capsule: some View {
+        if let url = title.capsuleURL {
+            AsyncImage(url: url) { phase in
+                if case .success(let image) = phase {
+                    // Overlays on a clear base: the card's frame sets the size, not the overflowing fill.
+                    Color.clear
+                        .overlay { image.resizable().aspectRatio(contentMode: .fill).blur(radius: 24).opacity(0.55) }
+                        .overlay {
+                            image.resizable().aspectRatio(contentMode: .fit)
+                                .shadow(color: .black.opacity(0.5), radius: 10, y: 4)
+                                .padding(artwork == .cover ? 10 : 0)
+                        }
+                        .clipped()
+                } else {
+                    MonogramPlate(title: title)
+                }
+            }
+        } else {
+            MonogramPlate(title: title)
+        }
     }
 }
 
@@ -200,6 +235,7 @@ struct MetaLine: View {
 
     var body: some View {
         HStack(spacing: 10) {
+            if !title.isDemo { AvailabilityBadge(title: title) }
             CompatibilityBadge(compatibility: title.compatibility, isDemo: title.isDemo)
             if let year = title.releaseYear {
                 Text(verbatim: String(year))
@@ -260,30 +296,60 @@ private struct StyledBody: View {
     }
 }
 
-/// Play / launch control. Disabled unless a real Whisky install exists; `PlayStatus` explains why.
+/// What a title's main button does, decided from verified state only.
+enum TitleAction: Equatable {
+    case play
+    case install(bottle: String)
+    case unavailable
+}
+
+extension LibraryStore {
+    func action(for title: Title) -> TitleAction {
+        if title.canLaunch, whiskyInstall != nil { return .play }
+        if !title.isDemo, title.kind == .game, title.install == nil, title.steamAppID != nil, let bottle = steamBottle?.name {
+            return .install(bottle: bottle)
+        }
+        return .unavailable
+    }
+}
+
+/// The main action. Red Play only when an installed, launchable copy and a ready Whisky exist.
 struct PlayButton: View {
     let title: Title
     @Environment(LibraryStore.self) private var store
 
     var body: some View {
-        Button {
-            Task { await store.launch(title) }
-        } label: {
-            switch store.launchStates[title.id] {
-            case .launching:
-                HStack(spacing: 8) { ProgressView().controlSize(.small).tint(.white); Text("Starting…") }
-            case .handedToSteam:
-                Label("Sent to Steam", systemImage: "checkmark")
-            default:
-                Label("Play", systemImage: "play.fill")
+        switch store.action(for: title) {
+        case .install(let bottle):
+            Button {
+                Task { await store.requestInstall(title) }
+            } label: {
+                Label("Install in “\(bottle)”", systemImage: "arrow.down.circle")
             }
+            .buttonStyle(SecondaryActionStyle())
+            .disabled(store.launchStates[title.id] == .installRequested)
+        case .play, .unavailable:
+            Button {
+                Task { await store.launch(title) }
+            } label: {
+                switch store.launchStates[title.id] {
+                case .launching:
+                    HStack(spacing: 8) { ProgressView().controlSize(.small).tint(.white); Text("Starting…") }
+                case .handedToSteam:
+                    Label("Sent to Steam", systemImage: "checkmark")
+                case .running:
+                    Label("Running", systemImage: "play.circle.fill")
+                default:
+                    Label("Play", systemImage: "play.fill")
+                }
+            }
+            .buttonStyle(PrimaryActionStyle())
+            .disabled(store.action(for: title) != .play || [.launching, .running].contains(store.launchStates[title.id]))
         }
-        .buttonStyle(PrimaryActionStyle())
-        .disabled(!title.canLaunch || store.launchStates[title.id] == .launching)
     }
 }
 
-/// One honest line under the action row: demo, not supported yet, handed to Steam, or the failure.
+/// One honest line under the action row: why Play is (un)available, or what just happened.
 struct PlayStatus: View {
     let title: Title
     @Environment(LibraryStore.self) private var store
@@ -297,7 +363,7 @@ struct PlayStatus: View {
             }
             .font(.callout)
             .foregroundStyle(isError ? Compatibility.issues.tint : Theme.textSecondary)
-            .frame(maxWidth: 520, alignment: .leading)
+            .frame(maxWidth: 560, alignment: .leading)
         }
     }
 
@@ -307,14 +373,43 @@ struct PlayStatus: View {
 
     private var caption: LocalizedStringKey? {
         switch store.launchStates[title.id] {
-        case .failed(let message): "Couldn't start: \(message)"
-        case .handedToSteam: "Steam received the launch request. MacHub doesn't check yet whether the game window opened."
-        case .launching: nil
-        case nil:
-            if title.isDemo { "Demo title. Install it in a Whisky bottle to play." }
-            else if title.kind == .software { "Launching Windows software comes in a later step." }
-            else { nil }
+        case .failed(let message): return "Couldn't start: \(message)"
+        case .handedToSteam: return "Steam received the launch request. MacHub doesn't check yet whether the game window opened."
+        case .installRequested: return "Steam for Windows was asked to install this game in the bottle. Follow the download in Steam."
+        case .exited(let code): return "The program closed (exit code \(code))."
+        case .running, .launching: return nil
+        case nil: break
         }
+        if title.isDemo { return "Demo title. Install it in a Whisky bottle to play." }
+        if title.macAvailable == true, title.install == nil { return "A native macOS version exists on Steam: use Steam for Mac rather than Whisky." }
+        if store.whiskyInstall == nil { return "Whisky isn't ready. See Settings." }
+        if let install = title.install, install.executables.isEmpty { return "Installed, but no Windows executable was found in its folder." }
+        if title.install != nil { return "Compatibility not verified: it may or may not run under Whisky." }
+        if title.kind == .game, store.steamBottle == nil { return "To play, a Whisky bottle with Steam for Windows is needed. See the requirements below." }
+        if title.owned == nil { return "Not in your Steam library. Buy or add it on Steam first." }
+        return nil
+    }
+}
+
+/// Store / owned / installed, always shown on real titles.
+struct AvailabilityBadge: View {
+    let title: Title
+    var compact = false
+
+    var body: some View {
+        let (label, symbol, fill, ink): (LocalizedStringKey, String, Color, Color) = switch title.availability {
+        case .installed: ("Installed", "shippingbox.fill", Theme.textPrimary, Theme.ground)
+        case .owned: ("Owned", "checkmark.circle", Theme.surfaceRaised, Theme.textPrimary)
+        case .store: ("On Steam", "cart", .clear, Theme.textSecondary)
+        }
+        Label { Text(label) } icon: { Image(systemName: symbol) }
+            .font(compact ? .caption.weight(.semibold) : .callout.weight(.semibold))
+            .foregroundStyle(ink)
+            .padding(.horizontal, compact ? 7 : 10)
+            .padding(.vertical, compact ? 3 : 5)
+            .background(fill, in: .capsule)
+            .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: title.availability == .store ? 1 : 0))
+            .help(title.bottle.map { Text("Installed in bottle “\($0)”") } ?? Text(label))
     }
 }
 
@@ -355,27 +450,22 @@ struct TitleCard: View {
                             .help(Text("Sample content. Not installed and not launchable."))
                     }
                 }
-                .overlay(alignment: .topLeading) {
-                    if !title.isDemo, let bottle = title.bottle {
-                        Label(bottle, systemImage: "shippingbox.fill")
-                            .font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 7).padding(.vertical, 3)
-                            .floatingGlass(cornerRadius: 6)
-                            .padding(8)
-                    }
-                }
             VStack(alignment: .leading, spacing: 6) {
                 Text(verbatim: title.name)
                     .font(.headline)
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
-                CompatibilityBadge(compatibility: title.compatibility, compact: true, isDemo: title.isDemo)
+                if title.isDemo {
+                    CompatibilityBadge(compatibility: title.compatibility, compact: true, isDemo: true)
+                } else {
+                    AvailabilityBadge(title: title, compact: true)
+                }
             }
             .frame(width: w, alignment: .leading)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(verbatim: title.name))
-        .accessibilityValue(Text(title.compatibility.label))
+        .accessibilityValue(title.isDemo ? Text(title.compatibility.label) : Text(verbatim: ""))
     }
 }
 

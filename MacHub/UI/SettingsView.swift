@@ -4,12 +4,13 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(LibraryStore.self) private var store
     @AppStorage("whiskyCmdPath") private var customPath = ""
-    @AppStorage("showDemoTitles") private var showDemo = true
+    @AppStorage("showDemoTitles") private var showDemo = false
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @State private var choosingFile = false
 
     var body: some View {
         Form {
+            SteamSettingsSection()
             Section("General") {
                 Picker(selection: $language) {
                     ForEach(AppLanguage.allCases) { $0.label.tag($0) }
@@ -132,5 +133,108 @@ private struct BottleRow: View {
             Text(verbatim: "#" + bottle.url.lastPathComponent.suffix(6)).font(.caption.monospaced()).foregroundStyle(.secondary)
         }
         .help(Text(verbatim: bottle.url.path))
+    }
+}
+
+/// Steam: verified OpenID account and the optional Web API key (Keychain only).
+private struct SteamSettingsSection: View {
+    @Environment(LibraryStore.self) private var store
+    @State private var keyDraft = ""
+    @State private var keyRejected = false
+
+    var body: some View {
+        let steam = store.steam
+        Section {
+            if let account = steam.account {
+                HStack(spacing: 12) {
+                    SteamAvatar(account: account, size: 44)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: account.personaName ?? "—").font(.headline)
+                        Text(verbatim: "SteamID64 \(account.steamID64)").font(.callout.monospaced()).foregroundStyle(.secondary).textSelection(.enabled)
+                        Text("Verified by Steam on \(account.verifiedAt.formatted(date: .abbreviated, time: .shortened))")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Link(destination: URL(string: "https://steamcommunity.com/profiles/\(account.steamID64)")!) {
+                        Label("Profile", systemImage: "arrow.up.right.square")
+                    }
+                }
+                LabeledContent("Profile visibility") { Text(account.visibility.label) }
+                HStack {
+                    Button("Sign in again") { Task { await steam.signIn() } }.disabled(steam.isBusy)
+                    Button("Disconnect Steam", role: .destructive) { steam.signOut() }
+                }
+            } else {
+                Text("Not connected. Sign in on Steam's own website: MacHub never sees your password, only your public SteamID, which it verifies with Steam.")
+                    .foregroundStyle(.secondary)
+                HStack {
+                    if steam.isBusy {
+                        ProgressView().controlSize(.small)
+                        Text(steam.state == .verifying ? "Checking with Steam…" : "Waiting for the browser…")
+                        Button("Cancel") { steam.cancelSignIn() }
+                    } else {
+                        Button("Sign in with Steam…") { Task { await steam.signIn() } }
+                    }
+                }
+            }
+            if case .failed(let problem) = steam.state {
+                Label { Text(problem.message) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+                    .foregroundStyle(Compatibility.issues.tint)
+            }
+        } header: {
+            Text("Steam account")
+        }
+
+        Section {
+            if steam.hasAPIKey {
+                LabeledContent("Web API key") { Text("Saved in the Keychain") }
+                LabeledContent("Library") { Text(ownedLabel) }
+                Button("Remove key", role: .destructive) { steam.removeAPIKey(); keyDraft = "" }
+            } else {
+                SecureField("Web API key", text: $keyDraft, prompt: Text(verbatim: "0123456789ABCDEF…"))
+                    .onSubmit(save)
+                HStack {
+                    Button("Save in Keychain", action: save).disabled(keyDraft.isEmpty)
+                    Link(destination: URL(string: "https://steamcommunity.com/dev/apikey")!) {
+                        Label("Get a key on Steam", systemImage: "arrow.up.right.square")
+                    }
+                }
+                if keyRejected {
+                    Text("That doesn't look like a Steam key (32 hexadecimal characters).").foregroundStyle(Compatibility.issues.tint)
+                }
+            }
+        } header: {
+            Text("Owned games (optional)")
+        } footer: {
+            Text("Signing in doesn't need a key. Steam only returns the list of games you own through its official Web API (IPlayerService/GetOwnedGames), which requires your personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine). MacHub keeps it in the macOS Keychain only and never writes it to files or logs. Your profile's “Game details” must also be public.")
+        }
+    }
+
+    private var ownedLabel: LocalizedStringKey {
+        switch store.ownedState {
+        case .loaded: "\(store.ownedTitles.count) games"
+        case .loading: "Loading…"
+        case .privateProfile: "Game details are private"
+        case .invalidKey: "Key refused by Steam"
+        case .signedOut: "Connect Steam first"
+        case .needsKey: "No key"
+        case .failed: "Couldn't load"
+        }
+    }
+
+    private func save() {
+        keyRejected = !store.steam.saveAPIKey(keyDraft)
+        if !keyRejected { keyDraft = "" }
+    }
+}
+
+extension SteamAccount.Visibility {
+    var label: LocalizedStringKey {
+        switch self {
+        case .public: "Public"
+        case .friendsOnly: "Friends only"
+        case .private: "Private"
+        case .unknown: "Unknown"
+        }
     }
 }
