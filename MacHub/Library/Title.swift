@@ -55,6 +55,8 @@ struct Title: Identifiable, Hashable, Sendable {
     var backgroundURL: URL?
     /// Steam ships a native macOS build: Whisky isn't needed for it.
     var macAvailable: Bool?
+    /// A game that runs natively on the Mac through its own launcher (Minecraft: Java Edition).
+    var nativeApp: URL?
 
     var availability: Availability {
         if install != nil { .installed } else if owned != nil { .owned } else { .store }

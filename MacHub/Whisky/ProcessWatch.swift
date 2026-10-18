@@ -10,11 +10,24 @@ enum ProcessWatch {
         let executable: String
     }
 
+    /// What to look for: a Steam game's processes (anything from its install folder) or one program by name.
+    enum Target: Equatable, Sendable {
+        case installFolder(String)
+        case executable(String)
+        /// A program whose command line also mentions `argument` (msiexec running one given package).
+        case executableWithArgument(String, String)
+    }
+
+    typealias Snapshot = @Sendable () async -> String
+
     /// Parses `ps -axo pid=,command=` output and returns the game's processes. Only the executable
     /// itself counts: the command must *start* with a Windows path (`C:\…`) whose folders include the
     /// game's install folder. Text in another process's arguments (a shell, a grep) never matches.
     static func matches(in psOutput: String, installFolder: String) -> [Match] {
-        let folder = installFolder.lowercased()
+        matches(in: psOutput, target: .installFolder(installFolder))
+    }
+
+    static func matches(in psOutput: String, target: Target) -> [Match] {
         let ignored = /(?i)^(unins.*|vc_?redist.*|dxsetup|directx.*|dotnet.*|ue4prereq.*|crash.*)\.exe$/
         return psOutput.split(separator: "\n").compactMap { line in
             let trimmed = line.trimmingCharacters(in: .whitespaces)
@@ -22,24 +35,41 @@ enum ProcessWatch {
             let command = trimmed[space...].trimmingCharacters(in: .whitespaces)
             // Wine shows a Windows program as its own Windows path: "C:\Program Files (x86)\…\game.exe args".
             guard let exe = command.firstMatch(of: /^(?i)([a-z]:\\[^:*?"<>|]*?\.exe)(\s|$)/) else { return nil }
-            let components = exe.1.split(separator: "\\").map { $0.lowercased() }
-            guard components.dropLast().contains(folder), !components.contains("_commonredist") else { return nil }
-            let name = String(exe.1.split(separator: "\\").last ?? Substring(exe.1))
-            guard name.firstMatch(of: ignored) == nil else { return nil }
+            let parts = exe.1.split(separator: "\\")
+            let components = parts.map { $0.lowercased() }
+            let name = String(parts.last ?? Substring(exe.1))
+            switch target {
+            case .installFolder(let folder):
+                guard components.dropLast().contains(folder.lowercased()), !components.contains("_commonredist") else { return nil }
+                guard name.firstMatch(of: ignored) == nil else { return nil }
+            case .executable(let wanted):
+                guard name.caseInsensitiveCompare(wanted) == .orderedSame else { return nil }
+            case .executableWithArgument(let wanted, let argument):
+                guard name.caseInsensitiveCompare(wanted) == .orderedSame,
+                      command[exe.range.upperBound...].localizedCaseInsensitiveContains(argument) else { return nil }
+            }
             return Match(pid: pid, executable: name)
         }
     }
 
-    static func snapshot() async -> String {
+    @Sendable static func snapshot() async -> String {
         (try? await ProcessRunner.run(URL(filePath: "/bin/ps"), ["-axo", "pid=,command="], timeout: 5).stdout) ?? ""
     }
 
     /// Polls until one of the game's processes appears, or gives up after `timeout`.
     static func waitForStart(installFolder: String, timeout: Duration = .seconds(180), interval: Duration = .seconds(2)) async -> [Match]? {
+        await waitForStart(.installFolder(installFolder), timeout: timeout, interval: interval)
+    }
+
+    static func waitForProgram(named name: String, timeout: Duration, interval: Duration = .seconds(1)) async -> [Match]? {
+        await waitForStart(.executable(name), timeout: timeout, interval: interval)
+    }
+
+    static func waitForStart(_ target: Target, timeout: Duration, interval: Duration, snapshot: Snapshot = snapshot) async -> [Match]? {
         let clock = ContinuousClock()
         let deadline = clock.now + timeout
         while clock.now < deadline {
-            let found = matches(in: await snapshot(), installFolder: installFolder)
+            let found = matches(in: await snapshot(), target: target)
             if !found.isEmpty { return found }
             try? await Task.sleep(for: interval)
             if Task.isCancelled { return nil }
@@ -49,10 +79,14 @@ enum ProcessWatch {
 
     /// Returns once none of the game's processes has been seen for two polls in a row.
     static func waitForExit(installFolder: String, interval: Duration = .seconds(3)) async {
+        await waitForExit(.installFolder(installFolder), interval: interval)
+    }
+
+    static func waitForExit(_ target: Target, interval: Duration, snapshot: Snapshot = snapshot) async {
         var misses = 0
         while misses < 2, !Task.isCancelled {
             try? await Task.sleep(for: interval)
-            misses = matches(in: await snapshot(), installFolder: installFolder).isEmpty ? misses + 1 : 0
+            misses = matches(in: await snapshot(), target: target).isEmpty ? misses + 1 : 0
         }
     }
 

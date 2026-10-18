@@ -23,9 +23,11 @@ actor SteamHTTP {
     private let session: URLSession
     private let directory: URL
     private let minimumInterval: Duration
+    private let userAgent: String?
     private var nextSlot: [String: ContinuousClock.Instant] = [:]
 
-    init(session: URLSession = .shared, directory: URL? = nil, minimumInterval: Duration = .milliseconds(350)) {
+    init(session: URLSession = .shared, directory: URL? = nil, minimumInterval: Duration = .milliseconds(350), userAgent: String? = nil) {
+        self.userAgent = userAgent
         self.session = session
         self.directory = directory ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appending(path: "app.machub.MacHub/steam")
@@ -41,6 +43,7 @@ actor SteamHTTP {
             try await pace(host: url.host() ?? "")
             var request = URLRequest(url: url)
             request.timeoutInterval = 20
+            if let userAgent { request.setValue(userAgent, forHTTPHeaderField: "User-Agent") }
             let (data, response) = try await session.data(for: request)
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             switch status {

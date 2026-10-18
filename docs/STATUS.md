@@ -127,3 +127,22 @@ Leçons pour P1-1 : enchaîner `create` → `wineboot --init` → installation s
 - Sparkle.
 
 **Reportés volontairement** : mods, proxy et sources de compatibilité, tant qu'un jeu n'a pas été lancé et vérifié.
+
+## Session du 18/10/2026 (après-midi) : manettes, lancement, import Windows, mods — **interrompue (limite d'usage)**
+
+Rien n'est commité. Build ✅, tests unitaires existants **61/61** ✅. **Aucun nouveau test automatisé n'a encore été écrit** pour le code ci-dessous.
+
+| Fonction | État | Preuve |
+|---|---|---|
+| Page Manettes (Réglages > Manettes, puce de la barre latérale, ⌘5) : détection GameController, connexion/déconnexion, test des boutons et sticks, vibration, guide Bluetooth/USB | ✅ détection vérifiée avec une vraie manette **Xbox One** (capture `.impeccable/review/controllers-1.png`) ; test des boutons et vibration **non essayés à la main** | capture |
+| Manette côté Windows | ✅ Wine (SDL activé) expose la manette en **XInput « Controller (Xbox One For Windows) »** dans le panneau joy.cpl de la bouteille ; bouton « Vérifier dans Windows » ajouté. Réglages manette de Whisky (SDL_*) affichés en lecture seule | `.impeccable/review/wine-joycpl-xbox.png` |
+| Écran de lancement (plein écran, étapes observées : préparation, bouteille, démarrage de Steam s'il ne tournait pas, attente du processus, lancé ; long délai > 45 s, arrêter d'attendre, réessayer, détails techniques ; réduction des animations) | ⚠️ compilé, **pas encore testé sur un vrai lancement** | — |
+| Suivi des logiciels par nom d'exécutable | ✅ vérifié : Wine affiche `C:\windows\system32\notepad.exe` pour un programme lancé depuis un chemin Mac | ps |
+| Import d'installateurs Windows (feuille guidée, identification MZ/PE/MSI + moteur NSIS/Inno…, bouteille dédiée « MacHub Apps » créée par `whisky create` + `wineboot --init`, confirmation, suivi du processus, détection des programmes ajoutés, arrêt) ; glisser-déposer, « Ouvrir avec » (rang Alternate), ⌘O, « Depuis Téléchargements » à la demande, choix opt-in de l'app par défaut | ⚠️ étape d'identification vérifiée sur `SteamSetup.exe` (NSIS, 32 bits, 2,4 Mo) ; **création de bouteille et exécution d'un installateur non testées** (demandent ton accord) | `import-1.png` |
+| Mods Minecraft Java (Modrinth : recherche, fiche, version compatible, téléchargement vérifié SHA-512, dépendances, activer/désactiver, mises à jour, corbeille) + profil Fabric séparé | ⚠️ API Modrinth/Fabric vérifiées en lecture ; **aucun profil créé, aucun mod téléchargé** (modifie `launcher_profiles.json`, sauvegarde prévue) | requêtes API |
+| Mods Assetto Corsa (import .zip/dossier, contrôle zip-slip et liens symboliques, sauvegarde/restauration) | ⚠️ compilé, non testé ; capture de la page échouée | — |
+| BeamNG.drive | lien externe uniquement | — |
+| Logo / icône | ❌ pas commencé | — |
+| Traductions des nouveaux textes (fr/ja/zh-Hans) | ❌ pas faites : nouveaux écrans en anglais | capture |
+
+Reste à faire : tests unitaires (classification manette, InputChecklist, LaunchRunner/LaunchTimeline, WindowsFile, BottleProvisioner.environment, Modrinth parsing, FolderModInstaller, ArchiveModImporter.validate) ; vérifier capture Minecraft ; logo ; traductions ; DESIGN.md.

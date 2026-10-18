@@ -11,6 +11,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             SteamSettingsSection()
+            ControllerSettingsSection()
             Section("General") {
                 Picker(selection: $language) {
                     ForEach(AppLanguage.allCases) { $0.label.tag($0) }
@@ -18,6 +19,7 @@ struct SettingsView: View {
                     Text("Language")
                 }
             }
+            WindowsFilesSection()
             Section {
                 Toggle("Show demo titles", isOn: $showDemo)
             } header: {
@@ -247,6 +249,63 @@ extension SteamAccount.Visibility {
         case .private: "Private"
         case .unknown: "Unknown"
         case .notSetUp: "Not set up"
+        }
+    }
+}
+
+/// Which app opens .exe and .msi files. MacHub only changes it when the user clicks, and can give it back.
+private struct WindowsFilesSection: View {
+    @Environment(LibraryStore.self) private var store
+    @State private var handler: URL?
+    @State private var error: String?
+
+    var body: some View {
+        Section {
+            LabeledContent("Open .exe and .msi files with") {
+                if let handler {
+                    HStack(spacing: 6) {
+                        Image(nsImage: NSWorkspace.shared.icon(forFile: handler.path)).resizable().frame(width: 16, height: 16)
+                        Text(verbatim: FileManager.default.displayName(atPath: handler.path))
+                    }
+                } else {
+                    Text("No app")
+                }
+            }
+            HStack {
+                if isMacHub {
+                    if let whisky = store.whiskyInstall?.appURL {
+                        Button("Give them back to Whisky") { set(whisky) }
+                    }
+                } else {
+                    Button("Open them with MacHub") { set(Bundle.main.bundleURL) }
+                }
+            }
+            if let error { Text(verbatim: error).foregroundStyle(Compatibility.issues.tint) }
+        } header: {
+            Text("Windows files")
+        } footer: {
+            Text("Without changing this, Finder's Open With menu still offers MacHub, and you can drag files onto its window. MacHub never runs a file before you confirm.")
+        }
+        .onAppear(perform: reload)
+    }
+
+    private var isMacHub: Bool {
+        handler.flatMap { Bundle(url: $0)?.bundleIdentifier } == Bundle.main.bundleIdentifier
+    }
+
+    private func reload() {
+        handler = WindowsFile.contentTypes.first.flatMap { NSWorkspace.shared.urlForApplication(toOpen: $0) }
+    }
+
+    private func set(_ app: URL) {
+        Task {
+            do {
+                for type in WindowsFile.contentTypes { try await NSWorkspace.shared.setDefaultApplication(at: app, toOpen: type) }
+                error = nil
+            } catch {
+                self.error = error.localizedDescription
+            }
+            reload()
         }
     }
 }

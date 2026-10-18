@@ -187,38 +187,49 @@ struct LibraryView: View {
 
 struct SoftwareView: View {
     @Environment(LibraryStore.self) private var store
-    @State private var importing = false
-    @State private var chosenBottle = ""
+    @Environment(AppNavigation.self) private var navigation
+    @State private var recentDownloads: [URL]?
 
     var body: some View {
-        let bottles = store.registeredBottles.compactMap(\.name)
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(title: "Software", subtitle: "Windows programs you added yourself, and programs pinned in Whisky.")
                 HStack(spacing: 12) {
-                    Picker("Bottle", selection: $chosenBottle) {
-                        ForEach(bottles, id: \.self) { Text(verbatim: $0).tag($0) }
-                    }
-                    .fixedSize()
-                    .disabled(bottles.isEmpty)
                     Button {
-                        importing = true
+                        navigation.installRequest += 1
                     } label: {
-                        Label("Add a Windows program…", systemImage: "plus")
+                        Label("Install a Windows program…", systemImage: "plus")
                     }
                     .buttonStyle(SecondaryActionStyle())
-                    .disabled(bottles.isEmpty)
+                    .disabled(store.whiskyInstall == nil)
+                    Button {
+                        recentDownloads = DownloadsScanner.recentInstallers()
+                    } label: {
+                        Label("From Downloads", systemImage: "arrow.down.circle")
+                    }
+                    .buttonStyle(SecondaryActionStyle())
+                    .disabled(store.whiskyInstall == nil)
+                    .help("Lists the .exe and .msi files in your Downloads folder. MacHub only looks when you click.")
+                    .popover(isPresented: Binding(get: { recentDownloads != nil }, set: { if !$0 { recentDownloads = nil } })) {
+                        DownloadsPopover(files: recentDownloads ?? []) { url in
+                            recentDownloads = nil
+                            ImportInbox.shared.receive([url])
+                        }
+                    }
                 }
-                if bottles.isEmpty {
-                    NoticeCard(symbol: "shippingbox", title: "No bottle yet",
-                               message: "Programs run inside a Whisky bottle. Create one in Whisky, then add your .exe here.")
+                Text("You can also drag a .exe or .msi onto this window, or use Open With > MacHub in Finder.")
+                    .font(.callout)
+                    .foregroundStyle(Theme.textSecondary)
+                if store.whiskyInstall == nil {
+                    NoticeCard(symbol: "shippingbox", title: "Whisky isn't ready",
+                               message: "Programs run inside a Whisky bottle. See Settings to finish setting up Whisky.")
                         .padding(.horizontal, -Theme.gutter)
                 }
                 if store.software.isEmpty {
                     ContentUnavailableView {
                         Label("No programs yet", systemImage: "macwindow")
                     } description: {
-                        Text("Add a Windows .exe, or pin a program in Whisky: it shows up here.")
+                        Text("Install a Windows program, or pin one in Whisky: it shows up here.")
                     }
                     .frame(maxWidth: .infinity)
                 } else {
@@ -230,10 +241,36 @@ struct SoftwareView: View {
         }
         .toolbar(removing: .title)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-        .onAppear { if chosenBottle.isEmpty { chosenBottle = bottles.first ?? "" } }
-        .fileImporter(isPresented: $importing, allowedContentTypes: [UTType(filenameExtension: "exe") ?? .item]) { result in
-            if case .success(let url) = result, !chosenBottle.isEmpty { store.importProgram(at: url, bottle: chosenBottle) }
+    }
+}
+
+private struct DownloadsPopover: View {
+    let files: [URL]
+    let pick: (URL) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Windows files in Downloads").font(.headline)
+            if files.isEmpty {
+                Text("No .exe or .msi file in your Downloads folder.").foregroundStyle(.secondary)
+            }
+            ForEach(files, id: \.self) { url in
+                Button {
+                    pick(url)
+                } label: {
+                    HStack {
+                        Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable().frame(width: 20, height: 20)
+                        Text(verbatim: url.lastPathComponent).lineLimit(1).truncationMode(.middle)
+                        Spacer()
+                    }
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .padding(.vertical, 2)
+            }
         }
+        .padding(16)
+        .frame(width: 340)
     }
 }
 

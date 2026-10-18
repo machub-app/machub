@@ -6,21 +6,48 @@ import Observation
 @MainActor @Observable
 final class LibraryStore {
     enum LaunchState: Equatable {
-        case launching
+        /// Checking that Whisky is ready.
+        case preparing
+        /// Checking the bottle and the program on disk.
+        case checkingBottle
+        /// A check failed before anything ran.
+        case blocked(LaunchProblem)
+        /// Steam for Windows wasn't running in the bottle: waiting for steam.exe to appear.
+        case startingSteam
+        /// The program was handed to Wine (software); waiting for its process.
+        case startingProcess
         /// Steam received the launch request; MacHub is watching for the game's own process.
         case waitingForGame
-        /// A process of the title was actually seen (games: from its install folder; software: our own child).
+        /// A process of the title was actually seen (games: from its install folder; software: its own .exe).
         case running(String?)
-        /// The game's processes were seen, then disappeared.
+        /// The title's processes were seen, then disappeared.
         case closed
         /// A Windows program started with `whisky run` exited with this code.
         case exited(Int32)
         case installRequested
-        /// No process of the game appeared in time.
+        /// No process appeared in time.
         case notStarted(log: String?)
-        /// The game's process appeared, then vanished within seconds: almost certainly a crash at startup.
+        /// The process appeared, then vanished within seconds: almost certainly a crash at startup.
         case crashedAtStart(seconds: Int, log: String?)
+        /// The user stopped waiting. Whatever Steam or Wine was doing carries on.
+        case cancelled
         case failed(String, log: String?)
+
+        var isInProgress: Bool {
+            switch self {
+            case .preparing, .checkingBottle, .startingSteam, .startingProcess, .waitingForGame: true
+            default: false
+            }
+        }
+    }
+
+    /// One launch shown on the launch screen: the title, its route and when the current step began.
+    struct LaunchSession: Equatable {
+        let title: Title
+        let route: LaunchPlan.Route
+        let steamAlreadyRunning: Bool
+        var stepStartedAt: Date
+        let startedAt: Date
     }
 
     enum OwnedState: Equatable {
@@ -40,13 +67,24 @@ final class LibraryStore {
     private(set) var ownedState: OwnedState = .signedOut
     private(set) var imported: [ImportedProgram] = LocalData.load([ImportedProgram].self, from: "software.json") ?? []
     private(set) var pinnedTitles: [Title] = []
+    /// Native Mac games MacHub manages mods for (today: Minecraft: Java Edition, when installed).
+    private(set) var nativeTitles: [Title] = []
     private(set) var featuredStore = SteamStore.Featured()
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
     private(set) var details: [Int: StoreDetails] = [:]
     private(set) var loadErrors: [String] = []
     private(set) var isLoading = false
-    private(set) var launchStates: [Title.ID: LaunchState] = [:]
+    private(set) var launchStates: [Title.ID: LaunchState] = [:] {
+        didSet {
+            // Restart the step clock whenever a title moves to another step.
+            for (id, state) in launchStates where oldValue[id] != state { launchSessions[id]?.stepStartedAt = .now }
+        }
+    }
+    private(set) var launchSessions: [Title.ID: LaunchSession] = [:]
+    /// The title whose launch screen covers the window, if any.
+    var presentedLaunch: Title.ID?
+    private var launchTasks: [Title.ID: Task<Void, Never>] = [:]
     /// The title whose artwork lights the window (hero, hovered card, open detail).
     var spotlight: Title?
 
@@ -55,7 +93,7 @@ final class LibraryStore {
     /// Steam games the user has: installed ∪ owned, merged per App ID.
     var library: [Title] {
         var byID: [String: Title] = [:]
-        for t in installedTitles + ownedTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
+        for t in installedTitles + ownedTitles + nativeTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
         return byID.values.map(enriched).sorted { lastPlayed($0) > lastPlayed($1) }
     }
 
@@ -124,7 +162,17 @@ final class LibraryStore {
         _ = await (store, owned, profile)
     }
 
+    func refreshNative() {
+        guard MinecraftHome.standard.exists else { nativeTitles = []; return }
+        var minecraft = Title(id: ModSupport.minecraftTitleID, name: "Minecraft: Java Edition", kind: .game, steamAppID: nil)
+        minecraft.nativeApp = MinecraftHome.launcherApp
+        minecraft.developer = "Mojang Studios"
+        minecraft.summary = "Runs natively on your Mac through the official Minecraft Launcher. MacHub manages Fabric mods for it from Modrinth."
+        nativeTitles = [minecraft]
+    }
+
     func refreshWhisky(customPath: String?) async {
+        refreshNative()
         let report = await DiagnosticsReport.make(customPath: customPath)
         self.report = report
         guard let install = whiskyInstall else {
@@ -193,42 +241,103 @@ final class LibraryStore {
 
     // MARK: Actions
 
+    /// Starts a title and shows the launch screen. Every step is checked; nothing is assumed.
     func launch(_ title: Title) async {
-        guard title.canLaunch, let bottle = title.bottle, let install = whiskyInstall else { return }
-        let cli = WhiskyCLI(install: install)
-        launchStates[title.id] = .launching
+        guard title.canLaunch, !(launchStates[title.id]?.isInProgress ?? false) else { return }
+        let route: LaunchPlan.Route = if title.kind == .game, let appID = title.steamAppID {
+            .steam(appID: appID)
+        } else {
+            .program(path: title.installPath ?? "")
+        }
+        let steamRunning: Bool
+        if case .steam = route {
+            steamRunning = !ProcessWatch.matches(in: await ProcessWatch.snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty
+        } else {
+            steamRunning = false
+        }
+        launchSessions[title.id] = LaunchSession(title: title, route: route, steamAlreadyRunning: steamRunning, stepStartedAt: .now, startedAt: .now)
+        presentedLaunch = title.id
+        launchStates[title.id] = .preparing
+        let task = Task { await runLaunch(title, route: route) }
+        launchTasks[title.id] = task
+        await task.value
+        launchTasks[title.id] = nil
+    }
+
+    /// Stops waiting for a launch. Steam or Wine may still start the title; MacHub just stops watching.
+    func cancelLaunch(_ id: Title.ID) {
+        launchTasks[id]?.cancel()
+        if launchStates[id]?.isInProgress == true { launchStates[id] = .cancelled }
+    }
+
+    func dismissLaunch() { presentedLaunch = nil }
+
+    func retryLaunch(_ id: Title.ID) {
+        guard let title = launchSessions[id]?.title else { return }
+        launchStates[id] = nil
+        Task { await launch(title) }
+    }
+
+    private func runLaunch(_ title: Title, route: LaunchPlan.Route) async {
+        let id = title.id
+        guard let install = whiskyInstall else { launchStates[id] = .blocked(.whiskyNotReady); return }
+        launchStates[id] = .checkingBottle
+        if let problem = Self.problem(for: title, route: route, bottles: registeredBottles) {
+            launchStates[id] = .blocked(problem)
+            return
+        }
+        guard let bottle = title.bottle else { return }
         recordLaunch(title)
-        do {
-            if title.kind == .game, let appID = title.steamAppID, let path = title.installPath {
+        let target: ProcessWatch.Target = switch route {
+        case .steam: .installFolder(URL(filePath: title.installPath ?? "").lastPathComponent)
+        case .program(let path): .executable(URL(filePath: path).lastPathComponent)
+        }
+        let cli = WhiskyCLI(install: install)
+        let runner = LaunchRunner { plan in
+            switch plan.route {
+            case .steam(let appID):
                 // `whisky launch` (3.7.0) reports "launched" without ever reaching Steam (verified 2026-10-18),
                 // so ask the bottle's Steam directly. If Steam isn't running yet, this call *becomes* the
-                // client and only returns when Steam quits: never await it.
-                Task.detached {
-                    _ = try? await cli.run(#"C:\Program Files (x86)\Steam\steam.exe"#, bottle: bottle,
-                                           arguments: ["-applaunch", String(appID)], timeout: 24 * 3600)
-                }
-                launchStates[title.id] = .waitingForGame
-                let folder = URL(filePath: path).lastPathComponent
-                guard let found = await ProcessWatch.waitForStart(installFolder: folder, interval: .milliseconds(500)) else {
-                    launchStates[title.id] = .notStarted(log: ProcessWatch.latestWineLog()?.path)
-                    return
-                }
-                let started = ContinuousClock.now
-                launchStates[title.id] = .running(found.first?.executable)
-                await ProcessWatch.waitForExit(installFolder: folder, interval: .seconds(1))
-                let lived = Int((ContinuousClock.now - started).components.seconds)
-                launchStates[title.id] = lived < 15
-                    ? .crashedAtStart(seconds: lived, log: ProcessWatch.latestWineLog()?.path)
-                    : .closed
-            } else if let path = title.installPath {
-                launchStates[title.id] = .running(URL(filePath: path).lastPathComponent)
-                let result = try await cli.run(path, bottle: bottle, timeout: 24 * 3600)
-                launchStates[title.id] = .exited(result.status)
+                // client and only returns when Steam quits: the runner never awaits it.
+                _ = try await cli.run(#"C:\Program Files (x86)\Steam\steam.exe"#, bottle: plan.bottle,
+                                      arguments: ["-applaunch", String(appID)], timeout: 24 * 3600)
+            case .program(let path):
+                _ = try await cli.run(path, bottle: plan.bottle, timeout: 24 * 3600)
             }
-        } catch {
-            let log: String? = if case WhiskyError.programExit(_, let path)? = error as? WhiskyError { path } else { ProcessWatch.latestWineLog()?.path }
-            launchStates[title.id] = .failed(Self.describe(error), log: log)
         }
+        await runner.run(LaunchPlan(route: route, bottle: bottle, target: target)) { [weak self] state in
+            guard let self, self.launchStates[id] != .cancelled || !state.isInProgress else { return }
+            self.launchStates[id] = state
+        }
+    }
+
+    /// The on-disk checks before a launch: bottle registered and set up, program present, Steam present.
+    static func problem(for title: Title, route: LaunchPlan.Route, bottles: [BottleInfo], fileManager: FileManager = .default) -> LaunchProblem? {
+        guard let name = title.bottle else { return .executableMissing(title.installPath ?? "") }
+        guard let bottle = bottles.first(where: { $0.name == name }) else { return .bottleMissing(name) }
+        guard bottle.hasDriveC else { return .bottleNotSetUp(name) }
+        switch route {
+        case .steam:
+            let steam = bottle.url.appending(path: "drive_c/Program Files (x86)/Steam/steam.exe")
+            guard fileManager.fileExists(atPath: steam.path) else { return .steamMissing(name) }
+            guard let path = title.installPath, fileManager.fileExists(atPath: path), title.hasExecutable else {
+                return .executableMissing(title.installPath ?? "")
+            }
+        case .program(let path):
+            guard fileManager.fileExists(atPath: path) else { return .executableMissing(path) }
+        }
+        return nil
+    }
+
+    /// Opens Wine's Game Controllers panel (joy.cpl) in a bottle: the Windows-side check that a controller
+    /// is exposed to games. Read-only; returns once the panel has been handed to Wine.
+    func openWindowsControllerPanel(bottle: String) async {
+        guard let install = whiskyInstall else { return }
+        let cli = WhiskyCLI(install: install)
+        Task.detached {
+            _ = try? await cli.run(#"C:\windows\system32\control.exe"#, bottle: bottle, arguments: ["joy.cpl"], timeout: 3600)
+        }
+        _ = await ProcessWatch.waitForProgram(named: "control.exe", timeout: .seconds(20), interval: .milliseconds(500))
     }
 
     /// Asks Steam for Windows inside the bottle to install the game (`steam://install/<id>`).
@@ -244,9 +353,21 @@ final class LibraryStore {
         }
     }
 
-    func importProgram(at url: URL, bottle: String) {
-        imported.append(ImportedProgram(id: UUID(), name: url.deletingPathExtension().lastPathComponent, path: url.path, bottle: bottle))
+    /// A guided import for a Windows file, wired to the live Whisky install and its bottles.
+    func makeImport(_ url: URL) -> InstallerImport {
+        let dependencies = whiskyInstall.map { install in
+            let container = BottleReader.containerURL(bundleID: install.bundleIdentifier ?? WhiskyLocator.forkBundleID)
+            return InstallerImport.Dependencies(install: install, bottles: { BottleReader.read(container: container) })
+        }
+        return InstallerImport(url: url, dependencies: dependencies)
+    }
+
+    @discardableResult
+    func importProgram(at url: URL, bottle: String, name: String? = nil) -> Title {
+        let program = ImportedProgram(id: UUID(), name: name ?? url.deletingPathExtension().lastPathComponent, path: url.path, bottle: bottle)
+        imported.append(program)
         LocalData.save(imported, to: "software.json")
+        return program.title
     }
 
     func removeProgram(_ title: Title) {

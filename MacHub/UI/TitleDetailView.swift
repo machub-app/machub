@@ -21,6 +21,7 @@ struct TitleDetailView: View {
                     VStack(alignment: .leading, spacing: 28) {
                         about
                         RequirementsPanel(title: title, details: details, detailsLoaded: detailsLoaded)
+                        ModsEntry(title: title)
                         compatibility
                     }
                     .frame(maxWidth: 640, alignment: .leading)

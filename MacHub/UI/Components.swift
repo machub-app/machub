@@ -299,12 +299,15 @@ private struct StyledBody: View {
 /// What a title's main button does, decided from verified state only.
 enum TitleAction: Equatable {
     case play
+    /// Native Mac game: its own launcher opens it.
+    case openNative(URL)
     case install(bottle: String)
     case unavailable
 }
 
 extension LibraryStore {
     func action(for title: Title) -> TitleAction {
+        if let app = title.nativeApp { return .openNative(app) }
         if title.canLaunch, whiskyInstall != nil { return .play }
         if !title.isDemo, title.kind == .game, title.install == nil, title.steamAppID != nil, let bottle = steamBottle?.name {
             return .install(bottle: bottle)
@@ -320,6 +323,13 @@ struct PlayButton: View {
 
     var body: some View {
         switch store.action(for: title) {
+        case .openNative(let app):
+            Button {
+                NSWorkspace.shared.openApplication(at: app, configuration: .init())
+            } label: {
+                Label("Open the launcher", systemImage: "play.fill")
+            }
+            .buttonStyle(PrimaryActionStyle())
         case .install(let bottle):
             Button {
                 Task { await store.requestInstall(title) }
@@ -331,10 +341,14 @@ struct PlayButton: View {
         case .play, .unavailable:
             let state = store.launchStates[title.id]
             Button {
-                Task { await store.launch(title) }
+                if state?.isInProgress == true || state.isRunning {
+                    store.presentedLaunch = title.id
+                } else {
+                    Task { await store.launch(title) }
+                }
             } label: {
                 switch state {
-                case .launching, .waitingForGame:
+                case .preparing, .checkingBottle, .startingSteam, .startingProcess, .waitingForGame:
                     HStack(spacing: 8) { ProgressView().controlSize(.small).tint(.white); Text("Starting…") }
                 case .running:
                     Label("Running", systemImage: "play.circle.fill")
@@ -343,18 +357,15 @@ struct PlayButton: View {
                 }
             }
             .buttonStyle(PrimaryActionStyle())
-            .disabled(store.action(for: title) != .play || state.isBusy)
+            // While starting or running, the button reopens the launch screen instead of launching twice.
+            .disabled(store.action(for: title) != .play)
         }
     }
 }
 
 extension LibraryStore.LaunchState? {
-    var isBusy: Bool {
-        switch self {
-        case .launching?, .waitingForGame?, .running?: true
-        default: false
-        }
-    }
+    var isBusy: Bool { self?.isInProgress == true || isRunning }
+    var isRunning: Bool { if case .running? = self { true } else { false } }
 }
 
 /// One honest line under the action row: why Play is (un)available, or what was actually observed.
@@ -388,7 +399,7 @@ struct PlayStatus: View {
 
     private var isError: Bool {
         switch store.launchStates[title.id] {
-        case .failed?, .notStarted?, .crashedAtStart?: true
+        case .failed?, .notStarted?, .crashedAtStart?, .blocked?: true
         default: false
         }
     }
@@ -411,6 +422,11 @@ struct PlayStatus: View {
     private var caption: LocalizedStringKey? {
         switch store.launchStates[title.id] {
         case .failed(let message, _): return "Couldn't start: \(message)"
+        case .blocked(let problem): return problem.message
+        case .preparing, .checkingBottle: return "Checking the bottle…"
+        case .startingSteam: return "Starting Steam for Windows in the bottle…"
+        case .startingProcess: return "Starting the program in Wine…"
+        case .cancelled: return "MacHub stopped waiting. If the title still starts, it opens normally."
         case .notStarted: return "No process of the game appeared within 3 minutes. The Wine log may explain why."
         case .waitingForGame: return "Steam received the launch request. MacHub is watching for the game's own process…"
         case .running(let exe?): return "Running: macOS sees \(exe) from the game's folder."
@@ -419,10 +435,11 @@ struct PlayStatus: View {
         case .crashedAtStart(let seconds, _): return "The game started, then closed after \(seconds) s: it most likely crashed at startup. See the requirements and the Wine log."
         case .installRequested: return "Steam for Windows was asked to install this game in the bottle. Follow the download in Steam."
         case .exited(let code): return "The program closed (exit code \(code))."
-        case .launching: return nil
         case nil: break
         }
         if title.isDemo { return "Demo title. Install it in a Whisky bottle to play." }
+        if title.nativeApp != nil { return "Native Mac game: it runs in its own launcher, without Whisky." }
+        if title.id == ModSupport.minecraftTitleID { return "The Minecraft Launcher isn't installed in Applications." }
         if title.macAvailable == true, title.install == nil { return "A native macOS version exists on Steam: use Steam for Mac rather than Whisky." }
         if store.whiskyInstall == nil { return "Whisky isn't ready. See Settings." }
         if let install = title.install, install.executables.isEmpty { return "Installed, but no Windows executable was found in its folder." }

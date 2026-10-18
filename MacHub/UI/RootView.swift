@@ -29,12 +29,22 @@ enum SidebarItem: Hashable, CaseIterable {
 final class AppNavigation {
     var selection: SidebarItem? = .home
     var searchFocusRequest = 0
+    /// A Settings sub-page to open (the sidebar's controller chip, the Go menu).
+    var settingsPageRequest: SettingsPage?
+    /// ⌘O and the Software page's button: choose a Windows file to install or add.
+    var installRequest = 0
+
+    func open(_ page: SettingsPage) { settingsPageRequest = page }
 }
 
 struct RootView: View {
     @Bindable var navigation: AppNavigation
     @State private var store = LibraryStore()
     @State private var discover = DiscoverModel()
+    @State private var controllers = ControllerMonitor()
+    @State private var inbox = ImportInbox.shared
+    @State private var importSession: InstallerImport?
+    @State private var choosingInstaller = false
     @State private var path = NavigationPath()
     @State private var query = ""
     @FocusState private var searchFocused: Bool
@@ -53,6 +63,7 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 8) {
+                    ControllerChip { navigation.open(.controllers) }
                     SteamAccountChip { navigation.selection = .settings }
                     WhiskyStatusChip { navigation.selection = .settings }
                 }
@@ -73,19 +84,57 @@ struct RootView: View {
                     }
                 }
                 .navigationDestination(for: Title.self) { TitleDetailView(title: $0) }
+                .navigationDestination(for: ModsRoute.self) { ModsView(title: $0.title) }
+                .navigationDestination(for: SettingsPage.self) { page in
+                    switch page {
+                    case .controllers: ControllersView()
+                    }
+                }
             }
             .background { AmbientBackdrop(title: store.spotlight) }
         }
+        .overlay { LaunchOverlay() }
+        .dropDestination(for: URL.self) { urls, _ in
+            let windows = urls.filter(WindowsFile.isCandidate)
+            inbox.receive(windows)
+            return !windows.isEmpty
+        }
+        .sheet(item: $importSession, onDismiss: {
+            Task { await store.refreshWhisky(customPath: customPath) }
+            openNextImport()
+        }) { session in
+            InstallerImportView(session: session)
+        }
+        .fileImporter(isPresented: $choosingInstaller, allowedContentTypes: WindowsFile.contentTypes) { result in
+            if case .success(let url) = result { inbox.receive([url]) }
+        }
+        .onChange(of: inbox.pending) { openNextImport() }
+        .onChange(of: navigation.installRequest) { choosingInstaller = true }
+        .toolbar(store.presentedLaunch == nil ? .automatic : .hidden, for: .windowToolbar)
         .searchable(text: $query, placement: .toolbar, prompt: Text("Search games and software"))
         .searchFocused($searchFocused)
         .environment(store)
         .environment(discover)
         .environment(navigation)
+        .environment(controllers)
+        .onAppear { controllers.start() }
         .task(id: customPath) {
             await store.refresh(customPath: customPath)
             #if DEBUG
             playFromLaunchArgument()
+            if let i = CommandLine.arguments.firstIndex(of: "--open"), i + 1 < CommandLine.arguments.count,
+               CommandLine.arguments[i + 1].hasPrefix("mods:") {
+                let key = CommandLine.arguments[i + 1].dropFirst(5)
+                if let title = store.library.first(where: { key == "minecraft" ? $0.id == ModSupport.minecraftTitleID : $0.steamAppID.map(String.init) == String(key) }) {
+                    path.append(title)
+                    path.append(ModsRoute(title: title))
+                }
+            }
+            if let i = CommandLine.arguments.firstIndex(of: "--import"), i + 1 < CommandLine.arguments.count {
+                inbox.receive([URL(filePath: CommandLine.arguments[i + 1])])
+            }
             #endif
+            openNextImport()
         }
         .onChange(of: store.steam.account) { Task { await store.refreshOwned() } }
         .onChange(of: store.steam.hasAPIKey) { Task { await store.refreshOwned() } }
@@ -96,7 +145,27 @@ struct RootView: View {
         .onChange(of: navigation.selection) {
             path = NavigationPath()
             query = ""
+            if let page = navigation.settingsPageRequest, navigation.selection == .settings {
+                path.append(page)
+                navigation.settingsPageRequest = nil
+            }
         }
+        .onChange(of: navigation.settingsPageRequest) {
+            guard let page = navigation.settingsPageRequest else { return }
+            if navigation.selection == .settings {
+                query = ""
+                path = NavigationPath([page])
+                navigation.settingsPageRequest = nil
+            } else {
+                navigation.selection = .settings
+            }
+        }
+    }
+
+    private func openNextImport() {
+        guard importSession == nil, !inbox.pending.isEmpty, store.report != nil else { return }
+        let url = inbox.pending.removeFirst()
+        importSession = store.makeImport(url)
     }
 
     #if DEBUG
@@ -120,6 +189,7 @@ struct RootView: View {
         case "library": navigation.selection = .library
         case "software": navigation.selection = .software
         case "settings": navigation.selection = .settings
+        case "controllers": navigation.open(.controllers)
         default:
             if target.hasPrefix("title:"), let id = Int(target.dropFirst(6)) {
                 path.append(Title(id: Title.steamID(id), name: "", kind: .game, steamAppID: id))
@@ -211,6 +281,38 @@ private struct WhiskyStatusChip: View {
         guard case .ready = store.report?.status else { return "Open Settings for details" }
         let bottles = store.registeredBottles.count
         return bottles == 0 ? "No bottles yet" : "\(bottles) bottle(s) · \(store.installedTitles.count) game(s)"
+    }
+}
+
+/// Connected controller at a glance; opens Settings > Controllers. Always shown so the page is easy to find.
+private struct ControllerChip: View {
+    let action: () -> Void
+    @Environment(ControllerMonitor.self) private var monitor
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: monitor.controllers.first?.family.symbol ?? "gamecontroller")
+                    .font(.system(size: 14))
+                    .foregroundStyle(monitor.controllers.isEmpty ? Theme.textSecondary : Theme.textPrimary)
+                    .frame(width: 22)
+                VStack(alignment: .leading, spacing: 1) {
+                    if let first = monitor.controllers.first {
+                        Text(verbatim: first.displayName).font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
+                        Text("Controller connected").font(.caption2).foregroundStyle(Theme.textSecondary)
+                    } else {
+                        Text("Controllers").font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
+                        Text("None connected").font(.caption2).foregroundStyle(Theme.textSecondary)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(10)
+            .background(Theme.surface, in: .rect(cornerRadius: 10))
+            .animation(.snappy, value: monitor.controllers.first?.id)
+        }
+        .buttonStyle(.plain)
+        .help("Connect and test controllers")
     }
 }
 

@@ -12,14 +12,16 @@ enum ProcessError: Error, Equatable {
 
 enum ProcessRunner {
     /// Runs `executable` to completion off the main thread, terminating it after `timeout`.
-    static func run(_ executable: URL, _ arguments: [String], timeout: TimeInterval = 10) async throws -> ProcessResult {
+    static func run(_ executable: URL, _ arguments: [String], timeout: TimeInterval = 10,
+                    environment: [String: String]? = nil) async throws -> ProcessResult {
         try await Task.detached(priority: .userInitiated) {
-            try runBlocking(executable, arguments, timeout: timeout)
+            try runBlocking(executable, arguments, timeout: timeout, environment: environment)
         }.value
     }
 
     // Output goes to temp files rather than pipes so a chatty child can never fill a pipe buffer and deadlock.
-    private static func runBlocking(_ executable: URL, _ arguments: [String], timeout: TimeInterval) throws -> ProcessResult {
+    private static func runBlocking(_ executable: URL, _ arguments: [String], timeout: TimeInterval,
+                                    environment: [String: String]?) throws -> ProcessResult {
         let fm = FileManager.default
         let base = fm.temporaryDirectory.appending(path: "machub-\(UUID().uuidString)")
         let outURL = base.appendingPathExtension("out"), errURL = base.appendingPathExtension("err")
@@ -35,6 +37,7 @@ enum ProcessRunner {
         let process = Process()
         process.executableURL = executable
         process.arguments = arguments
+        if let environment { process.environment = ProcessInfo.processInfo.environment.merging(environment) { _, new in new } }
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = outHandle
         process.standardError = errHandle
