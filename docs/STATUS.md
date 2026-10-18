@@ -36,7 +36,8 @@ Branche : `steam/library` (commit `fad1f69` + correctifs du profil non commités
 | **Premier lancement réel** | ⚠️ `AssettoCorsa.exe` (le lanceur) démarre puis s'arrête au bout de **2 s** (journal de Steam : 10:23:01 → 10:23:03). MacHub affiche « planté au lancement ». Cause capturée avec `run --follow` : `System.TypeLoadException: Could not load file or assembly 'CEF3, Version=49.0.0.0'`. Le lanceur est une app **.NET** (en-tête CLR) avec un assembly mixte C++/CLI, que **Wine-Mono 10.4.1 ne sait pas charger**. `acs.exe` (le jeu) n'est pas .NET |
 | .NET Framework 4.8 | ✅ installé avec ton accord (`winetricks -q dotnet48`, celui de Whisky, 11:24 → 11:28, exit 0). Registre : `Version 4.8.03761`, `Release 528049`. Steam pour Windows arrêté proprement avant (`-shutdown`). winetricks avait laissé la bouteille en Windows 7 ; **remise en Windows 10** (`winecfg -v win10`), conforme au réglage Whisky |
 | **Lancement d'Assetto Corsa depuis MacHub** | ✅ **le lanceur tourne** : MacHub affiche « En cours : macOS voit AssettoCorsa.exe », confirmé par `ps` (2 processus, > 28 s), par Steam (`Game process added` sans `removed`) et par une fenêtre « Assetto Corsa Launcher » visible (capture `.impeccable/review/ac-launcher.png`). Steam était arrêté : la requête `-applaunch` l'a démarré, reconnecté automatiquement, puis a lancé le jeu |
-| Jeu en piste (`acs.exe`) | ⏳ **non vérifié**. Tu as indiqué qu'une course avait démarré, mais à 11:31:42 aucun processus `acs.exe` n'existait et aucun `Documents/Assetto Corsa/logs/log.txt` (écrit par `acs.exe` dès le lancement) n'était présent ; le lanceur venait d'être prêt (« UI Ready » à 11:31:28). Surveillance en cours (`build/acs-watch.log`) |
+| Jeu en piste (`acs.exe`) | ❌ **non démarré**. Le lanceur affiche son intro (capture de 11:29), puis devient « UI Ready » (11:31:28) mais sa fenêtre reste **entièrement noire** (capture au premier plan, 11:34) : le menu CEF3 v49 du lanceur ne s'affiche pas sous Wine, il est donc impossible de cliquer sur « Drive ». Vérifié : aucun `acs.exe` (`ps`, surveillance de 10 min), aucun `log.txt` de session, aucune demande de course dans `launcher.log`. Cause exacte non vérifiée |
+| Prochaine piste (à valider) | 1) options de rendu du lanceur (désactiver le GPU de CEF) ; 2) **Content Manager**, le lanceur communautaire d'Assetto Corsa (.NET, maintenant installé), qui remplace le lanceur officiel ; 3) lancement direct de `acs.exe` avec une configuration de course existante. Aucune n'est testée |
 
 Leçons pour P1-1 : enchaîner `create` → `wineboot --init` → installation silencieuse → lancement de Steam ; rappeler à l'utilisateur d'amener l'app « wine » au premier plan.
 
@@ -58,7 +59,7 @@ Leçons pour P1-1 : enchaîner `create` → `wineboot --init` → installation s
 
 | Blocage | Cause exacte | Débloqué par |
 |---|---|---|
-| Session de jeu non vérifiée | Le lanceur fonctionne ; la course (`acs.exe`, DX11 via DXMT) reste à essayer | Toi : lancer une session depuis le lanceur |
+| Pas de course possible via le lanceur officiel | Le menu du lanceur (CEF3) reste noir sous Wine après l'intro | Piste à valider : GPU de CEF désactivé, ou Content Manager |
 | Liste complète des jeux possédés | Seule API officielle : `GetOwnedGames`, avec clé ; OAuth Steam réservé aux partenaires Valve ; la page publique des jeux exige une connexion | Ta clé (facultative), ou un proxy serveur (P3, profils publics uniquement) |
 
 ## Décisions d'architecture
