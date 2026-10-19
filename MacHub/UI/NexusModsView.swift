@@ -98,13 +98,18 @@ private struct NexusModCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: mod.pictureURL) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Theme.surface
-            }
-            .frame(height: 140)
-            .clipShape(.rect(cornerRadius: 10))
+            // The card sets the size; the picture fills it and is cropped to it, never wider than its own column.
+            Color.black.opacity(0.2)
+                .frame(maxWidth: .infinity)
+                .frame(height: 140)
+                .overlay {
+                    AsyncImage(url: mod.pictureURL) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Image(systemName: "puzzlepiece.extension").font(.title).foregroundStyle(Theme.textSecondary)
+                    }
+                }
+                .clipShape(.rect(cornerRadius: 10))
             Text(verbatim: mod.name).font(.headline).foregroundStyle(Theme.textPrimary).lineLimit(1)
             Text(verbatim: mod.summary).font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(2)
             HStack(spacing: 10) {
@@ -115,6 +120,7 @@ private struct NexusModCard: View {
             .font(.caption).foregroundStyle(Theme.textSecondary)
         }
         .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.surface, in: .rect(cornerRadius: 14))
         .contentShape(.rect)
     }
