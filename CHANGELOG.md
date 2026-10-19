@@ -2,6 +2,11 @@
 
 All notable changes to MacHub. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.3.0] - 2026-10-19
+
+### Added
+- Automatic updates: MacHub checks its GitHub releases at most once a day and offers a new version in the sidebar. **Install and Relaunch** downloads it, checks its published SHA-256, replaces MacHub and relaunches it. Settings › General › Updates shows the version, a manual check and the automatic-check switch.
+
 ## [0.2.0] - 2026-10-19
 
 ### Added
