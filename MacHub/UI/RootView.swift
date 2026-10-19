@@ -43,6 +43,7 @@ struct RootView: View {
     @State private var store = LibraryStore()
     @State private var discover = DiscoverModel()
     @State private var controllers = ControllerMonitor()
+    @State private var updater = AppUpdater.shared
     @State private var inbox = ImportInbox.shared
     @State private var nexusInbox = NexusLinkInbox.shared
     @State private var importSession: InstallerImport?
@@ -65,6 +66,7 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 8) {
+                    UpdateChip()
                     SetupChip { navigation.selection = .settings }
                     ControllerChip { navigation.selection = .settings }
                     SteamAccountChip { navigation.selection = .settings }
@@ -73,6 +75,7 @@ struct RootView: View {
                 .animation(.snappy, value: controllers.controllers.count)
                 .animation(.snappy, value: store.engineState)
                 .animation(.snappy, value: store.steamPrefix?.url)
+                .animation(.snappy, value: updater.state)
             }
         } detail: {
             NavigationStack(path: $path) {
@@ -128,6 +131,15 @@ struct RootView: View {
         .environment(navigation)
         .environment(controllers)
         .onAppear { controllers.start() }
+        .task {
+            // `-installUpdateNow YES` (a launch argument, never saved): checks and installs at once. Used to test updates.
+            if UserDefaults.standard.bool(forKey: "installUpdateNow") {
+                await updater.check()
+                await updater.install()
+            } else {
+                await updater.checkIfDue()
+            }
+        }
         .task(id: customPath) {
             await store.refresh(customPath: customPath)
             #if DEBUG
@@ -244,6 +256,50 @@ struct AmbientBackdrop: View {
         .animation(.easeInOut(duration: 0.8), value: title?.id)
         .ignoresSafeArea()
         .accessibilityHidden(true)
+    }
+}
+
+/// A newer MacHub on GitHub: install it in place and relaunch, or read what's new. Shown only while one is offered.
+private struct UpdateChip: View {
+    @State private var updater = AppUpdater.shared
+
+    var body: some View {
+        if let release = updater.offered {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "sparkles").font(.system(size: 14)).foregroundStyle(Theme.textPrimary).frame(width: 22)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("MacHub \(release.version) is available").font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
+                        Text(detail).font(.caption2).foregroundStyle(Theme.textSecondary).lineLimit(4)
+                    }
+                    Spacer(minLength: 0)
+                }
+                switch updater.state {
+                case .downloading(_, let fraction):
+                    if let fraction { ProgressView(value: fraction).controlSize(.small) } else { ProgressView().controlSize(.small) }
+                case .installing:
+                    ProgressView().controlSize(.small)
+                default:
+                    HStack(spacing: 6) {
+                        Button("Install and Relaunch") { Task { await updater.install() } }
+                            .buttonStyle(.borderedProminent).controlSize(.small)
+                        Link("What's New", destination: release.page).font(.caption)
+                    }
+                }
+            }
+            .padding(10)
+            .background(Theme.surface, in: .rect(cornerRadius: 10))
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
+        }
+    }
+
+    private var detail: String {
+        switch updater.state {
+        case .downloading: String(localized: "Downloading…")
+        case .installing: String(localized: "Restarting MacHub…")
+        case .installFailed(_, let message): message
+        default: String(localized: "You have \(AppUpdates.currentVersion).")
+        }
     }
 }
 
