@@ -2,29 +2,36 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(LibraryStore.self) private var store
-    @AppStorage("showDemoTitles") private var showDemo = true
-
+    @AppStorage("showDemoTitles") private var showDemo = false
     @State private var viewportHeight: CGFloat = 900
 
     var body: some View {
         let featured = store.featured(includeDemo: showDemo)
-        let demo = showDemo ? DemoLibrary.titles : []
+        let installed = store.library.filter { $0.availability == .installed }
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 40) {
                 if featured.isEmpty {
-                    EmptyLibraryHero()
+                    FeaturedPlaceholder(state: store.featuredState)
                 } else {
                     HeroCarousel(titles: featured, height: min(max(viewportHeight * 0.62, 480), 720))
                 }
-                if store.realTitles.isEmpty {
+                if store.steam.account == nil { SteamConnectCard() }
+                TitleRow(heading: "Continue", titles: store.recent, style: .landscape)
+                if installed.isEmpty {
                     InstalledEmptyState()
                 } else {
-                    TitleRow(heading: "Installed in Whisky", titles: store.realTitles, style: .landscape)
+                    TitleRow(heading: "Installed in Whisky", titles: installed, style: .landscape)
                 }
-                if !demo.isEmpty {
-                    TitleRow(heading: "Sample games", titles: demo.filter { $0.kind == .game }, style: .portrait, isDemo: true)
-                    TitleRow(heading: "Racing & simulation", titles: demo.filter { $0.genres.contains("Racing") }, style: .landscape, isDemo: true)
-                    TitleRow(heading: "Windows software", titles: demo.filter { $0.kind == .software }, style: .landscape, isDemo: true)
+                if store.steam.account != nil {
+                    if store.ownedState == .loaded {
+                        TitleRow(heading: "Your Steam library", titles: store.library.filter { $0.owned != nil }, style: .portrait)
+                    } else {
+                        OwnedStateNotice()
+                    }
+                }
+                StoreRows()
+                if showDemo {
+                    TitleRow(heading: "Sample games", titles: DemoLibrary.titles.filter { $0.kind == .game }, style: .portrait, isDemo: true)
                 }
             }
             .padding(.bottom, 48)
@@ -193,18 +200,6 @@ private struct PageDots: View {
         .padding(10)
         .floatingGlass(cornerRadius: 12)
         .fixedSize()
-    }
-}
-
-private struct EmptyLibraryHero: View {
-    var body: some View {
-        ContentUnavailableView {
-            Label("Your library is empty", systemImage: "gamecontroller")
-        } description: {
-            Text("Install a game in a Whisky bottle, or turn demo titles back on in Settings.")
-        }
-        .frame(height: 420)
-        .padding(.top, 60)
     }
 }
 

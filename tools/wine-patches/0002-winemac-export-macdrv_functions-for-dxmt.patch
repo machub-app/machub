@@ -1,0 +1,106 @@
+--- a/dlls/winemac.drv/Makefile.in
++++ b/dlls/winemac.drv/Makefile.in
+@@ -25,6 +25,7 @@
+ 	cocoa_opengl.m \
+ 	cocoa_status_item.m \
+ 	cocoa_window.m \
++	dxmt_exports.c \
+ 	display.c \
+ 	dllmain.c \
+ 	event.c \
+--- /dev/null
++++ b/dlls/winemac.drv/dxmt_exports.c
+@@ -0,0 +1,93 @@
++/*
++ * MacHub: the table of Mac driver functions DXMT looks up (dlsym "macdrv_functions") to put a Metal layer in a
++ * window. Upstream Wine builds winemac with hidden symbols, so DXMT fails with "Failed to create metal view, it seems
++ * like your Wine has no exported symbols needed by DXMT" and games crash when they create their device.
++ *
++ * DXMT reads the window data with CrossOver's layout (hwnd, cocoa_window, cocoa_view, client_cocoa_view), which
++ * differs from upstream's (hwnd, cocoa_window, client_view, rects...). get_win_data here hands DXMT a small struct in
++ * its expected layout, backed by the real data, and release_win_data releases the real one. A Direct3D window has
++ * no client view upstream, so one is created on demand (see dxmt_get_win_data).
++ *
++ * Copyright 2026 MacHub contributors. LGPL-2.1-or-later, like the rest of Wine.
++ */
++
++#if 0
++#pragma makedep unix
++#endif
++
++#include "config.h"
++#include <stdlib.h>
++#include "macdrv.h"
++
++struct dxmt_win_data
++{
++    HWND                     hwnd;
++    macdrv_window            cocoa_window;
++    macdrv_view              cocoa_view;
++    macdrv_view              client_cocoa_view;
++    struct macdrv_win_data  *data;   /* the real data, locked until release */
++};
++
++static struct dxmt_win_data *dxmt_get_win_data(HWND hwnd)
++{
++    struct macdrv_win_data *data = get_win_data(hwnd);
++    struct dxmt_win_data *compat;
++
++    if (!data) return NULL;
++    if (!data->client_view)
++    {
++        /* Upstream only gives a window a client view once a GL/Vulkan client surface presents to it; a Direct3D
++           window has none, and DXMT would get a NULL view ("Failed to create metal view"). Create the same client
++           surface Vulkan uses: a view sized to the client area, attached to the window and kept in place by win32u
++           on moves and resizes. It lives as long as the window (the surface is detached when the window goes). */
++        release_win_data(data);
++        macdrv_client_surface_create(hwnd);
++        if (!(data = get_win_data(hwnd))) return NULL;
++    }
++    if (!(compat = calloc(1, sizeof(*compat))))
++    {
++        release_win_data(data);
++        return NULL;
++    }
++    compat->hwnd = data->hwnd;
++    compat->cocoa_window = data->cocoa_window;
++    compat->cocoa_view = data->client_view;
++    compat->client_cocoa_view = data->client_view;
++    compat->data = data;
++    return compat;
++}
++
++static void dxmt_release_win_data(struct dxmt_win_data *compat)
++{
++    if (!compat) return;
++    release_win_data(compat->data);
++    free(compat);
++}
++
++/* Field order matches DXMT's struct macdrv_functions_t; the table is padded like CrossOver's (192 bytes). */
++struct macdrv_functions_t
++{
++    void (*macdrv_init_display_devices)(BOOL);
++    struct dxmt_win_data *(*get_win_data)(HWND hwnd);
++    void (*release_win_data)(struct dxmt_win_data *data);
++    macdrv_window (*macdrv_get_cocoa_window)(HWND hwnd, BOOL require_on_screen);
++    macdrv_metal_device (*macdrv_create_metal_device)(void);
++    void (*macdrv_release_metal_device)(macdrv_metal_device d);
++    macdrv_metal_view (*macdrv_view_create_metal_view)(macdrv_view v, macdrv_metal_device d);
++    macdrv_metal_layer (*macdrv_view_get_metal_layer)(macdrv_metal_view v);
++    void (*macdrv_view_release_metal_view)(macdrv_metal_view v);
++    void *reserved[15];
++};
++
++__attribute__((visibility("default"))) struct macdrv_functions_t macdrv_functions =
++{
++    NULL,
++    dxmt_get_win_data,
++    dxmt_release_win_data,
++    macdrv_get_cocoa_window,
++    macdrv_create_metal_device,
++    macdrv_release_metal_device,
++    macdrv_view_create_metal_view,
++    macdrv_view_get_metal_layer,
++    macdrv_view_release_metal_view,
++};

@@ -1,0 +1,36 @@
+--- a/dlls/winemac.drv/cocoa_app.m
++++ b/dlls/winemac.drv/cocoa_app.m
+@@ -230,6 +230,33 @@
+             NSString* title;
+             NSMenuItem* item;
+ 
++            /* MacHub: no Dock icon for the helper processes listed in MACHUB_NO_DOCK_ICON ("steam.exe;other.exe").
++               Their windows still show; the process just doesn't add an icon of its own. Wine shows a Windows
++               program's own path as argv[0], so its last component is the .exe name. */
++            {
++                const char *list = getenv("MACHUB_NO_DOCK_ICON");
++                NSArray<NSString *> *arguments = [[NSProcessInfo processInfo] arguments];
++                /* argv[0] is the Windows program's path once Wine has renamed the process, but Foundation may have
++                   captured the original argv ("…/wine", "C:\…\steam.exe", …): look at the first two. */
++                NSArray<NSString *> *candidates = [arguments subarrayWithRange:NSMakeRange(0, MIN(arguments.count, 2))];
++                if (list && *list)
++                {
++                    for (NSString *argument in candidates)
++                    {
++                        NSString *exeName = [[argument stringByReplacingOccurrencesOfString:@"\\" withString:@"/"] lastPathComponent];
++                        for (NSString *name in [[NSString stringWithUTF8String:list] componentsSeparatedByString:@";"])
++                        {
++                            if (name.length && [exeName caseInsensitiveCompare:name] == NSOrderedSame)
++                            {
++                                if (activateIfTransformed)
++                                    [self tryToActivateIgnoringOtherApps:YES];
++                                return;
++                            }
++                        }
++                    }
++                }
++            }
++
+             [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+ 
+             if (activateIfTransformed)

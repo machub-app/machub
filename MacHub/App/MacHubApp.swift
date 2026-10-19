@@ -14,7 +14,18 @@ enum Main {
     }
 }
 
+/// Receives Windows files opened from Finder ("Open With > MacHub", or by default if the user chose it).
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func application(_ application: NSApplication, open urls: [URL]) {
+        MainActor.assumeIsolated {
+            NexusLinkInbox.shared.receive(urls.filter { $0.scheme?.lowercased() == "nxm" })
+            ImportInbox.shared.receive(urls.filter { $0.isFileURL })
+        }
+    }
+}
+
 struct MacHubApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @State private var navigation = AppNavigation()
 
@@ -37,11 +48,18 @@ struct MacHubApp: App {
                 Button("Settings…") { navigation.selection = .settings }
                     .keyboardShortcut(",")
             }
+            CommandGroup(after: .newItem) {
+                Button("Install a Windows Program…") { navigation.installRequest += 1 }
+                    .keyboardShortcut("o")
+            }
             CommandMenu("Go") {
                 Button("Home") { navigation.selection = .home }.keyboardShortcut("1")
-                Button("Library") { navigation.selection = .library }.keyboardShortcut("2")
-                Button("Search") { navigation.selection = .search }.keyboardShortcut("3")
-                Button("Find…") { navigation.selection = .search }.keyboardShortcut("f")
+                Button("Discover") { navigation.selection = .discover }.keyboardShortcut("2")
+                Button("Library") { navigation.selection = .library }.keyboardShortcut("3")
+                Button("Software") { navigation.selection = .software }.keyboardShortcut("4")
+                Button("Controllers") { navigation.open(.controllers) }.keyboardShortcut("5")
+                Divider()
+                Button("Find…") { navigation.searchFocusRequest += 1 }.keyboardShortcut("f")
             }
         }
     }

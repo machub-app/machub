@@ -1,0 +1,68 @@
+# Builds MacHub's Windows engine (official WineHQ sources + MacHub's patches in tools/wine-patches, DXMT, DXVK, the
+# Steam CEF shim) and publishes it as a GitHub Release the app can download. Run it by hand (Actions › Build engine).
+#
+# Not yet run on GitHub: the same scripts were run locally on 2026-10-19 (macOS 27, Xcode 27.1) and produced
+# MacHubRuntime-1.0.5. Expect small fixes on the first CI run.
+name: Build engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      wine_version:
+        description: WineHQ source version
+        default: "11.0"
+      engine_version:
+        description: MacHub engine version to publish
+        default: "1.0.5"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 180
+    env:
+      WINE_VERSION: ${{ inputs.wine_version }}
+      WORK: ${{ github.workspace }}/work
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build tools
+        run: brew install bison pkgconf gettext freetype gnutls sdl2
+
+      - name: Download sources and toolchain
+        run: |
+          mkdir -p "$WORK" build/runtime-cache
+          major="${WINE_VERSION%%.*}"
+          curl -fL -o "$WORK/wine-$WINE_VERSION.tar.xz" "https://dl.winehq.org/wine/source/$major.0/wine-$WINE_VERSION.tar.xz"
+          gh release download 20261006 -R mstorsjo/llvm-mingw -p 'llvm-mingw-20261006-ucrt-macos-universal.tar.xz' -D "$WORK"
+          tar -xf "$WORK"/llvm-mingw-*.tar.xz -C "$WORK"
+          # The WineHQ macOS package supplies the x86_64 libraries Wine links against (and ships with).
+          gh release download 11.0_1 -R Gcenx/macOS_Wine_builds -p 'wine-stable-11.0_1-osx64.tar.xz' -D build/runtime-cache
+          mkdir -p "$WORK/winehq" && tar -xf build/runtime-cache/wine-stable-11.0_1-osx64.tar.xz -C "$WORK/winehq"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Compile Wine
+        run: |
+          MACOS_LIBS="$(ls -d "$WORK"/winehq/*.app)/Contents/Resources/wine/lib" \
+            scripts/build-wine.sh "$WORK/wine-$WINE_VERSION.tar.xz" "$WORK" "$WORK/install"
+
+      - name: Assemble engine
+        run: |
+          VARIANT=source WINE_BUILD="$WORK/install" WINE_SOURCES="$WORK/wine-$WINE_VERSION.tar.xz" \
+            VERSION_OVERRIDE="${{ inputs.engine_version }}" LLVM_MINGW="$(ls -d "$WORK"/llvm-mingw-*/ | head -1)" \
+            scripts/build-runtime.sh build/runtime-cache build/runtime
+          cat build/runtime/runtime-manifest.json
+
+      - name: Publish release (engine + exact sources and patches, as the LGPL requires)
+        run: |
+          version=$(python3 -c 'import json; print(json.load(open("build/runtime/runtime-manifest.json"))["version"])')
+          tar -cJf "build/runtime/machub-wine-patches-$version.tar.xz" tools/wine-patches tools/steam-cef-shim
+          gh release create "runtime-$version" --title "MacHub engine $version" --notes-file docs/LICENSES.md \
+            build/runtime/MacHubRuntime-$version.tar.xz build/runtime/runtime-manifest.json \
+            "$WORK/wine-$WINE_VERSION.tar.xz" "build/runtime/machub-wine-patches-$version.tar.xz" \
+            scripts/build-wine.sh scripts/build-runtime.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
