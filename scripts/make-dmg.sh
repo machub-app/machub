@@ -1,32 +1,36 @@
 #!/bin/bash
-# Builds MacHub for release, signs it with a Developer ID, packs it in a disk image (background, Applications
-# shortcut), then notarizes and staples the image so it opens without Gatekeeper warnings.
+# Builds MacHub for release and packs it in a disk image (background, Applications shortcut, volume icon).
 #
 #   scripts/make-dmg.sh [output-dir]           (default: build/release)
 #
-# SIGN_IDENTITY   codesign identity (default: the first "Developer ID Application" in the keychain)
+# By default the app is only ad-hoc signed (no Apple account): it runs on any Apple silicon Mac, but macOS asks the
+# user to confirm the first launch (Privacy & Security › Open Anyway). MacHub is not signed with any developer
+# account for now. To sign and notarize later:
+# SIGN_IDENTITY   a "Developer ID Application: …" identity. Never picked automatically, so a certificate that
+#                 belongs to another project can't end up on MacHub by mistake.
 # NOTARY_PROFILE  notarytool keychain profile, created once with
 #                 xcrun notarytool store-credentials <name> --apple-id <id> --team-id <team>
-#                 Without it, the image is signed but not notarized (fine for testing, not for publishing).
 # NOTARY_KEYCHAIN keychain holding that profile, when it isn't the login keychain (CI)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/build/release}"
 WORK="$ROOT/build/dmg"
-SIGN_IDENTITY="${SIGN_IDENTITY:-$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)}"
-[[ -n "$SIGN_IDENTITY" ]] || { echo "No Developer ID Application certificate in the keychain" >&2; exit 1; }
-echo "Signing with: $SIGN_IDENTITY"
+SIGN_IDENTITY="${SIGN_IDENTITY:--}"
+if [[ "$SIGN_IDENTITY" == "-" ]]; then echo "Ad-hoc signature (no developer account)"; else echo "Signing with: $SIGN_IDENTITY"; fi
 
 rm -rf "$WORK"; mkdir -p "$WORK" "$OUT"
 
-# 1. Release build, signed with the Developer ID, hardened runtime and secure timestamp (required by notarization).
-xcodebuild -project "$ROOT/MacHub.xcodeproj" -scheme MacHub -configuration Release -destination "generic/platform=macOS" -derivedDataPath "$WORK/dd" \
-  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$SIGN_IDENTITY" ENABLE_HARDENED_RUNTIME=YES \
-  OTHER_CODE_SIGN_FLAGS="--timestamp" CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO build -quiet
+# 1. Release build. With a Developer ID: hardened runtime and secure timestamp, as notarization requires.
+SIGN_FLAGS=(CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$SIGN_IDENTITY" DEVELOPMENT_TEAM= CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO)
+[[ "$SIGN_IDENTITY" == "-" ]] || SIGN_FLAGS+=(ENABLE_HARDENED_RUNTIME=YES OTHER_CODE_SIGN_FLAGS="--timestamp")
+xcodebuild -project "$ROOT/MacHub.xcodeproj" -scheme MacHub -configuration Release -destination "generic/platform=macOS" \
+  -derivedDataPath "$WORK/dd" "${SIGN_FLAGS[@]}" build -quiet
 APP="$WORK/dd/Build/Products/Release/MacHub.app"
 codesign --verify --deep --strict "$APP"
-[[ "$(codesign -dv "$APP" 2>&1)" == *"(runtime)"* ]] || { echo "Hardened runtime missing" >&2; exit 1; }
+if [[ "$SIGN_IDENTITY" != "-" ]]; then
+  [[ "$(codesign -dv "$APP" 2>&1)" == *"(runtime)"* ]] || { echo "Hardened runtime missing" >&2; exit 1; }
+fi
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")"
 DMG="$OUT/MacHub-$VERSION.dmg"
 
@@ -64,15 +68,15 @@ cp "$APP/Contents/Resources/AppIcon.icns" "$MOUNT/.VolumeIcon.icns" && SetFile -
 sync; hdiutil detach -quiet "$MOUNT"
 rm -f "$DMG"
 hdiutil convert -quiet "$WORK/rw.dmg" -format ULMO -o "$DMG"
-codesign --sign "$SIGN_IDENTITY" --timestamp "$DMG"
+[[ "$SIGN_IDENTITY" == "-" ]] || codesign --sign "$SIGN_IDENTITY" --timestamp "$DMG"
 
-# 3. Notarization and stapling.
-if [[ -n "${NOTARY_PROFILE:-}" ]]; then
+# 3. Notarization and stapling (only with a Developer ID).
+if [[ "$SIGN_IDENTITY" != "-" && -n "${NOTARY_PROFILE:-}" ]]; then
   xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" ${NOTARY_KEYCHAIN:+--keychain "$NOTARY_KEYCHAIN"} --wait
   xcrun stapler staple "$DMG"
   spctl --assess --type open --context context:primary-signature -v "$DMG"
 else
-  echo "NOTARY_PROFILE not set: $DMG is signed but NOT notarized"
+  echo "Not notarized: macOS will ask users to confirm the first launch"
 fi
 shasum -a 256 "$DMG" | tee "$DMG.sha256"
 echo "Done: $DMG"
