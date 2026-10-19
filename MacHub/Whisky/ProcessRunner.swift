@@ -12,16 +12,17 @@ enum ProcessError: Error, Equatable {
 
 enum ProcessRunner {
     /// Runs `executable` to completion off the main thread, terminating it after `timeout`.
+    /// With `log`, stdout and stderr go to that file instead (long-running programs): the result's text is empty.
     static func run(_ executable: URL, _ arguments: [String], timeout: TimeInterval = 10,
-                    environment: [String: String]? = nil) async throws -> ProcessResult {
+                    environment: [String: String]? = nil, log: URL? = nil) async throws -> ProcessResult {
         try await Task.detached(priority: .userInitiated) {
-            try runBlocking(executable, arguments, timeout: timeout, environment: environment)
+            try runBlocking(executable, arguments, timeout: timeout, environment: environment, log: log)
         }.value
     }
 
     // Output goes to temp files rather than pipes so a chatty child can never fill a pipe buffer and deadlock.
     private static func runBlocking(_ executable: URL, _ arguments: [String], timeout: TimeInterval,
-                                    environment: [String: String]?) throws -> ProcessResult {
+                                    environment: [String: String]?, log: URL?) throws -> ProcessResult {
         let fm = FileManager.default
         let base = fm.temporaryDirectory.appending(path: "machub-\(UUID().uuidString)")
         let outURL = base.appendingPathExtension("out"), errURL = base.appendingPathExtension("err")
@@ -31,8 +32,17 @@ enum ProcessRunner {
             try? fm.removeItem(at: outURL)
             try? fm.removeItem(at: errURL)
         }
-        let outHandle = try FileHandle(forWritingTo: outURL)
-        let errHandle = try FileHandle(forWritingTo: errURL)
+        let outHandle: FileHandle, errHandle: FileHandle
+        if let log {
+            try fm.createDirectory(at: log.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if !fm.fileExists(atPath: log.path) { fm.createFile(atPath: log.path, contents: nil) }
+            outHandle = try FileHandle(forWritingTo: log)
+            outHandle.seekToEndOfFile()
+            errHandle = outHandle
+        } else {
+            outHandle = try FileHandle(forWritingTo: outURL)
+            errHandle = try FileHandle(forWritingTo: errURL)
+        }
 
         let process = Process()
         process.executableURL = executable

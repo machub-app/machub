@@ -9,6 +9,8 @@ enum ModSupport: Equatable, Sendable {
     case archiveImport(gameFolder: URL)
     /// MacHub only points to the official source; installing is up to the game.
     case externalOnly(URL)
+    /// Nexus Mods catalog: browse in MacHub, download with the user's Nexus account, install per the game's layout.
+    case nexus(domain: String)
 
     static let minecraftTitleID = "native:minecraft-java"
     static let assettoCorsaAppID = 244210
@@ -17,6 +19,7 @@ enum ModSupport: Equatable, Sendable {
     static func support(for title: Title) -> ModSupport? {
         if title.id == minecraftTitleID { return .modrinth }
         if title.steamAppID == assettoCorsaAppID, let path = title.installPath { return .archiveImport(gameFolder: URL(filePath: path)) }
+        if let appID = title.steamAppID, let domain = NexusMods.domains[appID], title.install != nil { return .nexus(domain: domain) }
         if title.steamAppID == beamNGAppID { return .externalOnly(URL(string: "https://www.beamng.com/resources/")!) }
         return nil
     }

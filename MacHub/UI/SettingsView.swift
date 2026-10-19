@@ -1,69 +1,78 @@
 import SwiftUI
 
-/// Native grouped settings: language, demo content, and the real Whisky state (formerly the B2 diagnostics screen).
+/// Settings, grouped by topic: a category column on the left, the category's options on the right.
+enum SettingsCategory: String, CaseIterable, Identifiable {
+    case general, steamAccount, steamWindows, engine, graphics, performance, input, environments, mods, controllers, whisky, diagnostics
+
+    var id: Self { self }
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .general: "General"
+        case .steamAccount: "Steam Account"
+        case .steamWindows: "Steam for Windows"
+        case .engine: "Windows Engine"
+        case .graphics: "Graphics"
+        case .performance: "Performance"
+        case .input: "Keyboard & Mouse"
+        case .environments: "Windows Environments"
+        case .mods: "Mods"
+        case .controllers: "Controllers"
+        case .whisky: "Whisky (Fallback)"
+        case .diagnostics: "Diagnostics"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .general: "gearshape"
+        case .steamAccount: "person.crop.circle"
+        case .steamWindows: "arrow.down.app"
+        case .engine: "cpu"
+        case .graphics: "display"
+        case .performance: "gauge.with.dots.needle.67percent"
+        case .input: "keyboard"
+        case .environments: "square.stack.3d.up"
+        case .mods: "puzzlepiece.extension"
+        case .controllers: "gamecontroller"
+        case .whisky: "wineglass"
+        case .diagnostics: "stethoscope"
+        }
+    }
+
+    /// Groups in the category column.
+    @MainActor static let groups: [(LocalizedStringKey, [SettingsCategory])] = [
+        ("MacHub", [.general, .steamAccount, .mods, .controllers]),
+        ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments]),
+        ("Advanced", [.whisky, .diagnostics]),
+    ]
+}
+
 struct SettingsView: View {
     @Environment(LibraryStore.self) private var store
     @AppStorage("whiskyCmdPath") private var customPath = ""
-    @AppStorage("showDemoTitles") private var showDemo = false
-    @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
-    @State private var choosingFile = false
+    @AppStorage("settings.category") private var category = SettingsCategory.general
 
     var body: some View {
-        Form {
-            SteamSettingsSection()
-            ControllerSettingsSection()
-            Section("General") {
-                Picker(selection: $language) {
-                    ForEach(AppLanguage.allCases) { $0.label.tag($0) }
-                } label: {
-                    Text("Language")
-                }
-            }
-            WindowsFilesSection()
-            Section {
-                Toggle("Show demo titles", isOn: $showDemo)
-            } header: {
-                Text("Library")
-            } footer: {
-                Text("Demo titles let you explore MacHub before your own games are installed. They are labelled and can't be launched.")
-            }
-            Section("Whisky") {
-                if let report = store.report {
-                    WhiskyStatusRow(status: report.status)
-                    if let present = report.librariesPresent {
-                        LabeledContent("Wine runtime") { Text(present ? "Installed" : "Missing") }
-                    }
-                    ForEach(store.loadErrors, id: \.self) { error in
-                        Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Compatibility.issues.tint)
-                    }
-                    DisclosureGroup("Diagnostics") {
-                        if let install = report.status.install { InstallDetails(install: install) }
-                        HStack {
-                            TextField("Custom WhiskyCmd path", text: $customPath, prompt: Text("Automatic detection"))
-                            Button("Choose…") { choosingFile = true }
+        HStack(spacing: 0) {
+            List(selection: Binding(get: { category }, set: { if let new = $0 { category = new } })) {
+                ForEach(SettingsCategory.groups, id: \.1) { group in
+                    Section(group.0) {
+                        ForEach(group.1) { item in
+                            Label(item.label, systemImage: item.symbol).tag(item)
                         }
                     }
-                } else {
-                    ProgressView()
                 }
             }
-            ForEach((store.report?.containers ?? []).filter(\.exists)) { container in
-                Section {
-                    if container.bottles.isEmpty {
-                        Text("No bottles yet. Create one in Whisky.").foregroundStyle(.secondary)
-                    }
-                    ForEach(container.bottles) { BottleRow(bottle: $0) }
-                } header: {
-                    Text(container.bundleID == WhiskyLocator.forkBundleID ? "Bottles · Whisky" : "Bottles · original Whisky (read only)")
-                } footer: {
-                    if container.bundleID != WhiskyLocator.forkBundleID, !container.bottles.isEmpty {
-                        Text("These bottles come from the original Whisky. “Not set up” means Wine never created the bottle's files, so it can't run anything. MacHub never changes them.")
-                    }
-                }
-            }
+            .listStyle(.sidebar)
+            .scrollContentBackground(.hidden)
+            .frame(width: 230)
+            Divider()
+            Form { detail }
+                .formStyle(.grouped)
+                .scrollContentBackground(.hidden)
+                .id(category)
         }
-        .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
         .onAppear { store.spotlight = nil }
         .navigationTitle("Settings")
         .toolbar {
@@ -75,8 +84,96 @@ struct SettingsView: View {
             }
             .disabled(store.report == nil)
         }
+    }
+
+    @ViewBuilder private var detail: some View {
+        switch category {
+        case .general: GeneralSettingsSections()
+        case .steamAccount: SteamSettingsSection()
+        case .steamWindows: SteamEngineSection()
+        case .engine: EngineSettingsSection()
+        case .graphics: GraphicsSettingsSection()
+        case .performance: PerformanceSettingsSection()
+        case .input: InputSettingsSection()
+        case .environments: EnvironmentsSettingsSection()
+        case .mods: ModsSettingsSection()
+        case .controllers: ControllerSettingsSection()
+        case .whisky: WhiskySettingsSections()
+        case .diagnostics: DiagnosticsSettingsSection()
+        }
+    }
+}
+
+private struct GeneralSettingsSections: View {
+    @AppStorage("showDemoTitles") private var showDemo = false
+    @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
+
+    var body: some View {
+        Section("Language") {
+            Picker(selection: $language) {
+                ForEach(AppLanguage.allCases) { $0.label.tag($0) }
+            } label: {
+                Text("Language")
+            }
+        }
+        Section {
+            Toggle("Show demo titles", isOn: $showDemo)
+        } header: {
+            Text("Library")
+        } footer: {
+            Text("Demo titles let you explore MacHub before your own games are installed. They are labelled and can't be launched.")
+        }
+        WindowsFilesSection()
+    }
+}
+
+/// The previous integration, kept as a fallback until MacHub's own engine has replaced it everywhere.
+private struct WhiskySettingsSections: View {
+    @Environment(LibraryStore.self) private var store
+    @AppStorage("whiskyCmdPath") private var customPath = ""
+    @State private var choosingFile = false
+
+    var body: some View {
+        Section {
+            if let report = store.report {
+                WhiskyStatusRow(status: report.status)
+                if let present = report.librariesPresent {
+                    LabeledContent("Wine runtime") { Text(present ? "Installed" : "Missing") }
+                }
+                ForEach(store.loadErrors, id: \.self) { error in
+                    Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Compatibility.issues.tint)
+                }
+                DisclosureGroup("Diagnostics") {
+                    if let install = report.status.install { InstallDetails(install: install) }
+                    HStack {
+                        TextField("Custom WhiskyCmd path", text: $customPath, prompt: Text("Automatic detection"))
+                        Button("Choose…") { choosingFile = true }
+                    }
+                }
+            } else {
+                ProgressView()
+            }
+        } header: {
+            Text("Whisky")
+        } footer: {
+            Text("Optional. MacHub no longer needs Whisky: its own engine runs Windows programs. Bottles you already have in Whisky keep working through it.")
+        }
         .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.item]) { result in
             if case .success(let url) = result { customPath = url.path }
+        }
+        ForEach((store.report?.containers ?? []).filter(\.exists)) { container in
+            Section {
+                if container.bottles.isEmpty {
+                    Text("No bottles yet.").foregroundStyle(.secondary)
+                }
+                ForEach(container.bottles) { BottleRow(bottle: $0) }
+            } header: {
+                Text(container.bundleID == WhiskyLocator.forkBundleID ? "Bottles · Whisky" : "Bottles · original Whisky (read only)")
+            } footer: {
+                if container.bundleID != WhiskyLocator.forkBundleID, !container.bottles.isEmpty {
+                    Text("These bottles come from the original Whisky. “Not set up” means Wine never created the bottle's files, so it can't run anything. MacHub never changes them.")
+                }
+            }
         }
     }
 }
@@ -139,7 +236,7 @@ private struct BottleRow: View {
 }
 
 /// Steam: verified OpenID account and the optional Web API key (Keychain only).
-private struct SteamSettingsSection: View {
+struct SteamSettingsSection: View {
     @Environment(LibraryStore.self) private var store
     @State private var keyDraft = ""
     @State private var keyRejected = false

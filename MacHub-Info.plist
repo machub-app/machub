@@ -31,5 +31,19 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Nexus Mods "Mod Manager Download" links (nxm://): MacHub downloads and installs the file for the user. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Nexus Mods download link</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nxm</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

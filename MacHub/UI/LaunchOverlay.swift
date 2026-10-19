@@ -95,6 +95,15 @@ private struct LaunchScreen: View {
                 Button("Back to MacHub") { store.dismissLaunch() }
                     .buttonStyle(PrimaryActionStyle())
                     .keyboardShortcut(.defaultAction)
+                if case .running = state {
+                    Button {
+                        Task { await store.stop(title) }
+                    } label: {
+                        Label("Stop", systemImage: "stop.fill")
+                    }
+                    .buttonStyle(SecondaryActionStyle())
+                    .help("Asks the game to close, then forces it after 10 seconds.")
+                }
             case .blocked, .notStarted, .failed, .crashedAtStart, .cancelled:
                 Button {
                     store.retryLaunch(title.id)
@@ -127,7 +136,7 @@ private struct LaunchScreen: View {
 
     /// A missing bottle or program won't fix itself by retrying.
     private var isBlockedForGood: Bool {
-        if case .blocked(let problem) = state { problem != .whiskyNotReady } else { false }
+        if case .blocked(let problem) = state { problem != .whiskyNotReady && problem != .engineNotReady } else { false }
     }
 
     private var log: String? {
@@ -311,6 +320,7 @@ extension LaunchProblem {
     var message: LocalizedStringKey {
         switch self {
         case .whiskyNotReady: "Whisky isn't ready. See Settings."
+        case .engineNotReady: "MacHub's Windows engine isn't ready. See Settings › Windows Engine."
         case .bottleMissing(let name): "The bottle “\(name)” no longer exists in Whisky."
         case .bottleNotSetUp(let name): "The bottle “\(name)” has never been set up by Wine."
         case .executableMissing(let path): "The program is missing from its folder: \(path)"

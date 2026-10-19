@@ -357,6 +357,7 @@ struct TitleGrid: View {
                     .aspectRatio(176 / 330, contentMode: .fit)
                 }
                 .buttonStyle(CardButtonStyle())
+                .contextMenu { TitleActionsMenu.Items(title: title) }
                 .focusable(interactions: .activate)
                 .focusEffectDisabled()
                 .onHover { if $0 { store.spotlight = title } }

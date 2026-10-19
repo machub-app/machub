@@ -10,6 +10,8 @@ struct BottleInfo: Identifiable, Equatable, Sendable {
     let hasDriveC: Bool
     /// Whisky's "Controller & Input" options for this bottle (frankea fork); nil when the bottle predates them.
     var input: InputSettings? = nil
+    /// Whisky bottle, or a prefix of MacHub's own runtime.
+    var engine: EngineKind = .whisky
     var id: URL { url }
 
     /// Each option maps to an SDL variable Whisky sets when it starts Wine for this bottle.

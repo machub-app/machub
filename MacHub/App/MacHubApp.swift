@@ -17,7 +17,10 @@ enum Main {
 /// Receives Windows files opened from Finder ("Open With > MacHub", or by default if the user chose it).
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
-        MainActor.assumeIsolated { ImportInbox.shared.receive(urls) }
+        MainActor.assumeIsolated {
+            NexusLinkInbox.shared.receive(urls.filter { $0.scheme?.lowercased() == "nxm" })
+            ImportInbox.shared.receive(urls.filter { $0.isFileURL })
+        }
     }
 }
 

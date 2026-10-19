@@ -14,6 +14,7 @@ struct ModsView: View {
                 case .modrinth: MinecraftModsSection()
                 case .archiveImport(let folder): AssettoCorsaModsSection(gameFolder: folder)
                 case .externalOnly(let url): ExternalModsSection(url: url)
+                case .nexus(let domain): NexusModsSection(title: title, domain: domain)
                 case nil: Text("MacHub has no mod integration for this game.").foregroundStyle(Theme.textSecondary)
                 }
             }
@@ -58,6 +59,7 @@ struct ModsEntry: View {
         case .modrinth: "Browse and install mods"
         case .archiveImport: "Add cars and tracks"
         case .externalOnly: "Mods on the official site"
+        case .nexus: "Browse and install mods from Nexus Mods"
         }
     }
 
@@ -66,6 +68,7 @@ struct ModsEntry: View {
         case .modrinth: "Integrated with Modrinth: search, details, verified downloads, updates."
         case .archiveImport: "Manual import: download a .zip from a community site, MacHub installs it safely and can undo it."
         case .externalOnly: "External link only: MacHub doesn't install these mods yet."
+        case .nexus: "Search the Nexus Mods catalog, install in one click, turn mods on and off, remove them cleanly."
         }
     }
 }

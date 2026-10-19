@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum SidebarItem: Hashable, CaseIterable {
+enum SidebarItem: String, Hashable, CaseIterable {
     case home, discover, library, software, settings
 
     var label: LocalizedStringKey {
@@ -27,7 +27,8 @@ enum SidebarItem: Hashable, CaseIterable {
 /// Sidebar selection and search focus, owned by the app so menu commands (⌘1–4, ⌘F, ⌘,) can drive them.
 @MainActor @Observable
 final class AppNavigation {
-    var selection: SidebarItem? = .home
+    /// `-startPage settings` (a launch argument, never saved) opens a page directly: used for screenshots and tests.
+    var selection: SidebarItem? = UserDefaults.standard.string(forKey: "startPage").flatMap(SidebarItem.init(rawValue:)) ?? .home
     var searchFocusRequest = 0
     /// A Settings sub-page to open (the sidebar's controller chip, the Go menu).
     var settingsPageRequest: SettingsPage?
@@ -43,6 +44,7 @@ struct RootView: View {
     @State private var discover = DiscoverModel()
     @State private var controllers = ControllerMonitor()
     @State private var inbox = ImportInbox.shared
+    @State private var nexusInbox = NexusLinkInbox.shared
     @State private var importSession: InstallerImport?
     @State private var choosingInstaller = false
     @State private var path = NavigationPath()
@@ -109,6 +111,11 @@ struct RootView: View {
             if case .success(let url) = result { inbox.receive([url]) }
         }
         .onChange(of: inbox.pending) { openNextImport() }
+        .onChange(of: nexusInbox.pending) {
+            let links = nexusInbox.pending
+            nexusInbox.pending = []
+            for link in links { Task { await store.handle(link) } }
+        }
         .onChange(of: navigation.installRequest) { choosingInstaller = true }
         .toolbar(store.presentedLaunch == nil ? .automatic : .hidden, for: .windowToolbar)
         .searchable(text: $query, placement: .toolbar, prompt: Text("Search games and software"))
@@ -238,12 +245,17 @@ struct AmbientBackdrop: View {
 }
 
 /// Real Whisky state at a glance, at the foot of the sidebar.
+/// MacHub's Windows engine at a glance; opens Settings › Windows Engine.
 private struct WhiskyStatusChip: View {
     let action: () -> Void
     @Environment(LibraryStore.self) private var store
+    @AppStorage("settings.category") private var category = SettingsCategory.general
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            category = .engine
+            action()
+        } label: {
             HStack(spacing: 8) {
                 Circle().fill(color).frame(width: 8, height: 8)
                 VStack(alignment: .leading, spacing: 1) {
@@ -256,31 +268,34 @@ private struct WhiskyStatusChip: View {
             .background(Theme.surface, in: .rect(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .help("Open Whisky settings")
+        .help("Open the Windows engine settings")
     }
 
     private var color: Color {
-        switch store.report?.status {
-        case .ready: store.registeredBottles.isEmpty ? Compatibility.issues.tint : Compatibility.great.tint
-        case .outdated, .notFound, .invalidCustomPath: Compatibility.unsupported.tint
-        case nil: Theme.textSecondary
+        switch store.engineState {
+        case .ready: store.steamPrefix == nil ? Compatibility.issues.tint : Compatibility.great.tint
+        case .checking, .installing: Theme.textSecondary
+        case .notInstalled, .needsRosetta, .failed: Compatibility.unsupported.tint
         }
     }
 
     private var headline: LocalizedStringKey {
-        switch store.report?.status {
-        case .ready(let install): "Whisky \(install.version ?? "")"
-        case .outdated: "Whisky too old"
-        case .notFound: "Whisky not found"
-        case .invalidCustomPath: "Whisky path invalid"
-        case nil: "Checking Whisky…"
+        switch store.engineState {
+        case .ready(let version, _): "Windows engine \(version)"
+        case .checking: "Checking the engine…"
+        case .installing: "Installing the engine…"
+        case .notInstalled: "Windows engine not installed"
+        case .needsRosetta: "Rosetta 2 needed"
+        case .failed: "Windows engine problem"
         }
     }
 
     private var detail: LocalizedStringKey {
-        guard case .ready = store.report?.status else { return "Open Settings for details" }
-        let bottles = store.registeredBottles.count
-        return bottles == 0 ? "No bottles yet" : "\(bottles) bottle(s) · \(store.installedTitles.count) game(s)"
+        guard case .ready = store.engineState else { return "Open Settings for details" }
+        let environments = store.prefixes.count
+        return store.steamPrefix == nil
+            ? "\(environments) environment(s) · Steam not set up"
+            : "\(environments) environment(s) · \(store.installedTitles.count) game(s)"
     }
 }
 

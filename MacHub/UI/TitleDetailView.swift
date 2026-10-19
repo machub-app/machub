@@ -22,6 +22,7 @@ struct TitleDetailView: View {
                         about
                         RequirementsPanel(title: title, details: details, detailsLoaded: detailsLoaded)
                         ModsEntry(title: title)
+                        if title.install != nil, !title.isDemo { TitleGraphicsPanel(title: title) }
                         compatibility
                     }
                     .frame(maxWidth: 640, alignment: .leading)
@@ -65,6 +66,7 @@ struct TitleDetailView: View {
                 HStack(spacing: 12) {
                     PlayButton(title: title)
                         .keyboardShortcut(.defaultAction)
+                    TitleActionsMenu(title: title)
                     if let appID = title.steamAppID {
                         Link(destination: URL(string: "https://store.steampowered.com/app/\(appID)")!) {
                             Label("Steam page", systemImage: "arrow.up.right.square")
@@ -141,7 +143,7 @@ struct TitleDetailView: View {
     private var compatibilityNote: LocalizedStringKey {
         title.isDemo
             ? "Illustrative value for the demo. MacHub has no compatibility data source yet."
-            : "Not verified. MacHub has no compatibility source yet, so being on Steam or installed says nothing about how well it runs under Whisky."
+            : "Not verified. MacHub has no compatibility source yet, so being on Steam or installed says nothing about how well it runs on Mac."
     }
 
     private var similar: [Title] {
@@ -224,29 +226,29 @@ private struct RequirementsPanel: View {
             Text("Requirements").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
             VStack(alignment: .leading, spacing: 0) {
                 if title.isDemo {
-                    item(.info, "Demo title", "Sample content, not connected to Steam or Whisky.")
+                    item(.info, "Demo title", "Sample content, not connected to Steam.")
                 } else {
                     if title.kind == .game {
                         item(details != nil ? .ok : (detailsLoaded ? .missing : .unknown), "Listed on the Steam store",
                              details == nil && detailsLoaded ? "No store page returned for your region." : nil)
                         ownedItem
                     }
-                    item(title.install != nil ? .ok : .missing, "Installed in a Whisky bottle",
-                         title.bottle.map { "Bottle “\($0)”" })
+                    item(title.install != nil ? .ok : .missing, "Installed in a Windows environment",
+                         title.bottle.map { "Environment “\($0)”" })
                     if title.install != nil {
                         let count = title.install?.executables.count ?? 0
                         item(count > 0 ? .ok : .missing, "Windows executable detected",
                              count > 0 ? (title.install?.executables.prefix(3).joined(separator: ", ")) : "No .exe found in the install folder.")
                     }
-                    item(store.whiskyInstall != nil ? .ok : .missing, "Whisky ready",
-                         store.whiskyInstall?.version.map { "Whisky \($0)" })
+                    item(store.canRunWindows ? .ok : .missing, "Windows engine ready",
+                         store.runtime.map { "MacHub engine \($0.version)" } ?? store.whiskyInstall?.version.map { "Whisky \($0) (fallback)" })
                     if title.kind == .game, title.install == nil {
                         item(store.steamBottle != nil ? .ok : .missing, "Steam for Windows in a bottle",
-                             store.steamBottle?.name.map { "Bottle “\($0)”" } ?? "Needed to install Windows games. Create a bottle in Whisky and install Steam in it.")
+                             store.steamBottle?.name.map { "Environment “\($0)”" } ?? "Needed to install Windows games. Set it up in Settings › Windows Engine.")
                     }
-                    item(.unknown, "Runs under Whisky", "Not verified.")
+                    item(.unknown, "Runs on Mac", "Not verified.")
                     if details?.mac == true {
-                        item(.info, "Native macOS version", "Steam sells a Mac build of this game: Steam for Mac runs it without Whisky.")
+                        item(.info, "Native macOS version", "Steam sells a Mac build of this game: Steam for Mac runs it without Wine.")
                     }
                 }
             }
@@ -309,6 +311,68 @@ private struct ScreenshotRow: View {
                 .padding(.horizontal, Theme.gutter)
             }
             .scrollIndicators(.never)
+        }
+    }
+}
+
+/// The title's own graphics layer, applied at its next launch. Shows what the last launch actually used.
+private struct TitleGraphicsPanel: View {
+    let title: Title
+    @Environment(LibraryStore.self) private var store
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Launch & Graphics").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
+            VStack(alignment: .leading, spacing: 10) {
+                TextField("Launch options", text: Binding(
+                    get: { store.settings(for: title).arguments },
+                    set: { new in
+                        var settings = store.settings(for: title)
+                        settings.arguments = new
+                        store.updateSettings(settings, for: title)
+                    }), prompt: Text(verbatim: title.steamAppID == ModSupport.beamNGAppID ? "-gfx dx11" : "-windowed"))
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 380)
+                Text("Passed to the game at launch, like Steam's own launch options.")
+                    .font(.caption).foregroundStyle(Theme.textSecondary)
+                Picker("Direct3D", selection: Binding(
+                    get: { store.settings(for: title).graphics },
+                    set: { new in
+                        var settings = store.settings(for: title)
+                        settings.graphics = new
+                        store.updateSettings(settings, for: title)
+                    })) {
+                    ForEach(GraphicsChoice.allCases.filter { $0 != .d3dmetal }, id: \.self) { Text($0.label).tag($0) }
+                }
+                .frame(maxWidth: 380)
+                Text(store.settings(for: title).graphics.explanation).font(.callout).foregroundStyle(Theme.textSecondary)
+                if let last = store.performance[title.id]?.first {
+                    Label {
+                        Text("Last session: \(Int(last.averageFPS.rounded())) FPS on average, lows \(Int(last.lowFPS.rounded())) FPS, \(Int((last.duration / 60).rounded())) min")
+                    } icon: {
+                        Image(systemName: "speedometer")
+                    }
+                    .font(.callout).foregroundStyle(Theme.textPrimary)
+                    if let sessions = store.performance[title.id], sessions.count > 1 {
+                        Text("Previous: \(sessions.dropFirst().prefix(4).map { "\(Int($0.averageFPS.rounded()))" }.joined(separator: " · ")) FPS")
+                            .font(.caption).foregroundStyle(Theme.textSecondary)
+                    }
+                } else if !store.engineSettings.metalHUD {
+                    Text("Turn on the Metal performance overlay in Settings › Graphics to measure frame rates: MacHub then shows a summary here after each session.")
+                        .font(.caption).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                }
+                if let used = store.lastGraphics[title.id], !used.isEmpty {
+                    Text("Last launch: \(used.sorted { $0.key < $1.key }.map { "\($0.key) → \($0.value.rawValue)" }.joined(separator: ", "))")
+                        .font(.caption).foregroundStyle(Theme.textSecondary)
+                    if used.values.contains(where: { $0 == .dxmt || $0 == .dxvk }) {
+                        Text("Some games warn about “third-party libraries” (d3d11.dll, dxgi.dll) next to their executable: those are MacHub's graphics layer. The warning is safe to dismiss.")
+                            .font(.caption).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.surface, in: .rect(cornerRadius: 12))
         }
     }
 }
