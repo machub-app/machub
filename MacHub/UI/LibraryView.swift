@@ -149,12 +149,17 @@ struct LibraryView: View {
                 } else {
                     TitleGrid(titles: titles)
                 }
-                if store.steam.account != nil {
-                    // Steam gives apps the games an account owns, never the ones shared through Steam Families.
-                    Label("Games shared with you through Steam Families appear here once installed with Steam for Windows: Steam doesn't give apps the list of shared games. To get one, find it in Discover and click Install.",
-                          systemImage: "person.2")
-                        .font(.caption).foregroundStyle(Theme.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                if store.steam.account != nil, store.steamPrefix != nil {
+                    // Shared games reach MacHub through Steam for Windows' library cache, which Steam only updates
+                    // while it runs: after joining a family, it has to start once.
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                        Label("Missing games from your Steam Family? Start Steam for Windows once: it syncs the family library, and MacHub picks the shared games up within a minute.",
+                              systemImage: "person.2")
+                            .font(.caption).foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button("Start Steam for Windows") { Task { await store.startSteam() } }
+                            .controlSize(.small)
+                    }
                 }
                 if showDemo {
                     Text("Sample games").font(.title2.weight(.bold)).padding(.top, 12)

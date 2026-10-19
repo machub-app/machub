@@ -53,3 +53,23 @@ struct CompatibilityEstimateTests {
         #expect(SteamLibrary.libraryCacheAppIDs(steamRoot: root) == [570, 284160])
     }
 }
+
+struct StoreTrailerTests {
+    @Test func readsTrailersHighlightFirstWithMP4Fallback() throws {
+        let json = #"""
+        {"42": {"success": true, "data": {"name": "G", "type": "game",
+          "pc_requirements": [],
+          "movies": [
+            {"id": 1, "name": "Old &amp; small", "thumbnail": "https://e.com/1.jpg", "mp4": {"480": "https://e.com/1-480.mp4", "max": "https://e.com/1.mp4"}},
+            {"id": 2, "name": "Launch trailer", "thumbnail": "https://e.com/2.jpg", "hls_h264": "https://e.com/2.m3u8", "highlight": true},
+            {"id": 3, "name": "No stream"}
+          ]}}}
+        """#
+        let details = try #require(try SteamStore.parseDetails(Data(json.utf8), appID: 42))
+        #expect(details.trailers.map(\.id) == [2, 1])
+        #expect(details.trailers[0].stream.absoluteString == "https://e.com/2.m3u8")
+        #expect(details.trailers[1].stream.absoluteString == "https://e.com/1.mp4")
+        #expect(details.trailers[1].name == "Old & small")
+        #expect(details.directX == nil)   // pc_requirements as an empty array must not break parsing
+    }
+}

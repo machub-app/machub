@@ -3235,16 +3235,6 @@
         }
       }
     },
-    "Games shared with you through Steam Families appear here once installed with Steam for Windows: Steam doesn't give apps the list of shared games. To get one, find it in Discover and click Install.": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les jeux partagés avec toi via les Familles Steam apparaissent ici une fois installés avec Steam pour Windows : Steam ne donne pas la liste des jeux partagés aux applications. Pour en obtenir un, cherche-le dans Découvrir et clique sur Installer."
-          }
-        }
-      }
-    },
     "Games wait on thousands of Windows events per second. msync answers them with macOS's own Mach semaphores instead of asking Wine's server each time. Switch to Off only if a game hangs.": {
       "localizations": {
         "fr": {
@@ -5142,6 +5132,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "缺少命令：%@。请安装仍在维护的分支 (frankea/Whisky)。"
+          }
+        }
+      }
+    },
+    "Missing games from your Steam Family? Start Steam for Windows once: it syncs the family library, and MacHub picks the shared games up within a minute.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Des jeux de ta Famille Steam manquent ? Démarre Steam pour Windows une fois : il synchronise la bibliothèque familiale, et MacHub récupère les jeux partagés en moins d'une minute."
           }
         }
       }
@@ -8844,6 +8844,16 @@
         }
       }
     },
+    "Start Steam for Windows": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrer Steam pour Windows"
+          }
+        }
+      }
+    },
     "Start over": {
       "localizations": {
         "fr": {
@@ -10553,6 +10563,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Circuit"
+          }
+        }
+      }
+    },
+    "Trailers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bandes-annonces"
           }
         }
       }

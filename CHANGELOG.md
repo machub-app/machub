@@ -2,6 +2,14 @@
 
 All notable changes to MacHub. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.3.1] - 2026-10-20
+
+### Added
+- **Trailers** on game pages, played in MacHub (streamed from Steam only when you open one).
+
+### Fixed
+- The Library explained Steam Families games with outdated text. It now says what to do when shared games are missing (start Steam for Windows once so it syncs the family library) and has a button for it.
+
 ## [0.3.0] - 2026-10-19
 
 ### Added
