@@ -1,7 +1,16 @@
 # MacHub : état du projet
 
 Dernier audit : 18/10/2026. Règle : rien n'est marqué « vérifié » sans preuve. L'historique des étapes précédentes est dans git (`fad1f69` et antérieurs).
-Branche : `steam/library` (commit `fad1f69` + correctifs du profil non commités), base `main` @ `35b3883`.
+Branche : `steam/library` (commit `0f16068` + travail non commité, à reporter sur `engine/embedded-wine`), base `main` @ `35b3883`.
+
+## Mise à jour du 19/10/2026 : moteur Windows intégré
+
+Whisky n'est plus nécessaire : MacHub a son propre moteur (Wine 11.0 compilé par MacHub, DXMT, DXVK). Détail, état vérifié et limites : [`docs/ENGINE.md`](ENGINE.md). En bref :
+- ✅ Steam pour Windows installé, connecté, BeamNG.drive téléchargé et joué via DXMT (Direct3D 11 → Metal), une seule icône dans le Dock.
+- ✅ Options de lancement par jeu, choix Direct3D par jeu, résumé de performances (journal du compteur Metal), arrêt forcé de tous les programmes Windows.
+- ✅ Menu « … » d'un jeu : Mettre à jour, Vérifier les fichiers, Dossier, Propriétés Steam, Arrêter, Désinstaller (⏳ pas encore essayé sur un vrai jeu).
+- ✅ Catalogue Nexus Mods (BeamNG.drive, Cyberpunk 2077, Dead Island 2) : recherche vérifiée ; ⏳ installation à essayer avec ta clé API.
+- ✅ Tests : 95 unitaires. Interface entièrement traduite en français ; japonais et chinois à compléter.
 
 ## Vérifié (preuve à l'appui)
 
@@ -14,7 +23,7 @@ Branche : `steam/library` (commit `fad1f69` + correctifs du profil non commités
 | Catalogue | Vitrine, recherche paginée (50 par page), fiches (FR, prix, Metacritic, captures, version Mac native), cache disque, pacing, états 429 / hors ligne |
 | Détection Whisky | Fork 3.7.0 `ready`, Wine 3.1.1, DXMT 0.80, DXVK 1.10.3 |
 | Erreurs du CLI Whisky | Codes 64 / 1 typés et vérifiés sur le vrai `WhiskyCmd` |
-| Localisation | en / fr / ja / zh-Hans, 0 chaîne manquante |
+| Localisation | en / fr complets (19/10/2026) ; ja / zh-Hans à jour seulement pour les écrans d'avant le moteur intégré |
 
 ## Spike P0-3 « MacHub Steam » (18/10/2026, en cours)
 
@@ -143,6 +152,6 @@ Rien n'est commité. Build ✅, tests unitaires existants **61/61** ✅. **Aucun
 | Mods Assetto Corsa (import .zip/dossier, contrôle zip-slip et liens symboliques, sauvegarde/restauration) | ⚠️ compilé, non testé ; capture de la page échouée | — |
 | BeamNG.drive | lien externe uniquement | — |
 | Logo / icône | ❌ pas commencé | — |
-| Traductions des nouveaux textes (fr/ja/zh-Hans) | ❌ pas faites : nouveaux écrans en anglais | capture |
+| Traductions des nouveaux textes (fr/ja/zh-Hans) | ✅ fr fait le 19/10/2026 ; ❌ ja/zh-Hans | catalogue `Localizable.xcstrings` |
 
 Reste à faire : tests unitaires (classification manette, InputChecklist, LaunchRunner/LaunchTimeline, WindowsFile, BottleProvisioner.environment, Modrinth parsing, FolderModInstaller, ArchiveModImporter.validate) ; vérifier capture Minecraft ; logo ; traductions ; DESIGN.md.

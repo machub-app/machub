@@ -4,6 +4,106 @@
     "%@": {
       "shouldTranslate": false
     },
+    "%@ closed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ s'est fermé"
+          }
+        }
+      }
+    },
+    "%@ closed right after starting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ s'est fermé juste après son démarrage"
+          }
+        }
+      }
+    },
+    "%@ connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ connectée"
+          }
+        }
+      }
+    },
+    "%@ didn't start": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ n'a pas démarré"
+          }
+        }
+      }
+    },
+    "%@ disconnected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ déconnectée"
+          }
+        }
+      }
+    },
+    "%@ installer, %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installateur %@, %@"
+          }
+        }
+      }
+    },
+    "%@ is in your library. Play opens it in its bottle.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est dans ta bibliothèque. Jouer l'ouvre dans son environnement."
+          }
+        }
+      }
+    },
+    "%@ is open": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est ouvert"
+          }
+        }
+      }
+    },
+    "%@ is running": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est en cours"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        }
+      }
+    },
     "%@ — %@": {
       "shouldTranslate": false
     },
@@ -25,6 +125,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 个容器 · %lld 款游戏"
+          }
+        }
+      }
+    },
+    "%lld controllers connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld manettes connectées"
+          }
+        }
+      }
+    },
+    "%lld environment(s) · %lld game(s)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld environnement(s) · %lld jeu(x)"
+          }
+        }
+      }
+    },
+    "%lld environment(s) · Steam not set up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld environnement(s) · Steam non installé"
           }
         }
       }
@@ -73,6 +203,46 @@
         }
       }
     },
+    "%lld of %lld checked": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sur %lld vérifiés"
+          }
+        }
+      }
+    },
+    "4 GB memory for 32-bit games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4 Go de mémoire pour les jeux 32 bits"
+          }
+        }
+      }
+    },
+    "A bottle is a separate Windows environment managed by Whisky. A dedicated bottle keeps programs apart from your games.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une bouteille est un environnement Windows séparé, géré par Whisky. Une bouteille dédiée garde les programmes à l'écart de tes jeux."
+          }
+        }
+      }
+    },
+    "A fullscreen game takes over the display, like on Windows. Turn off to keep other displays and notifications visible.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un jeu en plein écran prend tout l'écran, comme sur Windows. Désactive pour garder les autres écrans et les notifications visibles."
+          }
+        }
+      }
+    },
     "A native macOS version exists on Steam: use Steam for Mac rather than Whisky.": {
       "localizations": {
         "fr": {
@@ -95,6 +265,26 @@
         }
       }
     },
+    "A native macOS version exists on Steam: use Steam for Mac rather than Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une version macOS native existe sur Steam : utilise Steam pour Mac plutôt que Wine."
+          }
+        }
+      }
+    },
+    "A text summary of the Mac, the engine and Whisky (no account data) to paste in a bug report.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un résumé texte du Mac, du moteur et de Whisky (sans données de compte) à coller dans un rapport de bug."
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "fr": {
@@ -113,6 +303,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "简介"
+          }
+        }
+      }
+    },
+    "Account": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compte"
           }
         }
       }
@@ -205,6 +405,16 @@
         }
       }
     },
+    "Add a car or track…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une voiture ou un circuit…"
+          }
+        }
+      }
+    },
     "Add a key in Settings": {
       "localizations": {
         "fr": {
@@ -227,6 +437,36 @@
         }
       }
     },
+    "Add cars and tracks": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter des voitures et des circuits"
+          }
+        }
+      }
+    },
+    "Add to MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter à MacHub"
+          }
+        }
+      }
+    },
+    "Add your Nexus Mods API key in Settings › Mods.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoute ta clé API Nexus Mods dans Réglages › Mods."
+          }
+        }
+      }
+    },
     "Add your Steam Web API key to check.": {
       "localizations": {
         "fr": {
@@ -245,6 +485,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "添加 Steam Web API 密钥以检查。"
+          }
+        }
+      }
+    },
+    "Added outside MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouté en dehors de MacHub"
+          }
+        }
+      }
+    },
+    "Added to Software": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouté aux Logiciels"
+          }
+        }
+      }
+    },
+    "Advanced": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avancé"
           }
         }
       }
@@ -293,6 +563,26 @@
         }
       }
     },
+    "All categories": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes les catégories"
+          }
+        }
+      }
+    },
+    "All controls received by macOS": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes les commandes reçues par macOS"
+          }
+        }
+      }
+    },
     "All genres": {
       "localizations": {
         "fr": {
@@ -311,6 +601,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "所有类型"
+          }
+        }
+      }
+    },
+    "Also installs what it requires: %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installe aussi ce dont il a besoin : %@."
+          }
+        }
+      }
+    },
+    "An installer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un installateur"
+          }
+        }
+      }
+    },
+    "An update is available. Steam applies it at the next launch, or choose Update Now in the … menu.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une mise à jour est disponible. Steam l'applique au prochain lancement, ou choisis « Mettre à jour » dans le menu …."
           }
         }
       }
@@ -359,6 +679,26 @@
         }
       }
     },
+    "Apple's translator, required for DirectX 12. Needs the Game Porting Toolkit.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le traducteur d'Apple, indispensable pour DirectX 12. Nécessite le Game Porting Toolkit."
+          }
+        }
+      }
+    },
+    "Asks the game to close, then forces it after 10 seconds.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande au jeu de se fermer, puis le force au bout de 10 secondes."
+          }
+        }
+      }
+    },
     "Audio player": {
       "localizations": {
         "fr": {
@@ -377,6 +717,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "音频播放器"
+          }
+        }
+      }
+    },
+    "Automatic (recommended)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatique (recommandé)"
           }
         }
       }
@@ -403,6 +753,76 @@
         }
       }
     },
+    "Automatic reads which DirectX version each game uses: DirectX 10/11 → DXMT, DirectX 9 and older → Wine's own renderer. Each game can override this on its page. MacHub puts the chosen DLLs next to the game and never replaces DLLs the game ships itself.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatique lit la version de DirectX qu'utilise chaque jeu : DirectX 10/11 → DXMT, DirectX 9 et plus ancien → le rendu de Wine. Chaque jeu peut choisir autre chose sur sa page. MacHub place les DLL choisies à côté du jeu et ne remplace jamais celles que le jeu fournit lui-même."
+          }
+        }
+      }
+    },
+    "Available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponible"
+          }
+        }
+      }
+    },
+    "Avoid ticking options that launch the program at the end: MacHub waits for the installer to close.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Évite de cocher les options qui lancent le programme à la fin : MacHub attend que l'installateur se ferme."
+          }
+        }
+      }
+    },
+    "Back to MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour à MacHub"
+          }
+        }
+      }
+    },
+    "Back to the title": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour à la fiche"
+          }
+        }
+      }
+    },
+    "Bluetooth": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth"
+          }
+        }
+      }
+    },
+    "Bluetooth trouble: try a USB cable. Some controllers expose more features over USB.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Souci de Bluetooth : essaie un câble USB. Certaines manettes offrent plus de fonctions en USB."
+          }
+        }
+      }
+    },
     "Bottle": {
       "localizations": {
         "fr": {
@@ -421,6 +841,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "容器"
+          }
+        }
+      }
+    },
+    "Bottle “%@”": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bouteille « %@ »"
           }
         }
       }
@@ -469,6 +899,36 @@
         }
       }
     },
+    "Browse and install mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcourir et installer des mods"
+          }
+        }
+      }
+    },
+    "Browse and install mods from Nexus Mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcourir et installer des mods de Nexus Mods"
+          }
+        }
+      }
+    },
+    "Browsing is open to everyone. To download, add your free Nexus Mods API key in Settings › Mods (nexusmods.com › Settings › API keys).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La navigation est ouverte à tous. Pour télécharger, ajoute ta clé API Nexus Mods gratuite dans Réglages › Mods (nexusmods.com › Settings › API keys)."
+          }
+        }
+      }
+    },
     "Bundle ID": {
       "localizations": {
         "fr": {
@@ -487,6 +947,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bundle ID"
+          }
+        }
+      }
+    },
+    "Button test": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test des boutons"
+          }
+        }
+      }
+    },
+    "Can't read this file": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lire ce fichier"
+          }
+        }
+      }
+    },
+    "Can't start %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lancer %@"
           }
         }
       }
@@ -513,6 +1003,36 @@
         }
       }
     },
+    "Capture displays in fullscreen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capturer les écrans en plein écran"
+          }
+        }
+      }
+    },
+    "Car": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voiture"
+          }
+        }
+      }
+    },
+    "Cars and tracks appear in the game's own launcher or in Content Manager. MacHub hasn't verified that a given mod runs well under Whisky.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les voitures et circuits apparaissent dans le lanceur du jeu ou dans Content Manager. MacHub n'a pas vérifié qu'un mod donné fonctionne bien sous Whisky."
+          }
+        }
+      }
+    },
     "Casual": {
       "localizations": {
         "fr": {
@@ -531,6 +1051,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "休闲"
+          }
+        }
+      }
+    },
+    "Catalog": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catalogue"
+          }
+        }
+      }
+    },
+    "Catalog by Nexus Mods (nexusmods.com). Mods are made by their authors; check each page for requirements.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catalogue de Nexus Mods (nexusmods.com). Les mods sont faits par leurs auteurs : vérifie les prérequis sur chaque page."
+          }
+        }
+      }
+    },
+    "Categories": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catégories"
+          }
+        }
+      }
+    },
+    "Category": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catégorie"
           }
         }
       }
@@ -557,6 +1117,66 @@
         }
       }
     },
+    "Check Again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier à nouveau"
+          }
+        }
+      }
+    },
+    "Check again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier à nouveau"
+          }
+        }
+      }
+    },
+    "Check for updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des mises à jour"
+          }
+        }
+      }
+    },
+    "Check in Windows": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier dans Windows"
+          }
+        }
+      }
+    },
+    "Check the connected controllers again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revérifier les manettes connectées"
+          }
+        }
+      }
+    },
+    "Checked": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifié"
+          }
+        }
+      }
+    },
     "Checking Whisky…": {
       "localizations": {
         "fr": {
@@ -575,6 +1195,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在检查 Whisky…"
+          }
+        }
+      }
+    },
+    "Checking and installing…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification et installation…"
+          }
+        }
+      }
+    },
+    "Checking the archive…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de l'archive…"
+          }
+        }
+      }
+    },
+    "Checking the bottle": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de la bouteille"
+          }
+        }
+      }
+    },
+    "Checking the bottle…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de la bouteille…"
+          }
+        }
+      }
+    },
+    "Checking the engine…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification du moteur…"
           }
         }
       }
@@ -623,6 +1293,46 @@
         }
       }
     },
+    "Checking your Nexus Mods account…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de ton compte Nexus Mods…"
+          }
+        }
+      }
+    },
+    "Checking…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification…"
+          }
+        }
+      }
+    },
+    "Choose another…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un autre…"
+          }
+        }
+      }
+    },
+    "Choose the program…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir le programme…"
+          }
+        }
+      }
+    },
     "Choose…": {
       "localizations": {
         "fr": {
@@ -667,6 +1377,36 @@
         }
       }
     },
+    "Close": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
+          }
+        }
+      }
+    },
+    "Closes Steam, games and every other Windows program MacHub started, including ones that stopped responding.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferme Steam, les jeux et tous les programmes Windows lancés par MacHub, y compris ceux qui ne répondent plus."
+          }
+        }
+      }
+    },
+    "Closes every process of this title, and forces those that don't close within 8 seconds.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferme tous les processus de ce titre et force ceux qui ne se ferment pas en 8 secondes."
+          }
+        }
+      }
+    },
     "Co-op": {
       "localizations": {
         "fr": {
@@ -689,6 +1429,16 @@
         }
       }
     },
+    "Come back here: it appears on its own.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reviens ici : il apparaîtra tout seul."
+          }
+        }
+      }
+    },
     "Coming soon": {
       "localizations": {
         "fr": {
@@ -707,6 +1457,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "即将推出"
+          }
+        }
+      }
+    },
+    "Command Prompt": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invite de commandes"
+          }
+        }
+      }
+    },
+    "Command keys act as Ctrl": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les touches Commande font Ctrl"
           }
         }
       }
@@ -777,6 +1547,16 @@
         }
       }
     },
+    "Compatibility not verified: it may or may not run on Mac.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compatibilité non vérifiée : il peut fonctionner sur Mac, ou pas."
+          }
+        }
+      }
+    },
     "Compatibility not verified: it may or may not run under Whisky.": {
       "localizations": {
         "fr": {
@@ -795,6 +1575,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "兼容性未验证：在 Whisky 下可能运行，也可能无法运行。"
+          }
+        }
+      }
+    },
+    "Compile DXVK shaders in the background": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compiler les shaders DXVK en arrière-plan"
+          }
+        }
+      }
+    },
+    "Components and Licenses": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composants et licences"
           }
         }
       }
@@ -887,6 +1687,46 @@
         }
       }
     },
+    "Connect a controller": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecte une manette"
+          }
+        }
+      }
+    },
+    "Connect and test controllers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecter et tester les manettes"
+          }
+        }
+      }
+    },
+    "Connect, test and check in Windows games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecter, tester et vérifier dans les jeux Windows"
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connectée"
+          }
+        }
+      }
+    },
     "Continue": {
       "localizations": {
         "fr": {
@@ -905,6 +1745,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "继续游玩"
+          }
+        }
+      }
+    },
+    "Controller compatibility mode on": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode de compatibilité manette activé"
+          }
+        }
+      }
+    },
+    "Controller connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manette connectée"
+          }
+        }
+      }
+    },
+    "Controller mapping off": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correspondance des manettes désactivée"
+          }
+        }
+      }
+    },
+    "Controllers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manettes"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier"
           }
         }
       }
@@ -949,6 +1839,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法检查。"
+          }
+        }
+      }
+    },
+    "Couldn't copy the toolkit: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de copier le toolkit : %@"
+          }
+        }
+      }
+    },
+    "Couldn't download Steam's installer: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de télécharger l'installateur de Steam : %@"
           }
         }
       }
@@ -1019,6 +1929,96 @@
         }
       }
     },
+    "Create Windows Environment": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer un environnement Windows"
+          }
+        }
+      }
+    },
+    "Create profile": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer le profil"
+          }
+        }
+      }
+    },
+    "Create the Fabric profile…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer le profil Fabric…"
+          }
+        }
+      }
+    },
+    "Create “%@” and continue": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer « %@ » et continuer"
+          }
+        }
+      }
+    },
+    "Create “MacHub · Fabric %@”?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer « MacHub · Fabric %@ » ?"
+          }
+        }
+      }
+    },
+    "Creating the Steam environment…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Création de l'environnement Steam…"
+          }
+        }
+      }
+    },
+    "Creating the bottle…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Création de la bouteille…"
+          }
+        }
+      }
+    },
+    "Creating…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Création…"
+          }
+        }
+      }
+    },
+    "Custom": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personnalisé"
+          }
+        }
+      }
+    },
     "Custom WhiskyCmd path": {
       "localizations": {
         "fr": {
@@ -1063,6 +2063,96 @@
         }
       }
     },
+    "D-pad down": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix bas"
+          }
+        }
+      }
+    },
+    "D-pad left": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix gauche"
+          }
+        }
+      }
+    },
+    "D-pad right": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix droite"
+          }
+        }
+      }
+    },
+    "D-pad up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Croix haut"
+          }
+        }
+      }
+    },
+    "D3DMetal": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D3DMetal"
+          }
+        }
+      }
+    },
+    "D3DMetal (Apple)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D3DMetal (Apple)"
+          }
+        }
+      }
+    },
+    "DXMT (Metal)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DXMT (Metal)"
+          }
+        }
+      }
+    },
+    "DXVK (Vulkan)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DXVK (Vulkan)"
+          }
+        }
+      }
+    },
+    "DXVK overlay": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compteur DXVK"
+          }
+        }
+      }
+    },
     "Deckbuilder": {
       "localizations": {
         "fr": {
@@ -1081,6 +2171,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "卡牌构筑"
+          }
+        }
+      }
+    },
+    "Default for titles": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Par défaut pour les jeux"
           }
         }
       }
@@ -1151,6 +2251,16 @@
         }
       }
     },
+    "Demo title. It can't be installed or launched.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titre de démonstration. Il ne peut être ni installé ni lancé."
+          }
+        }
+      }
+    },
     "Demo titles let you explore MacHub before your own games are installed. They are labelled and can't be launched.": {
       "localizations": {
         "fr": {
@@ -1191,6 +2301,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "简介尚未加载。商店信息将在后续版本中提供。"
+          }
+        }
+      }
+    },
+    "Detailed (slower)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Détaillé (plus lent)"
+          }
+        }
+      }
+    },
+    "Detailed logs help find why a game fails, but writing them costs frame rate. Logs stay on this Mac, in ~/Library/Logs/app.machub.MacHub.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les journaux détaillés aident à comprendre pourquoi un jeu échoue, mais les écrire coûte des images par seconde. Ils restent sur ce Mac, dans ~/Library/Logs/app.machub.MacHub."
           }
         }
       }
@@ -1283,6 +2413,56 @@
         }
       }
     },
+    "Direct3D": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct3D"
+          }
+        }
+      }
+    },
+    "Direct3D 10/11 straight to Metal: the fastest path for DirectX 11 games on Apple silicon.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct3D 10/11 traduit directement en Metal : le chemin le plus rapide pour les jeux DirectX 11 sur puce Apple."
+          }
+        }
+      }
+    },
+    "Direct3D 10/11 through Vulkan and MoltenVK: try it when a game misbehaves on DXMT.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct3D 10/11 via Vulkan et MoltenVK : à essayer si un jeu se comporte mal avec DXMT."
+          }
+        }
+      }
+    },
+    "DirectX 12 (D3DMetal)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DirectX 12 (D3DMetal)"
+          }
+        }
+      }
+    },
+    "DirectX 12 games need Apple's D3DMetal, part of the Game Porting Toolkit. Apple doesn't let MacHub include it: download it from Apple with your Apple Account (free), open the disk image, then point MacHub to it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les jeux DirectX 12 ont besoin de D3DMetal d'Apple, inclus dans le Game Porting Toolkit. Apple ne permet pas à MacHub de l'intégrer : télécharge-le chez Apple avec ton compte Apple (gratuit), ouvre l'image disque, puis indique-la à MacHub."
+          }
+        }
+      }
+    },
     "Disconnect Steam": {
       "localizations": {
         "fr": {
@@ -1327,6 +2507,166 @@
         }
       }
     },
+    "Display": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affichage"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminé"
+          }
+        }
+      }
+    },
+    "Download Engine %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Télécharger le moteur %@"
+          }
+        }
+      }
+    },
+    "Download failed: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec du téléchargement : %@"
+          }
+        }
+      }
+    },
+    "Downloaded from the internet. Only run installers from publishers you trust: a Windows program in a bottle can read your files.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargé depuis Internet. N'exécute que les installateurs d'éditeurs de confiance : un programme Windows dans une bouteille peut lire tes fichiers."
+          }
+        }
+      }
+    },
+    "Downloading Steam's installer from Valve…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement de l'installateur de Steam chez Valve…"
+          }
+        }
+      }
+    },
+    "Downloading in Steam…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement dans Steam…"
+          }
+        }
+      }
+    },
+    "Downloading in Steam… %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement dans Steam… %@"
+          }
+        }
+      }
+    },
+    "Downloading…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement…"
+          }
+        }
+      }
+    },
+    "Downloading… %@ of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement… %@ sur %@"
+          }
+        }
+      }
+    },
+    "Downloads": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargements"
+          }
+        }
+      }
+    },
+    "Downloads on Modrinth": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargements sur Modrinth"
+          }
+        }
+      }
+    },
+    "DualSense (PS5)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DualSense (PS5)"
+          }
+        }
+      }
+    },
+    "DualShock 4 (PS4)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DualShock 4 (PS4)"
+          }
+        }
+      }
+    },
+    "Each environment is a separate Windows installation (a Wine prefix): settings, saves and installed programs stay inside it and never mix with another. Creating one takes about a minute.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque environnement est une installation Windows séparée (un préfixe Wine) : réglages, sauvegardes et programmes installés restent à l'intérieur et ne se mélangent jamais avec un autre. En créer un prend environ une minute."
+          }
+        }
+      }
+    },
+    "Enable %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer %@"
+          }
+        }
+      }
+    },
     "End of results": {
       "localizations": {
         "fr": {
@@ -1345,6 +2685,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有更多结果"
+          }
+        }
+      }
+    },
+    "Engine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur"
+          }
+        }
+      }
+    },
+    "Errors (recommended)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erreurs (recommandé)"
+          }
+        }
+      }
+    },
+    "Everything inside it goes with it (installed programs, saves not synced to the cloud). You can still restore it from the Trash.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout ce qu'il contient part avec lui (programmes installés, sauvegardes non synchronisées dans le cloud). Tu peux encore le récupérer dans la Corbeille."
+          }
+        }
+      }
+    },
+    "Exited with code %d. Log: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermé avec le code %d. Journal : %@"
+          }
+        }
+      }
+    },
+    "Expected engine %@, the archive holds %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur %@ attendu, l'archive contient %@"
           }
         }
       }
@@ -1371,6 +2761,46 @@
         }
       }
     },
+    "Expose AVX instructions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exposer les instructions AVX"
+          }
+        }
+      }
+    },
+    "External link only. This game's official mod repository has no documented API MacHub could use, so MacHub doesn't search or install from it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lien externe uniquement. Le dépôt officiel de mods de ce jeu n'a pas d'API documentée que MacHub pourrait utiliser : MacHub n'y cherche ni n'y installe rien."
+          }
+        }
+      }
+    },
+    "External link only: MacHub doesn't install these mods yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lien externe uniquement : MacHub n'installe pas encore ces mods."
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec"
+          }
+        }
+      }
+    },
     "Farming": {
       "localizations": {
         "fr": {
@@ -1389,6 +2819,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "农场"
+          }
+        }
+      }
+    },
+    "File not found": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichier introuvable"
+          }
+        }
+      }
+    },
+    "Files": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichiers"
           }
         }
       }
@@ -1437,6 +2887,36 @@
         }
       }
     },
+    "Follow the installer's own window to the end. MacHub waits until it closes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suis la fenêtre de l'installateur jusqu'au bout. MacHub attend qu'elle se ferme."
+          }
+        }
+      }
+    },
+    "For your profile": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour ton profil"
+          }
+        }
+      }
+    },
+    "Force Quit All Windows Programs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forcer la fermeture de tous les programmes Windows"
+          }
+        }
+      }
+    },
     "Free": {
       "localizations": {
         "fr": {
@@ -1455,6 +2935,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "免费"
+          }
+        }
+      }
+    },
+    "Free: downloads via “Mod Manager Download”": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuit : téléchargements via « Mod Manager Download »"
           }
         }
       }
@@ -1481,6 +2971,56 @@
         }
       }
     },
+    "From %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis %@"
+          }
+        }
+      }
+    },
+    "From Downloads": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis Téléchargements"
+          }
+        }
+      }
+    },
+    "Full gamepad: two sticks and triggers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manette complète : deux sticks et gâchettes"
+          }
+        }
+      }
+    },
+    "Full page on Modrinth": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Page complète sur Modrinth"
+          }
+        }
+      }
+    },
+    "Fullscreen": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plein écran"
+          }
+        }
+      }
+    },
     "Game": {
       "localizations": {
         "fr": {
@@ -1499,6 +3039,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "游戏"
+          }
+        }
+      }
+    },
+    "Game Controllers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrôleurs de jeu"
+          }
+        }
+      }
+    },
+    "Game Controllers settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages des contrôleurs de jeu"
           }
         }
       }
@@ -1525,6 +3085,16 @@
         }
       }
     },
+    "Game started": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeu démarré"
+          }
+        }
+      }
+    },
     "Games": {
       "localizations": {
         "fr": {
@@ -1543,6 +3113,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "游戏"
+          }
+        }
+      }
+    },
+    "Games often bind Alt (Option on a Mac). With Command as Ctrl, ⌘C and ⌘V copy and paste in Windows programs, but ⌘Q and ⌘Tab reach the game instead of macOS.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les jeux utilisent souvent Alt (Option sur Mac). Avec Commande en Ctrl, ⌘C et ⌘V copient et collent dans les programmes Windows, mais ⌘Q et ⌘Tab vont au jeu au lieu de macOS."
+          }
+        }
+      }
+    },
+    "Games wait on thousands of Windows events per second. msync answers them with macOS's own Mach semaphores instead of asking Wine's server each time. Switch to Off only if a game hangs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les jeux attendent des milliers d'événements Windows par seconde. msync y répond avec les sémaphores Mach de macOS au lieu d'interroger le serveur de Wine à chaque fois. Passe sur Désactivé seulement si un jeu se bloque."
           }
         }
       }
@@ -1701,6 +3291,36 @@
         }
       }
     },
+    "Get it from Apple": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le télécharger chez Apple"
+          }
+        }
+      }
+    },
+    "Get my key": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obtenir ma clé"
+          }
+        }
+      }
+    },
+    "Give them back to Whisky": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les rendre à Whisky"
+          }
+        }
+      }
+    },
     "Go": {
       "localizations": {
         "fr": {
@@ -1723,6 +3343,76 @@
         }
       }
     },
+    "Graphics": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Graphismes"
+          }
+        }
+      }
+    },
+    "HIDAPI off (SDL_JOYSTICK_HIDAPI=0)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HIDAPI désactivé (SDL_JOYSTICK_HIDAPI=0)"
+          }
+        }
+      }
+    },
+    "Hide": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer"
+          }
+        }
+      }
+    },
+    "Hold Create and the PS button until the light bar flashes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintiens Create et le bouton PS jusqu'à ce que la barre lumineuse clignote."
+          }
+        }
+      }
+    },
+    "Hold Share and the PS button until the light bar flashes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintiens Share et le bouton PS jusqu'à ce que la barre lumineuse clignote."
+          }
+        }
+      }
+    },
+    "Hold the pairing button on top until the Xbox button flashes quickly.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintiens le bouton d'appairage du dessus jusqu'à ce que le bouton Xbox clignote vite."
+          }
+        }
+      }
+    },
+    "Hold the small sync button on top until the lights scroll.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintiens le petit bouton de synchronisation du dessus jusqu'à ce que les voyants défilent."
+          }
+        }
+      }
+    },
     "Home": {
       "localizations": {
         "fr": {
@@ -1741,6 +3431,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "首页"
+          }
+        }
+      }
+    },
+    "If the game doesn't respond": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si le jeu ne répond pas"
           }
         }
       }
@@ -1785,6 +3485,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "图像编辑器"
+          }
+        }
+      }
+    },
+    "Imported. Routing DirectX 12 games to D3DMetal isn't enabled yet: MacHub will turn it on once it has been tested on real games. Until then they run on DXMT.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importé. L'envoi des jeux DirectX 12 vers D3DMetal n'est pas encore activé : MacHub l'activera une fois testé sur de vrais jeux. D'ici là, ils tournent sur DXMT."
+          }
+        }
+      }
+    },
+    "Import…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer…"
+          }
+        }
+      }
+    },
+    "In Windows games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans les jeux Windows"
+          }
+        }
+      }
+    },
+    "In progress": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En cours"
+          }
+        }
+      }
+    },
+    "In the Minecraft Launcher, pick the “%@” profile to play with these mods.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans le Minecraft Launcher, choisis le profil « %@ » pour jouer avec ces mods."
+          }
+        }
+      }
+    },
+    "In use": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisé"
           }
         }
       }
@@ -1855,6 +3615,66 @@
         }
       }
     },
+    "Input when unfocused (SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commandes en arrière-plan (SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1)"
+          }
+        }
+      }
+    },
+    "Install": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer"
+          }
+        }
+      }
+    },
+    "Install Steam for Windows": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer Steam pour Windows"
+          }
+        }
+      }
+    },
+    "Install a Windows Program…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer un programme Windows…"
+          }
+        }
+      }
+    },
+    "Install a Windows program, or pin one in Whisky: it shows up here.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installe un programme Windows, ou épingle-le dans Whisky : il apparaîtra ici."
+          }
+        }
+      }
+    },
+    "Install a Windows program…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer un programme Windows…"
+          }
+        }
+      }
+    },
     "Install a game in a Whisky bottle, or turn demo titles back on in Settings.": {
       "localizations": {
         "fr": {
@@ -1921,6 +3741,16 @@
         }
       }
     },
+    "Install from File…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer depuis un fichier…"
+          }
+        }
+      }
+    },
     "Install in “%@”": {
       "localizations": {
         "fr": {
@@ -1939,6 +3769,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装到“%@”"
+          }
+        }
+      }
+    },
+    "Install the Minecraft Launcher from minecraft.net and play once: MacHub then manages mods for it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installe le Minecraft Launcher depuis minecraft.net et joue une fois : MacHub gérera ensuite ses mods."
           }
         }
       }
@@ -1987,6 +3827,46 @@
         }
       }
     },
+    "Installed %@ (%lld files)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ installé (%lld fichiers)"
+          }
+        }
+      }
+    },
+    "Installed (%lld)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installés (%lld)"
+          }
+        }
+      }
+    },
+    "Installed Versions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versions installées"
+          }
+        }
+      }
+    },
+    "Installed by MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installé par MacHub"
+          }
+        }
+      }
+    },
     "Installed in Whisky": {
       "localizations": {
         "fr": {
@@ -2027,6 +3907,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已安装到 Whisky 容器"
+          }
+        }
+      }
+    },
+    "Installed in a Windows environment": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installé dans un environnement Windows"
           }
         }
       }
@@ -2075,6 +3965,126 @@
         }
       }
     },
+    "Installer running": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installateur en cours"
+          }
+        }
+      }
+    },
+    "Installing Steam for Windows…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation de Steam pour Windows…"
+          }
+        }
+      }
+    },
+    "Installing the engine…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation du moteur…"
+          }
+        }
+      }
+    },
+    "Integrated with Modrinth: search, details, verified downloads, updates.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intégré à Modrinth : recherche, détails, téléchargements vérifiés, mises à jour."
+          }
+        }
+      }
+    },
+    "It appears here within a few seconds.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il apparaît ici en quelques secondes."
+          }
+        }
+      }
+    },
+    "Its file goes to the Trash, so you can still get it back.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son fichier va à la Corbeille : tu peux encore le récupérer."
+          }
+        }
+      }
+    },
+    "Its file goes to the Trash. These mods need it and may stop working: %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son fichier va à la Corbeille. Ces mods en ont besoin et risquent de ne plus fonctionner : %@."
+          }
+        }
+      }
+    },
+    "Its files go to the Trash, and any game file it replaced is put back.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ses fichiers vont à la Corbeille, et les fichiers du jeu qu'il remplaçait sont remis en place."
+          }
+        }
+      }
+    },
+    "Its process stopped after %lld s. It most likely crashed while starting; the technical details may say why.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son processus s'est arrêté au bout de %lld s. Il a sans doute planté au démarrage ; les détails techniques diront peut-être pourquoi."
+          }
+        }
+      }
+    },
+    "Its process was detected. Its window may take a few more seconds to appear.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son processus a été détecté. Sa fenêtre peut mettre encore quelques secondes à s'afficher."
+          }
+        }
+      }
+    },
+    "Its processes have ended.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ses processus sont terminés."
+          }
+        }
+      }
+    },
+    "Its window opens on your Mac in a moment.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sa fenêtre s'ouvre sur ton Mac dans un instant."
+          }
+        }
+      }
+    },
     "Key refused by Steam": {
       "localizations": {
         "fr": {
@@ -2093,6 +4103,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 拒绝了该密钥"
+          }
+        }
+      }
+    },
+    "Keyboard": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clavier"
+          }
+        }
+      }
+    },
+    "Keyboard & Mouse": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clavier et souris"
           }
         }
       }
@@ -2141,6 +4171,56 @@
         }
       }
     },
+    "Last launch: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernier lancement : %@"
+          }
+        }
+      }
+    },
+    "Last session: %lld FPS on average, lows %lld FPS, %lld min": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière session : %lld FPS en moyenne, creux à %lld FPS, %lld min"
+          }
+        }
+      }
+    },
+    "Latest": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière"
+          }
+        }
+      }
+    },
+    "Launch & Graphics": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancement et graphismes"
+          }
+        }
+      }
+    },
+    "Launch options": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options de lancement"
+          }
+        }
+      }
+    },
     "Launcher": {
       "localizations": {
         "fr": {
@@ -2185,6 +4265,16 @@
         }
       }
     },
+    "Less than 2 GB is free on this disk. The installation may fail.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moins de 2 Go libres sur ce disque. L'installation risque d'échouer."
+          }
+        }
+      }
+    },
     "Library": {
       "localizations": {
         "fr": {
@@ -2207,6 +4297,36 @@
         }
       }
     },
+    "License": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licence"
+          }
+        }
+      }
+    },
+    "Limited controller: not a full gamepad": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manette limitée : pas une manette complète"
+          }
+        }
+      }
+    },
+    "Listed but the game ignores it: check the game's own controller settings, and in Steam for Windows, Settings > Controller (Steam Input can take over the controller).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listée mais ignorée par le jeu : vérifie les réglages manette du jeu, et dans Steam pour Windows, Paramètres > Manette (Steam Input peut prendre le contrôle de la manette)."
+          }
+        }
+      }
+    },
     "Listed on the Steam store": {
       "localizations": {
         "fr": {
@@ -2225,6 +4345,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已在 Steam 商店上架"
+          }
+        }
+      }
+    },
+    "Lists the .exe and .msi files in your Downloads folder. MacHub only looks when you click.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liste les fichiers .exe et .msi de ton dossier Téléchargements. MacHub ne regarde que quand tu cliques."
           }
         }
       }
@@ -2317,6 +4447,36 @@
         }
       }
     },
+    "Logging": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journaux"
+          }
+        }
+      }
+    },
+    "Logs and settings stay on this Mac. MacHub sends nothing anywhere.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journaux et réglages restent sur ce Mac. MacHub n'envoie rien nulle part."
+          }
+        }
+      }
+    },
+    "Looking for what was installed…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche de ce qui a été installé…"
+          }
+        }
+      }
+    },
     "Lowest price": {
       "localizations": {
         "fr": {
@@ -2335,6 +4495,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "价格从低到高"
+          }
+        }
+      }
+    },
+    "MFi controllers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manettes MFi"
+          }
+        }
+      }
+    },
+    "MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub"
+          }
+        }
+      }
+    },
+    "MacHub adds it as it is, from where it is now. Keep the file in place.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub l'ajoute tel quel, là où il se trouve. Laisse le fichier à sa place."
+          }
+        }
+      }
+    },
+    "MacHub can't tell whether a specific game supports controllers: no game is marked compatible until it has been checked.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub ne peut pas savoir si un jeu précis gère les manettes : aucun jeu n'est marqué compatible tant qu'il n'a pas été vérifié."
+          }
+        }
+      }
+    },
+    "MacHub compares the bottle's program folders with how they were before.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub compare les dossiers de programmes de la bouteille avec leur état d'avant."
           }
         }
       }
@@ -2361,8 +4571,168 @@
         }
       }
     },
+    "MacHub data": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Données de MacHub"
+          }
+        }
+      }
+    },
+    "MacHub didn't recognise this mod's layout for this game.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub n'a pas reconnu l'organisation de ce mod pour ce jeu."
+          }
+        }
+      }
+    },
+    "MacHub downloads Fabric's profile from meta.fabricmc.net, adds it to the Minecraft Launcher's versions, and adds one profile to launcher_profiles.json after saving a backup copy. Quit the Minecraft Launcher first.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub télécharge le profil Fabric depuis meta.fabricmc.net, l'ajoute aux versions du Minecraft Launcher et ajoute un profil à launcher_profiles.json après en avoir sauvegardé une copie. Quitte d'abord le Minecraft Launcher."
+          }
+        }
+      }
+    },
+    "MacHub has no mod integration for this game.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub n'a pas d'intégration de mods pour ce jeu."
+          }
+        }
+      }
+    },
+    "MacHub runs Windows programs with its own Wine, built from the official open-source WineHQ code, plus DXMT and DXVK. Nothing is installed outside MacHub's folders, and Whisky isn't needed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub exécute les programmes Windows avec son propre Wine, compilé à partir du code open source officiel de WineHQ, plus DXMT et DXVK. Rien n'est installé hors des dossiers de MacHub, et Whisky n'est pas nécessaire."
+          }
+        }
+      }
+    },
+    "MacHub runs it in a bottle, then adds the program it installs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub l'exécute dans une bouteille, puis ajoute le programme installé."
+          }
+        }
+      }
+    },
+    "MacHub stopped waiting. If the title still starts, it opens normally.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub a cessé d'attendre. Si le titre finit par démarrer, il s'ouvre normalement."
+          }
+        }
+      }
+    },
+    "MacHub stopped watching. If the title still starts, it opens normally.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub a cessé de surveiller. Si le titre finit par démarrer, il s'ouvre normalement."
+          }
+        }
+      }
+    },
+    "MacHub's Windows engine isn't installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le moteur Windows de MacHub n'est pas installé"
+          }
+        }
+      }
+    },
+    "MacHub's Windows engine isn't ready. See Settings › Windows Engine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le moteur Windows de MacHub n'est pas prêt. Voir Réglages › Moteur Windows."
+          }
+        }
+      }
+    },
+    "Made with engine %@. Update it for engine %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créé avec le moteur %@. Mets-le à jour pour le moteur %@."
+          }
+        }
+      }
+    },
+    "Manage this game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gérer ce jeu"
+          }
+        }
+      }
+    },
+    "Manual import. Assetto Corsa's mod sites have no public download API, so MacHub doesn't search them: open one, download a car or track (.zip), then add it here. MacHub checks the archive, installs only into content/cars or content/tracks, and keeps a copy of anything it replaces.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import manuel. Les sites de mods d'Assetto Corsa n'ont pas d'API de téléchargement publique, donc MacHub n'y cherche pas : ouvre-en un, télécharge une voiture ou un circuit (.zip), puis ajoute-le ici. MacHub vérifie l'archive, installe uniquement dans content/cars ou content/tracks et garde une copie de tout ce qu'il remplace."
+          }
+        }
+      }
+    },
+    "Manual import: download a .zip from a community site, MacHub installs it safely and can undo it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import manuel : télécharge un .zip sur un site communautaire, MacHub l'installe en sécurité et peut l'annuler."
+          }
+        }
+      }
+    },
+    "Membership": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnement"
+          }
+        }
+      }
+    },
     "Metacritic": {
       "shouldTranslate": false
+    },
+    "Metal performance overlay": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compteur de performances Metal"
+          }
+        }
+      }
     },
     "Metroidvania": {
       "localizations": {
@@ -2382,6 +4752,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "类银河战士恶魔城"
+          }
+        }
+      }
+    },
+    "Minecraft %@ · Fabric %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minecraft %@ · Fabric %@"
+          }
+        }
+      }
+    },
+    "Minecraft isn't installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minecraft n'est pas installé"
+          }
+        }
+      }
+    },
+    "Minecraft version": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version de Minecraft"
           }
         }
       }
@@ -2452,6 +4852,56 @@
         }
       }
     },
+    "Modrinth can't be reached": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modrinth est injoignable"
+          }
+        }
+      }
+    },
+    "Mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mods"
+          }
+        }
+      }
+    },
+    "Mods folder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dossier des mods"
+          }
+        }
+      }
+    },
+    "Mods need the Fabric loader. MacHub creates a separate profile, “MacHub · Fabric”, with its own game folder: your current worlds and settings stay untouched.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les mods ont besoin du chargeur Fabric. MacHub crée un profil séparé, « MacHub · Fabric », avec son propre dossier de jeu : tes mondes et réglages actuels restent intacts."
+          }
+        }
+      }
+    },
+    "Mods on the official site": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mods sur le site officiel"
+          }
+        }
+      }
+    },
     "More like this": {
       "localizations": {
         "fr": {
@@ -2474,6 +4924,76 @@
         }
       }
     },
+    "Most BeamNG.drive mods live on BeamNG's own repository, which the game has built in (Mods in its main menu). Nexus has a smaller selection.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La plupart des mods BeamNG.drive se trouvent sur le dépôt de BeamNG, intégré au jeu (Mods dans son menu principal). Nexus en propose moins."
+          }
+        }
+      }
+    },
+    "Most downloaded": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les plus téléchargés"
+          }
+        }
+      }
+    },
+    "Most endorsed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les plus appréciés"
+          }
+        }
+      }
+    },
+    "Move this Windows environment to the Trash?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre cet environnement Windows à la Corbeille ?"
+          }
+        }
+      }
+    },
+    "Move this engine version to the Trash?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre cette version du moteur à la Corbeille ?"
+          }
+        }
+      }
+    },
+    "Move to Trash": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à la Corbeille"
+          }
+        }
+      }
+    },
+    "Move to Trash…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à la Corbeille…"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "fr": {
@@ -2492,6 +5012,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        }
+      }
+    },
+    "Name in MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom dans MacHub"
+          }
+        }
+      }
+    },
+    "Native Mac game: it runs in its own launcher, without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeu Mac natif : il tourne dans son propre lanceur, sans Wine."
+          }
+        }
+      }
+    },
+    "Native button labels (SDL_GAMECONTROLLER_USE_BUTTON_LABELS=1)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libellés de boutons natifs (SDL_GAMECONTROLLER_USE_BUTTON_LABELS=1)"
           }
         }
       }
@@ -2540,6 +5090,16 @@
         }
       }
     },
+    "New bottle “%@”": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle bouteille « %@ »"
+          }
+        }
+      }
+    },
     "New on Steam": {
       "localizations": {
         "fr": {
@@ -2558,6 +5118,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 新品"
+          }
+        }
+      }
+    },
+    "Newest": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les plus récents"
           }
         }
       }
@@ -2584,6 +5154,86 @@
         }
       }
     },
+    "Nexus Mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nexus Mods"
+          }
+        }
+      }
+    },
+    "Nexus Mods API key": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé API Nexus Mods"
+          }
+        }
+      }
+    },
+    "Nexus Mods answered HTTP %lld.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nexus Mods a répondu HTTP %lld."
+          }
+        }
+      }
+    },
+    "Nexus Mods only allows direct downloads for Premium members. Use “Mod Manager Download” on the mod's page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nexus Mods ne permet les téléchargements directs qu'aux membres Premium. Utilise « Mod Manager Download » sur la page du mod."
+          }
+        }
+      }
+    },
+    "Nexus Mods refused the API key. Check it in Settings › Mods.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nexus Mods a refusé la clé API. Vérifie-la dans Réglages › Mods."
+          }
+        }
+      }
+    },
+    "Nexus page": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Page Nexus"
+          }
+        }
+      }
+    },
+    "Nexus returned no download link.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nexus n'a renvoyé aucun lien de téléchargement."
+          }
+        }
+      }
+    },
+    "Nintendo Switch Pro Controller": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manette Pro Nintendo Switch"
+          }
+        }
+      }
+    },
     "No .exe found in the install folder.": {
       "localizations": {
         "fr": {
@@ -2606,6 +5256,46 @@
         }
       }
     },
+    "No .exe or .msi file in your Downloads folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun fichier .exe ou .msi dans ton dossier Téléchargements."
+          }
+        }
+      }
+    },
+    "No D3DMetal.framework in this folder. Choose the mounted “Evaluation environment for Windows games” disk image.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de D3DMetal.framework dans ce dossier. Choisis l'image disque montée « Evaluation environment for Windows games »."
+          }
+        }
+      }
+    },
+    "No Nexus mod installed by MacHub yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun mod Nexus installé par MacHub pour l'instant."
+          }
+        }
+      }
+    },
+    "No Windows environment yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun environnement Windows pour l'instant."
+          }
+        }
+      }
+    },
     "No answer from the browser after 5 minutes.": {
       "localizations": {
         "fr": {
@@ -2624,6 +5314,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 分钟内浏览器没有响应。"
+          }
+        }
+      }
+    },
+    "No app": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune app"
           }
         }
       }
@@ -2672,6 +5372,16 @@
         }
       }
     },
+    "No bottles yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune bouteille pour l'instant."
+          }
+        }
+      }
+    },
     "No bottles yet. Create one in Whisky.": {
       "localizations": {
         "fr": {
@@ -2694,6 +5404,16 @@
         }
       }
     },
+    "No controller connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune manette connectée"
+          }
+        }
+      }
+    },
     "No description for this program.": {
       "localizations": {
         "fr": {
@@ -2712,6 +5432,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "此程序没有简介。"
+          }
+        }
+      }
+    },
+    "No download address for the engine yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore d'adresse de téléchargement pour le moteur"
           }
         }
       }
@@ -2760,6 +5490,16 @@
         }
       }
     },
+    "No installer process appeared within 90 seconds.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun processus d'installation n'est apparu en 90 secondes."
+          }
+        }
+      }
+    },
     "No key": {
       "localizations": {
         "fr": {
@@ -2778,6 +5518,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "无密钥"
+          }
+        }
+      }
+    },
+    "No mod installed by MacHub in this profile yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun mod installé par MacHub dans ce profil pour l'instant."
+          }
+        }
+      }
+    },
+    "No mod matches for this Minecraft version.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun mod ne correspond à cette version de Minecraft."
+          }
+        }
+      }
+    },
+    "No new program found": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun nouveau programme trouvé"
+          }
+        }
+      }
+    },
+    "No process from the game's folder appeared in 3 minutes. Steam may be showing a message in its own window.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun processus du dossier du jeu n'est apparu en 3 minutes. Steam affiche peut-être un message dans sa propre fenêtre."
           }
         }
       }
@@ -2826,6 +5606,16 @@
         }
       }
     },
+    "No set-up Whisky bottle yet, so there is nothing to check on the Windows side.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune bouteille Whisky configurée pour l'instant : rien à vérifier côté Windows."
+          }
+        }
+      }
+    },
     "No store page returned for your region.": {
       "localizations": {
         "fr": {
@@ -2844,6 +5634,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "你所在地区没有返回商店页面。"
+          }
+        }
+      }
+    },
+    "No version for Minecraft %@ with Fabric. MacHub won't install it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune version pour Minecraft %@ avec Fabric. MacHub ne l'installera pas."
+          }
+        }
+      }
+    },
+    "None connected": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune connectée"
+          }
+        }
+      }
+    },
+    "Not a supported Windows file": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichier Windows non pris en charge"
           }
         }
       }
@@ -2936,6 +5756,26 @@
         }
       }
     },
+    "Not installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non installé"
+          }
+        }
+      }
+    },
+    "Not listed in the Windows panel: quit the game and Steam in the bottle, reconnect the controller, then open the panel again. Wine only sees controllers connected when the bottle starts.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Absente du panneau Windows : quitte le jeu et Steam dans la bouteille, reconnecte la manette, puis rouvre le panneau. Wine ne voit que les manettes connectées au démarrage de la bouteille."
+          }
+        }
+      }
+    },
     "Not registered": {
       "localizations": {
         "fr": {
@@ -2976,6 +5816,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "未设置"
+          }
+        }
+      }
+    },
+    "Not started": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non démarré"
           }
         }
       }
@@ -3046,6 +5896,16 @@
         }
       }
     },
+    "Not verified. MacHub has no compatibility source yet, so being on Steam or installed says nothing about how well it runs on Mac.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non vérifié. MacHub n'a pas encore de source de compatibilité : être sur Steam ou installé ne dit rien de son fonctionnement sur Mac."
+          }
+        }
+      }
+    },
     "Not verified. MacHub has no compatibility source yet, so being on Steam or installed says nothing about how well it runs under Whisky.": {
       "localizations": {
         "fr": {
@@ -3064,6 +5924,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "未验证。MacHub 还没有兼容性数据来源，因此在 Steam 上或已安装并不代表它能在 Whisky 下正常运行。"
+          }
+        }
+      }
+    },
+    "Not yet pressed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore appuyé"
+          }
+        }
+      }
+    },
+    "Notepad didn't start within a minute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Bloc-notes n'a pas démarré en une minute"
+          }
+        }
+      }
+    },
+    "Notepad exited at once": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Bloc-notes s'est fermé aussitôt"
+          }
+        }
+      }
+    },
+    "Notepad opened": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Bloc-notes s'est ouvert"
           }
         }
       }
@@ -3112,6 +6012,46 @@
         }
       }
     },
+    "Nothing was added to MacHub. If the installer had started copying files, they stay in the bottle.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien n'a été ajouté à MacHub. Si l'installateur avait commencé à copier des fichiers, ils restent dans la bouteille."
+          }
+        }
+      }
+    },
+    "Nothing yet. Content you add appears here and can be removed in one click.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien pour l'instant. Le contenu que tu ajoutes apparaît ici et peut être retiré en un clic."
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé"
+          }
+        }
+      }
+    },
+    "Off (most compatible)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé (le plus compatible)"
+          }
+        }
+      }
+    },
     "On Steam": {
       "localizations": {
         "fr": {
@@ -3130,6 +6070,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "在 Steam 上"
+          }
+        }
+      }
+    },
+    "On the Nexus page, click “Mod Manager Download” for this file: MacHub takes it from there.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur la page Nexus, clique sur « Mod Manager Download » pour ce fichier : MacHub s'occupe du reste."
+          }
+        }
+      }
+    },
+    "Open .exe and .msi files with": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les fichiers .exe et .msi avec"
+          }
+        }
+      }
+    },
+    "Open Bluetooth settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les réglages Bluetooth"
+          }
+        }
+      }
+    },
+    "Open Bluetooth settings and click Connect next to it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre les réglages Bluetooth et clique sur Se connecter à côté."
           }
         }
       }
@@ -3178,6 +6158,16 @@
         }
       }
     },
+    "Open Whisky": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Whisky"
+          }
+        }
+      }
+    },
     "Open Whisky settings": {
       "localizations": {
         "fr": {
@@ -3200,6 +6190,46 @@
         }
       }
     },
+    "Open the Windows engine settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les réglages du moteur Windows"
+          }
+        }
+      }
+    },
+    "Open the launcher": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir le lanceur"
+          }
+        }
+      }
+    },
+    "Open the official mod repository": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir le dépôt de mods officiel"
+          }
+        }
+      }
+    },
+    "Open them with MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les ouvrir avec MacHub"
+          }
+        }
+      }
+    },
     "Open world": {
       "localizations": {
         "fr": {
@@ -3218,6 +6248,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "开放世界"
+          }
+        }
+      }
+    },
+    "Open-source components, redistributed under their licenses. Their sources are published with each engine release. Apple's D3DMetal is never included.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composants open source, redistribués sous leurs licences. Leurs sources sont publiées avec chaque version du moteur. D3DMetal d'Apple n'est jamais inclus."
+          }
+        }
+      }
+    },
+    "Opening…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouverture…"
+          }
+        }
+      }
+    },
+    "Opens Wine's Game Controllers panel (joy.cpl) in this bottle. It changes nothing.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre le panneau Contrôleurs de jeu de Wine (joy.cpl) dans cette bouteille. Il ne modifie rien."
+          }
+        }
+      }
+    },
+    "Option keys act as Alt": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les touches Option font Alt"
+          }
+        }
+      }
+    },
+    "Optional. MacHub no longer needs Whisky: its own engine runs Windows programs. Bottles you already have in Whisky keep working through it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Facultatif. MacHub n'a plus besoin de Whisky : son propre moteur exécute les programmes Windows. Tes bouteilles Whisky existantes continuent de fonctionner via Whisky."
+          }
+        }
+      }
+    },
+    "Overlays": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compteurs à l'écran"
           }
         }
       }
@@ -3266,6 +6356,36 @@
         }
       }
     },
+    "Passed to the game at launch, like Steam's own launch options.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transmises au jeu au lancement, comme les options de lancement de Steam."
+          }
+        }
+      }
+    },
+    "Performance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Performances"
+          }
+        }
+      }
+    },
+    "Picks per game from the DirectX version it uses.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisit pour chaque jeu selon la version de DirectX utilisée."
+          }
+        }
+      }
+    },
     "Platformer": {
       "localizations": {
         "fr": {
@@ -3306,6 +6426,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "开始游戏"
+          }
+        }
+      }
+    },
+    "Play a release once in the Minecraft Launcher first, so MacHub knows your game version.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joue d'abord une fois à une version dans le Minecraft Launcher, pour que MacHub connaisse ta version du jeu."
           }
         }
       }
@@ -3354,6 +6484,56 @@
         }
       }
     },
+    "Plug the controller in with a data cable (some cables only charge).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Branche la manette avec un câble de données (certains câbles ne font que charger)."
+          }
+        }
+      }
+    },
+    "Premium: direct downloads": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premium : téléchargements directs"
+          }
+        }
+      }
+    },
+    "Preparing the environment": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Préparation de l'environnement"
+          }
+        }
+      }
+    },
+    "Press each button and push both sticks. Each control lights up when macOS receives it. MacHub must be the frontmost app for this test.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuie sur chaque bouton et pousse les deux sticks. Chaque commande s'allume quand macOS la reçoit. MacHub doit être au premier plan pendant ce test."
+          }
+        }
+      }
+    },
+    "Pressed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyé"
+          }
+        }
+      }
+    },
     "Previous": {
       "localizations": {
         "fr": {
@@ -3372,6 +6552,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一页"
+          }
+        }
+      }
+    },
+    "Previous: %@ FPS": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Précédente : %@ FPS"
           }
         }
       }
@@ -3420,6 +6610,26 @@
         }
       }
     },
+    "Process %@ detected. Its window may take a few more seconds to appear.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processus %@ détecté. Sa fenêtre peut mettre encore quelques secondes à s'afficher."
+          }
+        }
+      }
+    },
+    "Processor and Memory": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processeur et mémoire"
+          }
+        }
+      }
+    },
     "Profile": {
       "localizations": {
         "fr": {
@@ -3464,6 +6674,16 @@
         }
       }
     },
+    "Program started": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programme démarré"
+          }
+        }
+      }
+    },
     "Programs run inside a Whisky bottle. Create one in Whisky, then add your .exe here.": {
       "localizations": {
         "fr": {
@@ -3482,6 +6702,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "程序在 Whisky 容器中运行。请先在 Whisky 中创建容器，再在这里添加 .exe。"
+          }
+        }
+      }
+    },
+    "Programs run inside a Whisky bottle. See Settings to finish setting up Whisky.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les programmes tournent dans une bouteille Whisky. Va dans Réglages pour finir de configurer Whisky."
           }
         }
       }
@@ -3526,6 +6756,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "发行商"
+          }
+        }
+      }
+    },
+    "Put the controller in pairing mode (see below).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mets la manette en mode appairage (voir ci-dessous)."
+          }
+        }
+      }
+    },
+    "Put the controller in pairing mode, then search from here.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mets la manette en mode appairage, puis lance la recherche ici."
+          }
+        }
+      }
+    },
+    "Quit Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter Steam"
           }
         }
       }
@@ -3618,6 +6878,16 @@
         }
       }
     },
+    "Ready to install from %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prêt à installer depuis %@"
+          }
+        }
+      }
+    },
     "Recent": {
       "localizations": {
         "fr": {
@@ -3636,6 +6906,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "最近"
+          }
+        }
+      }
+    },
+    "Recently updated": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis à jour récemment"
           }
         }
       }
@@ -3680,6 +6960,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已注册"
+          }
+        }
+      }
+    },
+    "Registry Editor": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éditeur du Registre"
           }
         }
       }
@@ -3772,6 +7062,36 @@
         }
       }
     },
+    "Remove": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer"
+          }
+        }
+      }
+    },
+    "Remove %@?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@ ?"
+          }
+        }
+      }
+    },
+    "Remove and restore previous": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer et restaurer la version précédente"
+          }
+        }
+      }
+    },
     "Remove from MacHub": {
       "localizations": {
         "fr": {
@@ -3816,6 +7136,16 @@
         }
       }
     },
+    "Remove this mod?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer ce mod ?"
+          }
+        }
+      }
+    },
     "Removes the shortcut from MacHub only. The program's files are not touched.": {
       "localizations": {
         "fr": {
@@ -3838,6 +7168,26 @@
         }
       }
     },
+    "Remove…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer…"
+          }
+        }
+      }
+    },
+    "Report": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapport"
+          }
+        }
+      }
+    },
     "Requirements": {
       "localizations": {
         "fr": {
@@ -3856,6 +7206,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "前提条件"
+          }
+        }
+      }
+    },
+    "Retina renders at the screen's full resolution: sharper, but up to four times more pixels for the GPU. Background shader compilation removes most DXVK stutter, at the cost of objects popping in for a moment.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retina rend à la pleine résolution de l'écran : plus net, mais jusqu'à quatre fois plus de pixels pour le GPU. La compilation des shaders en arrière-plan supprime la plupart des saccades DXVK, au prix d'objets qui apparaissent avec un léger retard."
+          }
+        }
+      }
+    },
+    "Retina resolution": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résolution Retina"
           }
         }
       }
@@ -3900,6 +7270,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "Roguelike"
+          }
+        }
+      }
+    },
+    "Role": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rôle"
+          }
+        }
+      }
+    },
+    "Rosetta 2 is needed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosetta 2 est nécessaire"
+          }
+        }
+      }
+    },
+    "Rosetta 2 isn't installed. Wine needs it to run on Apple silicon": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosetta 2 n'est pas installé. Wine en a besoin pour tourner sur puce Apple"
+          }
+        }
+      }
+    },
+    "Rosetta 2 needed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosetta 2 nécessaire"
+          }
+        }
+      }
+    },
+    "Rosetta translates AVX/AVX2 since macOS 15: some recent games refuse to start without them. 32-bit games are normally limited to 2 GB; modded games benefit from 4 GB. Both are off by default: with them on, Steam for Windows stopped connecting on this Mac. Turn them on only for a game that needs them.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosetta traduit AVX/AVX2 depuis macOS 15 : certains jeux récents refusent de démarrer sans. Les jeux 32 bits sont normalement limités à 2 Go ; les jeux moddés profitent de 4 Go. Les deux sont désactivés par défaut : activés, Steam pour Windows ne se connectait plus sur ce Mac. Ne les active que pour un jeu qui en a besoin."
+          }
+        }
+      }
+    },
+    "Run %@ in “%@”?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exécuter %@ dans « %@ » ?"
+          }
+        }
+      }
+    },
+    "Run installer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancer l'installateur"
           }
         }
       }
@@ -3988,6 +7428,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "运行良好"
+          }
+        }
+      }
+    },
+    "Runs on Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonctionne sur Mac"
           }
         }
       }
@@ -4168,6 +7618,26 @@
         }
       }
     },
+    "Search Modrinth": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher sur Modrinth"
+          }
+        }
+      }
+    },
+    "Search Nexus Mods": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher sur Nexus Mods"
+          }
+        }
+      }
+    },
     "Search games and software": {
       "localizations": {
         "fr": {
@@ -4186,6 +7656,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "搜索游戏和软件"
+          }
+        }
+      }
+    },
+    "Search the Nexus Mods catalog, install in one click, turn mods on and off, remove them cleanly.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cherche dans le catalogue Nexus Mods, installe en un clic, active ou désactive les mods, retire-les proprement."
           }
         }
       }
@@ -4212,6 +7692,16 @@
         }
       }
     },
+    "Searching…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche…"
+          }
+        }
+      }
+    },
     "See all results in Discover": {
       "localizations": {
         "fr": {
@@ -4230,6 +7720,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "在“发现”中查看全部结果"
+          }
+        }
+      }
+    },
+    "Seeing a controller here means macOS receives it. A Windows game gets it through Wine inside the Whisky bottle, which presents it to Windows as an XInput or DirectInput device. To check that step, open Windows' own Game Controllers panel in the bottle: your controller should be listed there.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir une manette ici signifie que macOS la reçoit. Un jeu Windows la reçoit via Wine dans la bouteille Whisky, qui la présente à Windows comme un périphérique XInput ou DirectInput. Pour vérifier cette étape, ouvre le panneau Contrôleurs de jeu de Windows dans la bouteille : ta manette doit y figurer."
           }
         }
       }
@@ -4278,6 +7778,16 @@
         }
       }
     },
+    "Set up a modded profile": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurer un profil moddé"
+          }
+        }
+      }
+    },
     "Set up my Steam profile": {
       "localizations": {
         "fr": {
@@ -4296,6 +7806,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "设置我的 Steam 资料"
+          }
+        }
+      }
+    },
+    "Set up · engine %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuré · moteur %@"
+          }
+        }
+      }
+    },
+    "Setting Up…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration…"
           }
         }
       }
@@ -4344,6 +7874,16 @@
         }
       }
     },
+    "Several versions can stay side by side: if a new one misbehaves, go back to the previous one in a click. Removed versions go to the Trash.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plusieurs versions peuvent cohabiter : si une nouvelle pose problème, reviens à la précédente en un clic. Les versions retirées vont à la Corbeille."
+          }
+        }
+      }
+    },
     "Show": {
       "localizations": {
         "fr": {
@@ -4362,6 +7902,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示"
+          }
+        }
+      }
+    },
+    "Show Game Folder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le dossier du jeu"
           }
         }
       }
@@ -4428,6 +7978,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示文件"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher dans le Finder"
           }
         }
       }
@@ -4652,6 +8212,26 @@
         }
       }
     },
+    "Some games warn about “third-party libraries” (d3d11.dll, dxgi.dll) next to their executable: those are MacHub's graphics layer. The warning is safe to dismiss.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certains jeux signalent des « bibliothèques tierces » (d3d11.dll, dxgi.dll) à côté de leur exécutable : c'est la couche graphique de MacHub. Tu peux ignorer cet avertissement sans risque."
+          }
+        }
+      }
+    },
+    "Sort": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trier"
+          }
+        }
+      }
+    },
     "Sort by": {
       "localizations": {
         "fr": {
@@ -4696,6 +8276,16 @@
         }
       }
     },
+    "Source: Modrinth, through its public API. Downloads come from Modrinth's servers and are checked against the SHA-512 it publishes. Download counts are Modrinth's own.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source : Modrinth, via son API publique. Les téléchargements viennent des serveurs de Modrinth et sont vérifiés avec le SHA-512 qu'il publie. Les nombres de téléchargements sont ceux de Modrinth."
+          }
+        }
+      }
+    },
     "Sports": {
       "localizations": {
         "fr": {
@@ -4714,6 +8304,96 @@
           "stringUnit": {
             "state": "translated",
             "value": "体育"
+          }
+        }
+      }
+    },
+    "Start Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrer Steam"
+          }
+        }
+      }
+    },
+    "Start over": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommencer"
+          }
+        }
+      }
+    },
+    "Starting %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage de %@"
+          }
+        }
+      }
+    },
+    "Starting Steam for Windows": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage de Steam pour Windows"
+          }
+        }
+      }
+    },
+    "Starting Steam for Windows in the bottle…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage de Steam pour Windows dans la bouteille…"
+          }
+        }
+      }
+    },
+    "Starting Steam…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage de Steam…"
+          }
+        }
+      }
+    },
+    "Starting the installer…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage de l'installateur…"
+          }
+        }
+      }
+    },
+    "Starting the program": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage du programme"
+          }
+        }
+      }
+    },
+    "Starting the program in Wine…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage du programme dans Wine…"
           }
         }
       }
@@ -4740,8 +8420,28 @@
         }
       }
     },
+    "Status": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "État"
+          }
+        }
+      }
+    },
     "Steam": {
       "shouldTranslate": false
+    },
+    "Steam Account": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compte Steam"
+          }
+        }
+      }
     },
     "Steam App ID": {
       "localizations": {
@@ -4761,6 +8461,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 应用 ID"
+          }
+        }
+      }
+    },
+    "Steam Properties…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Propriétés Steam…"
           }
         }
       }
@@ -4963,6 +8673,36 @@
         }
       }
     },
+    "Steam for Windows": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows"
+          }
+        }
+      }
+    },
+    "Steam for Windows and its games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows et ses jeux"
+          }
+        }
+      }
+    },
+    "Steam for Windows didn't start within 2 minutes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows n'a pas démarré en 2 minutes"
+          }
+        }
+      }
+    },
     "Steam for Windows in a bottle": {
       "localizations": {
         "fr": {
@@ -4985,6 +8725,16 @@
         }
       }
     },
+    "Steam for Windows isn't installed in the bottle “%@”.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows n'est pas installé dans la bouteille « %@ »."
+          }
+        }
+      }
+    },
     "Steam for Windows was asked to install this game in the bottle. Follow the download in Steam.": {
       "localizations": {
         "fr": {
@@ -5003,6 +8753,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已请求容器中的 Windows 版 Steam 安装此游戏。请在 Steam 中查看下载进度。"
+          }
+        }
+      }
+    },
+    "Steam for Windows was asked to install this game. Confirm the install in Steam's window; MacHub follows the download.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows a reçu la demande d'installer ce jeu. Confirme l'installation dans la fenêtre de Steam ; MacHub suit le téléchargement."
           }
         }
       }
@@ -5069,6 +8829,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 当前正在限制请求，请几分钟后重试。"
+          }
+        }
+      }
+    },
+    "Steam is running. Sign in in Steam's own window.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam est lancé. Connecte-toi dans la fenêtre de Steam."
+          }
+        }
+      }
+    },
+    "Steam is uninstalling this game…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam désinstalle ce jeu…"
+          }
+        }
+      }
+    },
+    "Steam is updating this game. Play starts it once the update is done.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam met à jour ce jeu. Jouer le lancera une fois la mise à jour terminée."
+          }
+        }
+      }
+    },
+    "Steam is verifying the game's files…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam vérifie les fichiers du jeu…"
           }
         }
       }
@@ -5183,6 +8983,16 @@
         }
       }
     },
+    "Steam received the request. MacHub is watching for the game's own process.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam a reçu la demande. MacHub guette le processus du jeu."
+          }
+        }
+      }
+    },
     "Steam refused the Web API key. Check or replace it in Settings.": {
       "localizations": {
         "fr": {
@@ -5293,6 +9103,86 @@
         }
       }
     },
+    "Steam wasn't running in this bottle. Its first start can take a minute.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam n'était pas lancé dans cette bouteille. Son premier démarrage peut prendre une minute."
+          }
+        }
+      }
+    },
+    "Steam's installer finished, but Steam isn't in the Windows environment": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'installateur de Steam a terminé, mais Steam n'est pas dans l'environnement Windows"
+          }
+        }
+      }
+    },
+    "Still nothing: Whisky's bottle settings have a Controller & Input section (compatibility mode, HIDAPI, button labels). MacHub shows them here but leaves them to Whisky.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toujours rien : les réglages de bouteille de Whisky ont une section Manette et saisie (mode de compatibilité, HIDAPI, libellés des boutons). MacHub les affiche ici mais les laisse à Whisky."
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter"
+          }
+        }
+      }
+    },
+    "Stop installer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter l'installateur"
+          }
+        }
+      }
+    },
+    "Stop waiting": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ne plus attendre"
+          }
+        }
+      }
+    },
+    "Stopped": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêté"
+          }
+        }
+      }
+    },
+    "Stopped waiting for %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attente de %@ arrêtée"
+          }
+        }
+      }
+    },
     "Strategy": {
       "localizations": {
         "fr": {
@@ -5359,6 +9249,16 @@
         }
       }
     },
+    "Synchronization": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisation"
+          }
+        }
+      }
+    },
     "System": {
       "localizations": {
         "fr": {
@@ -5377,6 +9277,86 @@
           "stringUnit": {
             "state": "translated",
             "value": "跟随系统"
+          }
+        }
+      }
+    },
+    "Taking longer than usual. Steam may be updating itself: check its window in the Dock.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus long que d'habitude. Steam se met peut-être à jour : regarde sa fenêtre dans le Dock."
+          }
+        }
+      }
+    },
+    "Taking longer than usual. Steam may be updating the game, installing a prerequisite or waiting for you in its window. MacHub keeps watching for up to 3 minutes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus long que d'habitude. Steam met peut-être le jeu à jour, installe un prérequis ou t'attend dans sa fenêtre. MacHub continue de surveiller jusqu'à 3 minutes."
+          }
+        }
+      }
+    },
+    "Task Manager": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestionnaire des tâches"
+          }
+        }
+      }
+    },
+    "Technical details": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Détails techniques"
+          }
+        }
+      }
+    },
+    "Test": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tester"
+          }
+        }
+      }
+    },
+    "Test vibration": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tester la vibration"
+          }
+        }
+      }
+    },
+    "Test with Notepad": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tester avec le Bloc-notes"
+          }
+        }
+      }
+    },
+    "Testing below": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test ci-dessous"
           }
         }
       }
@@ -5403,6 +9383,16 @@
         }
       }
     },
+    "That doesn't look like a Nexus Mods API key.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ça ne ressemble pas à une clé API Nexus Mods."
+          }
+        }
+      }
+    },
     "That doesn't look like a Steam key (32 hexadecimal characters).": {
       "localizations": {
         "fr": {
@@ -5425,6 +9415,26 @@
         }
       }
     },
+    "The Metal overlay shows frame rate and GPU time for every game (DXMT, DXVK and D3DMetal all draw through Metal). Useful to compare settings.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le compteur Metal affiche les images par seconde et le temps GPU de chaque jeu (DXMT, DXVK et D3DMetal dessinent tous via Metal). Utile pour comparer des réglages."
+          }
+        }
+      }
+    },
+    "The Minecraft Launcher isn't installed in Applications.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Minecraft Launcher n'est pas installé dans Applications."
+          }
+        }
+      }
+    },
     "The Steam store, searched on demand. Being on Steam doesn't mean a game runs under Whisky.": {
       "localizations": {
         "fr": {
@@ -5443,6 +9453,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "按需搜索 Steam 商店。在 Steam 上并不代表游戏能在 Whisky 下运行。"
+          }
+        }
+      }
+    },
+    "The Windows environment “%@” no longer exists": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'environnement Windows « %@ » n'existe plus"
+          }
+        }
+      }
+    },
+    "The archive couldn't be unpacked: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de décompresser l'archive : %@"
+          }
+        }
+      }
+    },
+    "The archive was refused: it tries to write outside the game (%@).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archive refusée : elle tente d'écrire hors du jeu (%@)."
+          }
+        }
+      }
+    },
+    "The bottle isn't ready": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La bouteille n'est pas prête"
+          }
+        }
+      }
+    },
+    "The bottle “%@” has never been set up by Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La bouteille « %@ » n'a jamais été configurée par Wine."
+          }
+        }
+      }
+    },
+    "The bottle “%@” no longer exists in Whisky.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La bouteille « %@ » n'existe plus dans Whisky."
+          }
+        }
+      }
+    },
+    "The engine archive couldn't be unpacked: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de décompresser l'archive du moteur : %@"
+          }
+        }
+      }
+    },
+    "The engine archive doesn't match the expected fingerprint; it was not installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'archive du moteur ne correspond pas à l'empreinte attendue ; elle n'a pas été installée"
+          }
+        }
+      }
+    },
+    "The file downloaded from Valve isn't a Windows installer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier téléchargé chez Valve n'est pas un installateur Windows"
+          }
+        }
+      }
+    },
+    "The file was moved or deleted. Download it again or choose it from its new place.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier a été déplacé ou supprimé. Télécharge-le à nouveau ou choisis-le à son nouvel emplacement."
+          }
+        }
+      }
+    },
+    "The folder goes to the Trash and the one it replaced is put back.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le dossier va à la Corbeille et celui qu'il remplaçait est remis en place."
+          }
+        }
+      }
+    },
+    "The folder goes to the Trash.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le dossier va à la Corbeille."
           }
         }
       }
@@ -5491,6 +9621,66 @@
         }
       }
     },
+    "The installer added these programs. The first one is MacHub's best guess.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'installateur a ajouté ces programmes. Le premier est le choix le plus probable selon MacHub."
+          }
+        }
+      }
+    },
+    "The installer closed, but no new program appeared in Program Files. It may have been cancelled, or installed somewhere else: you can choose the program yourself.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'installateur s'est fermé, mais aucun nouveau programme n'est apparu dans Program Files. Il a peut-être été annulé ou installé ailleurs : tu peux choisir le programme toi-même."
+          }
+        }
+      }
+    },
+    "The installer didn't start": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'installateur n'a pas démarré"
+          }
+        }
+      }
+    },
+    "The installer stopped with an error": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'installateur s'est arrêté sur une erreur"
+          }
+        }
+      }
+    },
+    "The installer's own window opens on your Mac. Answer its questions and let it finish; MacHub follows it and then shows what it installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fenêtre de l'installateur s'ouvre sur ton Mac. Réponds à ses questions et laisse-le finir ; MacHub le suit puis affiche ce qu'il a installé."
+          }
+        }
+      }
+    },
+    "The launch carries on; its progress stays on the title's page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le lancement continue ; sa progression reste visible sur la page du titre."
+          }
+        }
+      }
+    },
     "The program closed (exit code %d).": {
       "localizations": {
         "fr": {
@@ -5509,6 +9699,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "程序已关闭（退出代码 %d）。"
+          }
+        }
+      }
+    },
+    "The program is missing from its folder: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le programme est absent de son dossier : %@"
+          }
+        }
+      }
+    },
+    "The program itself": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le programme lui-même"
+          }
+        }
+      }
+    },
+    "The program's process never appeared.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le processus du programme n'est jamais apparu."
           }
         }
       }
@@ -5535,6 +9755,16 @@
         }
       }
     },
+    "These are the families macOS supports. MacHub lists any controller macOS exposes, but only checks what macOS itself reports.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voici les familles prises en charge par macOS. MacHub liste toute manette exposée par macOS, mais ne vérifie que ce que macOS lui-même indique."
+          }
+        }
+      }
+    },
     "These bottles come from the original Whisky. “Not set up” means Wine never created the bottle's files, so it can't run anything. MacHub never changes them.": {
       "localizations": {
         "fr": {
@@ -5553,6 +9783,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "这些容器来自原版 Whisky。“未配置”表示 Wine 从未创建该容器的文件，因此无法运行任何程序。MacHub 不会修改它们。"
+          }
+        }
+      }
+    },
+    "These files are in the mods folder but MacHub didn't install them. It never changes them.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces fichiers sont dans le dossier des mods mais MacHub ne les a pas installés. Il n'y touche jamais."
           }
         }
       }
@@ -5579,6 +9819,86 @@
         }
       }
     },
+    "This build of MacHub has no runtime manifest.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version de MacHub n'a pas de manifeste de moteur."
+          }
+        }
+      }
+    },
+    "This controller doesn't accept vibration from macOS.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette manette n'accepte pas la vibration depuis macOS."
+          }
+        }
+      }
+    },
+    "This engine version has no msync: esync is used instead.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version du moteur n'a pas msync : esync est utilisé à la place."
+          }
+        }
+      }
+    },
+    "This file is a .%@ archive. MacHub installs .zip files; for others, unpack it and copy it yourself.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier est une archive .%@. MacHub installe les fichiers .zip ; pour les autres, décompresse-la et copie-la toi-même."
+          }
+        }
+      }
+    },
+    "This file isn't a MacHub engine archive": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier n'est pas une archive de moteur MacHub"
+          }
+        }
+      }
+    },
+    "This link is for a game MacHub doesn't manage mods for, or that isn't installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce lien concerne un jeu dont MacHub ne gère pas les mods, ou qui n'est pas installé."
+          }
+        }
+      }
+    },
+    "This takes about a minute the first time. Nothing else on your Mac changes.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela prend environ une minute la première fois. Rien d'autre ne change sur ton Mac."
+          }
+        }
+      }
+    },
+    "Threads": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fils d'exécution"
+          }
+        }
+      }
+    },
     "To play, a Whisky bottle with Steam for Windows is needed. See the requirements below.": {
       "localizations": {
         "fr": {
@@ -5597,6 +9917,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "要游玩，需要一个装有 Windows 版 Steam 的 Whisky 容器。请查看下方前提条件。"
+          }
+        }
+      }
+    },
+    "To play, set up Steam for Windows in Settings › Windows Engine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour jouer, installe Steam pour Windows dans Réglages › Moteur Windows."
           }
         }
       }
@@ -5623,6 +9953,16 @@
         }
       }
     },
+    "Track": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Circuit"
+          }
+        }
+      }
+    },
     "Try": {
       "localizations": {
         "fr": {
@@ -5641,6 +9981,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "试试"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer"
+          }
+        }
+      }
+    },
+    "Turn it on if it doesn't light up.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allume-la si elle ne s'éclaire pas."
+          }
+        }
+      }
+    },
+    "Turn on the Metal performance overlay in Settings › Graphics to measure frame rates: MacHub then shows a summary here after each session.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active le compteur de performances Metal dans Réglages › Graphismes pour mesurer les images par seconde : MacHub affichera ici un résumé après chaque session."
+          }
+        }
+      }
+    },
+    "Turn your controller on and pair it in Bluetooth settings, or plug it in with a USB cable. This page updates by itself as soon as macOS sees it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allume ta manette et appaire-la dans les réglages Bluetooth, ou branche-la avec un câble USB. Cette page se met à jour toute seule dès que macOS la voit."
           }
         }
       }
@@ -5689,6 +10069,46 @@
         }
       }
     },
+    "USB": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USB"
+          }
+        }
+      }
+    },
+    "Uninstall": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désinstaller"
+          }
+        }
+      }
+    },
+    "Uninstall %@?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désinstaller %@ ?"
+          }
+        }
+      }
+    },
+    "Uninstall…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désinstaller…"
+          }
+        }
+      }
+    },
     "Unknown": {
       "localizations": {
         "fr": {
@@ -5729,6 +10149,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "未测试"
+          }
+        }
+      }
+    },
+    "Update": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour"
+          }
+        }
+      }
+    },
+    "Update Now": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour maintenant"
+          }
+        }
+      }
+    },
+    "Update Windows Files": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour les fichiers Windows"
+          }
+        }
+      }
+    },
+    "Update to %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour vers %@"
+          }
+        }
+      }
+    },
+    "Updated": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis à jour"
+          }
+        }
+      }
+    },
+    "Use": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser"
           }
         }
       }
@@ -5777,6 +10257,16 @@
         }
       }
     },
+    "Verify Game Files": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier les fichiers du jeu"
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "fr": {
@@ -5795,6 +10285,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "版本"
+          }
+        }
+      }
+    },
+    "Version %@ supports Minecraft %@ with Fabric (%@).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La version %@ prend en charge Minecraft %@ avec Fabric (%@)."
+          }
+        }
+      }
+    },
+    "Vibration": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vibration"
+          }
+        }
+      }
+    },
+    "Vibration couldn't start.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La vibration n'a pas pu démarrer."
+          }
+        }
+      }
+    },
+    "View": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher"
+          }
+        }
+      }
+    },
+    "Waiting for Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente de Steam"
           }
         }
       }
@@ -5821,6 +10361,16 @@
         }
       }
     },
+    "Waiting for the game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente du jeu"
+          }
+        }
+      }
+    },
     "Web API key": {
       "localizations": {
         "fr": {
@@ -5839,6 +10389,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Web API 密钥"
+          }
+        }
+      }
+    },
+    "What is this file?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qu'est-ce que ce fichier ?"
+          }
+        }
+      }
+    },
+    "What your Mac sees, a quick button test, and what Windows games receive through Whisky.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que voit ton Mac, un test rapide des boutons, et ce que reçoivent les jeux Windows via Whisky."
+          }
+        }
+      }
+    },
+    "Which program should MacHub open?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quel programme MacHub doit-il ouvrir ?"
           }
         }
       }
@@ -5868,6 +10448,36 @@
         }
       }
     },
+    "Whisky (Fallback)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whisky (secours)"
+          }
+        }
+      }
+    },
+    "Whisky controller options: customised": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options manette de Whisky : personnalisées"
+          }
+        }
+      }
+    },
+    "Whisky controller options: default": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options manette de Whisky : par défaut"
+          }
+        }
+      }
+    },
     "Whisky is ready but has no bottle yet. Create a bottle named “Steam” in Whisky, install Steam and a game, and it will appear here.": {
       "localizations": {
         "fr": {
@@ -5886,6 +10496,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Whisky 已就绪，但还没有容器。请在 Whisky 中创建名为“Steam”的容器，安装 Steam 和游戏后即可在此显示。"
+          }
+        }
+      }
+    },
+    "Whisky isn't ready": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whisky n'est pas prêt"
           }
         }
       }
@@ -5978,6 +10598,16 @@
         }
       }
     },
+    "Whisky reported: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whisky a signalé : %@"
+          }
+        }
+      }
+    },
     "Whisky too old": {
       "localizations": {
         "fr": {
@@ -6025,6 +10655,96 @@
     "WhiskyCmd": {
       "shouldTranslate": false
     },
+    "Windows Engine": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur Windows"
+          }
+        }
+      }
+    },
+    "Windows Environments": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environnements Windows"
+          }
+        }
+      }
+    },
+    "Windows Games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeux Windows"
+          }
+        }
+      }
+    },
+    "Windows Installer package": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paquet Windows Installer"
+          }
+        }
+      }
+    },
+    "Windows Tools": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outils Windows"
+          }
+        }
+      }
+    },
+    "Windows engine %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur Windows %@"
+          }
+        }
+      }
+    },
+    "Windows engine not installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur Windows non installé"
+          }
+        }
+      }
+    },
+    "Windows engine problem": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problème du moteur Windows"
+          }
+        }
+      }
+    },
+    "Windows engine ready": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur Windows prêt"
+          }
+        }
+      }
+    },
     "Windows executable detected": {
       "localizations": {
         "fr": {
@@ -6043,6 +10763,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "已检测到 Windows 可执行文件"
+          }
+        }
+      }
+    },
+    "Windows files": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichiers Windows"
+          }
+        }
+      }
+    },
+    "Windows files in Downloads": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichiers Windows dans Téléchargements"
+          }
+        }
+      }
+    },
+    "Windows games need Steam's own client for downloads, updates, cloud saves and DRM. MacHub installs Valve's official installer in a separate Windows environment and never sees your password: you sign in in Steam's window.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les jeux Windows ont besoin du client Steam pour les téléchargements, les mises à jour, les sauvegardes cloud et les DRM. MacHub installe l'installateur officiel de Valve dans un environnement Windows séparé et ne voit jamais ton mot de passe : tu te connectes dans la fenêtre de Steam."
+          }
+        }
+      }
+    },
+    "Windows program, 32-bit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programme Windows 32 bits"
+          }
+        }
+      }
+    },
+    "Windows program, 64-bit": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programme Windows 64 bits"
           }
         }
       }
@@ -6091,6 +10861,106 @@
         }
       }
     },
+    "Windows version": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version de Windows"
+          }
+        }
+      }
+    },
+    "Wine (OpenGL)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine (OpenGL)"
+          }
+        }
+      }
+    },
+    "Wine Configuration": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration de Wine"
+          }
+        }
+      }
+    },
+    "Wine couldn't set up the Windows environment: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine n'a pas pu préparer l'environnement Windows : %@"
+          }
+        }
+      }
+    },
+    "Wine didn't start: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine n'a pas démarré : %@"
+          }
+        }
+      }
+    },
+    "Wine is built for Intel processors and runs through Rosetta 2, Apple's translator. Install it once by running this command in Terminal, then check again:": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine est conçu pour les processeurs Intel et passe par Rosetta 2, le traducteur d'Apple. Installe-le une fois en lançant cette commande dans Terminal, puis vérifie à nouveau :"
+          }
+        }
+      }
+    },
+    "Wine is opening the program.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine ouvre le programme."
+          }
+        }
+      }
+    },
+    "Wine is preparing Windows in the bottle…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine prépare Windows dans la bouteille…"
+          }
+        }
+      }
+    },
+    "Wine log": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal de Wine"
+          }
+        }
+      }
+    },
+    "Wine logs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journaux de Wine"
+          }
+        }
+      }
+    },
     "Wine runtime": {
       "localizations": {
         "fr": {
@@ -6113,6 +10983,26 @@
         }
       }
     },
+    "Wine's own renderer over OpenGL: for DirectX 9 and older games.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rendu de Wine via OpenGL : pour les jeux DirectX 9 et plus anciens."
+          }
+        }
+      }
+    },
+    "Without changing this, Finder's Open With menu still offers MacHub, and you can drag files onto its window. MacHub never runs a file before you confirm.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans rien changer ici, le menu Ouvrir avec du Finder propose quand même MacHub, et tu peux glisser des fichiers sur sa fenêtre. MacHub n'exécute jamais un fichier avant ta confirmation."
+          }
+        }
+      }
+    },
     "Won't run": {
       "localizations": {
         "fr": {
@@ -6131,6 +11021,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法运行"
+          }
+        }
+      }
+    },
+    "Xbox Wireless Controller": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manette sans fil Xbox"
+          }
+        }
+      }
+    },
+    "You can also drag a .exe or .msi onto this window, or use Open With > MacHub in Finder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu peux aussi glisser un .exe ou un .msi sur cette fenêtre, ou utiliser Ouvrir avec > MacHub dans le Finder."
           }
         }
       }
@@ -6223,6 +11133,16 @@
         }
       }
     },
+    "Your personal API key lets MacHub list a mod's files and download them with your account. It stays in the macOS Keychain. Free accounts click “Mod Manager Download” on the mod's page and MacHub installs the file; Premium accounts download directly from MacHub.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta clé API personnelle permet à MacHub de lister les fichiers d'un mod et de les télécharger avec ton compte. Elle reste dans le Trousseau macOS. Avec un compte gratuit, clique sur « Mod Manager Download » sur la page du mod et MacHub installe le fichier ; un compte Premium télécharge directement depuis MacHub."
+          }
+        }
+      }
+    },
     "Your sign-in is valid, but this account has no Steam Community profile yet, so Steam publishes no name or avatar. Optional: set one up on Steam.": {
       "localizations": {
         "fr": {
@@ -6245,8 +11165,98 @@
         }
       }
     },
+    "by %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "par %@"
+          }
+        }
+      }
+    },
+    "esync": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "esync"
+          }
+        }
+      }
+    },
+    "from %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "depuis %@"
+          }
+        }
+      }
+    },
+    "macOS didn't let MacHub open it. Check that it's fully downloaded.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS n'a pas laissé MacHub l'ouvrir. Vérifie qu'il est entièrement téléchargé."
+          }
+        }
+      }
+    },
+    "msync (fastest)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "msync (le plus rapide)"
+          }
+        }
+      }
+    },
+    "replaces an existing folder (kept as a backup)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "remplace un dossier existant (gardé en sauvegarde)"
+          }
+        }
+      }
+    },
+    "wineboot -u: refreshes Windows's own files for the current engine. Your programs and saves stay.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wineboot -u : actualise les fichiers de Windows pour le moteur actuel. Tes programmes et sauvegardes restent."
+          }
+        }
+      }
+    },
     "·": {
       "shouldTranslate": false
+    },
+    "· disabled": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· désactivé"
+          }
+        }
+      }
+    },
+    "· required by another mod": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· requis par un autre mod"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
