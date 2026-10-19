@@ -29,6 +29,22 @@ struct StoreDetails: Equatable, Sendable {
     var screenshots: [URL]
     var metacritic: Int?
     var price: String?
+    /// DirectX version named in the minimum (else recommended) PC requirements.
+    var directX: Int?
+    /// Steam genre IDs (language-independent), e.g. "57" Utilities.
+    var genreIDs: [String] = []
+
+    /// Steam's software genres (Animation & Modeling … Game Development): apps the store files as "game" but that
+    /// are tools, players or editors.
+    static let softwareGenres: Set<String> = ["51", "52", "53", "54", "55", "56", "57", "58", "59", "60"]
+
+    /// A real game: typed "game", with at least one genre that isn't a software genre, and not a benchmark, server,
+    /// SDK or player by name.
+    var isPlayableGame: Bool {
+        guard type == "game", !genreIDs.isEmpty, !Set(genreIDs).isSubset(of: Self.softwareGenres) else { return false }
+        let lowered = name.lowercased()
+        return !["benchmark", "dedicated server", " sdk", "video player", "soundtrack"].contains { lowered.contains($0) }
+    }
 }
 
 /// Steam store data. These endpoints are the ones the Steam store itself uses; Valve publishes no
@@ -130,7 +146,15 @@ enum SteamStore {
     static func parseDetails(_ data: Data, appID: Int) throws -> StoreDetails? {
         struct Entry: Decodable { let success: Bool; let data: Payload? }
         struct Payload: Decodable {
-            struct Named: Decodable { let description: String }
+            struct Named: Decodable { let description: String; let id: LooseID? }
+            /// Genre IDs come as strings, categories as numbers: accept both.
+            struct LooseID: Decodable {
+                let value: String
+                init(from decoder: Decoder) throws {
+                    let c = try decoder.singleValueContainer()
+                    value = (try? c.decode(String.self)) ?? String((try? c.decode(Int.self)) ?? 0)
+                }
+            }
             struct Release: Decodable { let date: String?; let coming_soon: Bool? }
             struct Platforms: Decodable { let windows, mac: Bool? }
             struct Shot: Decodable { let path_thumbnail: String? }
@@ -159,8 +183,23 @@ enum SteamStore {
             windows: d.platforms?.windows ?? false, mac: d.platforms?.mac ?? false,
             headerImage: d.header_image.flatMap(URL.init(string:)), background: d.background_raw.flatMap(URL.init(string:)),
             screenshots: (d.screenshots ?? []).compactMap { $0.path_thumbnail.flatMap(URL.init(string:)) },
-            metacritic: d.metacritic?.score, price: d.price_overview?.final_formatted
+            metacritic: d.metacritic?.score, price: d.price_overview?.final_formatted,
+            directX: directXVersion(in: data, appID: appID),
+            genreIDs: d.genres?.compactMap { $0.id?.value } ?? []
         )
+    }
+
+    /// `pc_requirements` is an object, or an empty array when the page has none: read it loosely.
+    static func directXVersion(in data: Data, appID: Int) -> Int? {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let payload = (root[String(appID)] as? [String: Any])?["data"] as? [String: Any],
+              let requirements = payload["pc_requirements"] as? [String: Any] else { return nil }
+        for key in ["minimum", "recommended"] {
+            if let html = requirements[key] as? String, let version = CompatibilitySources.directXVersion(inRequirements: html) {
+                return version
+            }
+        }
+        return nil
     }
 
     static func decodeEntities(_ text: String) -> String {

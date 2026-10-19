@@ -5,6 +5,9 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 ## [0.3.0] - 2026-10-19
 
 ### Added
+- **Mac compatibility estimate** on every game card and page: tested by MacHub, native Mac version, blocked by anti-cheat (AreWeAntiCheatYet), needs DirectX 12, or likely / issues / unlikely from Wine reports (ProtonDB). The game page shows each signal and its source.
+- **Your Steam library without a Web API key**: once Steam for Windows is signed in, MacHub reads the library from it, games shared through Steam Families included (tools, DLC and demos are left out).
+- The Steam account and Settings share one bar at the foot of the sidebar; a dot shows whether Steam is connected.
 - Automatic updates: MacHub checks its GitHub releases at most once a day and offers a new version in the sidebar. **Install and Relaunch** downloads it, checks its published SHA-256, replaces MacHub and relaunches it. Settings › General › Updates shows the version, a manual check and the automatic-check switch.
 
 ## [0.2.0] - 2026-10-19

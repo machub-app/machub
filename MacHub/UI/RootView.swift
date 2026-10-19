@@ -59,9 +59,6 @@ struct RootView: View {
                 ForEach([SidebarItem.home, .discover, .library, .software], id: \.self) { item in
                     Label(item.label, systemImage: item.symbol).tag(item)
                 }
-                Section {
-                    Label(SidebarItem.settings.label, systemImage: SidebarItem.settings.symbol).tag(SidebarItem.settings)
-                }
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
             .safeAreaInset(edge: .bottom) {
@@ -69,7 +66,7 @@ struct RootView: View {
                     UpdateChip()
                     SetupChip { navigation.selection = .settings }
                     ControllerChip { navigation.selection = .settings }
-                    SteamAccountChip { navigation.selection = .settings }
+                    ProfileBar(isInSettings: navigation.selection == .settings) { navigation.selection = .settings }
                 }
                 .padding(12)
                 .animation(.snappy, value: controllers.controllers.count)
@@ -427,38 +424,63 @@ private struct ControllerChip: View {
     }
 }
 
-private struct SteamAccountChip: View {
-    let action: () -> Void
+/// The foot of the sidebar: the Steam account (avatar, name and a dot for the connection) and the Settings gear.
+/// The account opens Settings › Steam Account; the gear opens Settings where the user left it.
+private struct ProfileBar: View {
+    let isInSettings: Bool
+    let openSettings: () -> Void
     @Environment(LibraryStore.self) private var store
     @AppStorage("settings.category") private var category = SettingsCategory.general
 
     var body: some View {
         let steam = store.steam
-        Button {
-            category = .steamAccount
-            action()
-        } label: {
-            HStack(spacing: 8) {
-                SteamAvatar(account: steam.account, size: 22)
-                VStack(alignment: .leading, spacing: 1) {
-                    if let account = steam.account {
-                        Group {
-                            if let name = account.displayName { Text(verbatim: name) } else { Text("Steam account") }
+        HStack(spacing: 6) {
+            Button {
+                category = .steamAccount
+                openSettings()
+            } label: {
+                HStack(spacing: 8) {
+                    SteamAvatar(account: steam.account, size: 26)
+                        .overlay(alignment: .bottomTrailing) {
+                            Circle().fill(dotColor).frame(width: 9, height: 9)
+                                .overlay(Circle().strokeBorder(Theme.surface, lineWidth: 2))
+                                .offset(x: 2, y: 2)
                         }
-                        .font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
-                        Text("Steam connected").font(.caption2).foregroundStyle(Theme.textSecondary)
-                    } else {
-                        Text("Steam").font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
-                        Text(steam.isBusy ? "Waiting for the browser…" : "Not connected").font(.caption2).foregroundStyle(Theme.textSecondary)
+                    Group {
+                        if let name = steam.account?.displayName { Text(verbatim: name) } else if steam.account != nil { Text("Steam account") } else { Text("Connect Steam") }
                     }
+                    .font(.callout.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
+                .contentShape(.rect)
             }
-            .padding(10)
-            .background(Theme.surface, in: .rect(cornerRadius: 10))
+            .buttonStyle(.plain)
+            .help(helpText)
+
+            Button(action: openSettings) {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 15))
+                    .foregroundStyle(isInSettings ? Theme.textPrimary : Theme.textSecondary)
+                    .frame(width: 30, height: 30)
+                    .background(isInSettings ? Theme.surfaceRaised : .clear, in: .rect(cornerRadius: 8))
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .help("Settings (⌘,)")
+            .accessibilityLabel(Text("Settings"))
         }
-        .buttonStyle(.plain)
-        .help("Steam account settings")
+        .padding(.leading, 10).padding(.trailing, 6).padding(.vertical, 6)
+        .background(Theme.surface, in: .rect(cornerRadius: 10))
+    }
+
+    private var dotColor: Color {
+        if store.steam.isBusy { return Compatibility.playable.tint }
+        return store.steam.account != nil ? Compatibility.great.tint : Theme.textSecondary
+    }
+
+    private var helpText: Text {
+        if store.steam.isBusy { return Text("Waiting for the browser…") }
+        return store.steam.account != nil ? Text("Steam connected · Steam account settings") : Text("Not connected · Connect Steam")
     }
 }
 

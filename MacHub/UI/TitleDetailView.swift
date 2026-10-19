@@ -123,27 +123,7 @@ struct TitleDetailView: View {
     }
 
     private var compatibility: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Compatibility").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
-            HStack(alignment: .top, spacing: 14) {
-                Image(systemName: title.compatibility.symbol)
-                    .font(.system(size: 26))
-                    .foregroundStyle(title.compatibility.tint)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title.compatibility.label).font(.headline).foregroundStyle(Theme.textPrimary)
-                    Text(compatibilityNote).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surface, in: .rect(cornerRadius: 12))
-        }
-    }
-
-    private var compatibilityNote: LocalizedStringKey {
-        title.isDemo
-            ? "Illustrative value for the demo. MacHub has no compatibility data source yet."
-            : "Not verified. MacHub has no compatibility source yet, so being on Steam or installed says nothing about how well it runs on Mac."
+        CompatibilityPanel(title: title)
     }
 
     private var similar: [Title] {

@@ -49,6 +49,8 @@ You sign in to Steam, pick a game, click **Install**, then **Play**.
 ### 🎮 One library for all your games
 - Your Steam games, what's installed on this Mac, and recently played titles in one place.
 - **Discover:** search the Steam store from MacHub, with a page for each game.
+- **Mac compatibility at a glance:** every game shows an estimate (tested by MacHub, native Mac version, blocked by anti-cheat, needs DirectX 12, or likely to run from Wine reports on ProtonDB), with its sources on the game's page.
+- **No key needed:** once Steam for Windows is signed in, MacHub reads your library from it, games shared through Steam Families included.
 - Native Mac games are recognised and opened through Steam for Mac, without Wine.
 
 <p align="center"><img src="docs/screenshots/library.png" width="49%" alt="Library"> <img src="docs/screenshots/discover.png" width="49%" alt="Discover"></p>

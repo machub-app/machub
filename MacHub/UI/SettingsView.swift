@@ -362,7 +362,7 @@ struct SteamSettingsSection: View {
         } header: {
             Text("Owned games (optional)")
         } footer: {
-            Text("Signing in doesn't need a key. Steam only returns the list of games you own through its official Web API (IPlayerService/GetOwnedGames), which requires your personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine). Steam returns the games visible to the key's owner, so your own key covers your own account. MacHub keeps it in the macOS Keychain only and never writes it to files or logs.")
+            Text("Without a key, MacHub reads your library from Steam for Windows on this Mac once you are signed in there (games shared through Steam Families included). A personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine) adds playtime and the games Steam for Windows hasn't shown yet. MacHub keeps it in the macOS Keychain only and never writes it to files or logs.")
         }
     }
 
@@ -374,6 +374,7 @@ struct SteamSettingsSection: View {
         case .invalidKey: "Key refused by Steam"
         case .signedOut: "Connect Steam first"
         case .needsKey: "No key"
+        case .fromSteamClient: "\(store.ownedTitles.count) games, from Steam for Windows"
         case .failed: "Couldn't load"
         }
     }
