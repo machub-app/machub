@@ -94,6 +94,16 @@
         }
       }
     },
+    "%@ of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sur %@"
+          }
+        }
+      }
+    },
     "%@ · %@": {
       "localizations": {
         "fr": {
@@ -1767,6 +1777,16 @@
         }
       }
     },
+    "Controller settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages des manettes"
+          }
+        }
+      }
+    },
     "Controllers": {
       "localizations": {
         "fr": {
@@ -3115,6 +3135,16 @@
         }
       }
     },
+    "Games shared with you through Steam Families appear here once installed with Steam for Windows: Steam doesn't give apps the list of shared games. To get one, find it in Discover and click Install.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les jeux partagés avec toi via les Familles Steam apparaissent ici une fois installés avec Steam pour Windows : Steam ne donne pas la liste des jeux partagés aux applications. Pour en obtenir un, cherche-le dans Découvrir et clique sur Installer."
+          }
+        }
+      }
+    },
     "Games wait on thousands of Windows events per second. msync answers them with macOS's own Mach semaphores instead of asking Wine's server each time. Switch to Off only if a game hangs.": {
       "localizations": {
         "fr": {
@@ -3749,6 +3779,16 @@
         }
       }
     },
+    "Install it once to download and play your Windows games.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installe-le une fois pour télécharger et jouer à tes jeux Windows."
+          }
+        }
+      }
+    },
     "Install the Minecraft Launcher from minecraft.net and play once: MacHub then manages mods for it.": {
       "localizations": {
         "fr": {
@@ -3961,12 +4001,32 @@
         }
       }
     },
+    "Installing the Windows engine…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation du moteur Windows…"
+          }
+        }
+      }
+    },
     "Installing the engine…": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Installation du moteur…"
+          }
+        }
+      }
+    },
+    "Installs once, about 240 MB. Needed to play Windows games.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S'installe une seule fois, environ 240 Mo. Nécessaire pour jouer aux jeux Windows."
           }
         }
       }
@@ -3987,6 +4047,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Il apparaît ici en quelques secondes."
+          }
+        }
+      }
+    },
+    "It printed nothing.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n'a rien affiché."
           }
         }
       }
@@ -4419,6 +4489,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在加载…"
+          }
+        }
+      }
+    },
+    "Log: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Journal : %@"
           }
         }
       }
@@ -6134,6 +6214,36 @@
         }
       }
     },
+    "Open Settings for details.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre les Réglages pour les détails."
+          }
+        }
+      }
+    },
+    "Open Settings for the reason and the logs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre les Réglages pour la cause et les journaux."
+          }
+        }
+      }
+    },
+    "Open Settings to see the one command to run.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre les Réglages pour voir la commande à lancer."
+          }
+        }
+      }
+    },
     "Open Whisky": {
       "localizations": {
         "fr": {
@@ -7806,6 +7916,16 @@
         }
       }
     },
+    "Setting up Steam for Windows…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation de Steam pour Windows…"
+          }
+        }
+      }
+    },
     "Settings": {
       "localizations": {
         "fr": {
@@ -7888,6 +8008,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afficher le dossier du jeu"
+          }
+        }
+      }
+    },
+    "Show Wine Logs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher les journaux de Wine"
           }
         }
       }
@@ -8665,6 +8795,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam pour Windows et ses jeux"
+          }
+        }
+      }
+    },
+    "Steam for Windows couldn't be set up": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows n'a pas pu être installé"
           }
         }
       }
@@ -9843,6 +9983,16 @@
         }
       }
     },
+    "This takes a minute or two the first time.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela prend une à deux minutes la première fois."
+          }
+        }
+      }
+    },
     "This takes about a minute the first time. Nothing else on your Mac changes.": {
       "localizations": {
         "fr": {
@@ -9945,6 +10095,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "试试"
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer"
           }
         }
       }
@@ -10679,6 +10839,16 @@
         }
       }
     },
+    "Windows engine needed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moteur Windows nécessaire"
+          }
+        }
+      }
+    },
     "Windows engine not installed": {
       "localizations": {
         "fr": {
@@ -10947,6 +11117,16 @@
         }
       }
     },
+    "Wine stopped with code %lld.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wine s'est arrêté avec le code %lld."
+          }
+        }
+      }
+    },
     "Wine's own renderer over OpenGL: for DirectX 9 and older games.": {
       "localizations": {
         "fr": {
@@ -11135,6 +11315,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "par %@"
+          }
+        }
+      }
+    },
+    "drive_c is missing after wineboot.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "drive_c est absent après wineboot."
           }
         }
       }
