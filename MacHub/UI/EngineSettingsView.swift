@@ -492,6 +492,12 @@ struct SteamEngineSection: View {
                     .foregroundStyle(.green)
             case .failed(let message)?:
                 Label(message, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                    .textSelection(.enabled)
+                Button("Show Wine Logs", systemImage: "doc.text.magnifyingglass") {
+                    let logs = EmbeddedWineEngine.logDirectory
+                    try? FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)
+                    NSWorkspace.shared.open(logs)
+                }
             case nil:
                 if let prefix = store.steamPrefix {
                     LabeledContent("Steam for Windows") { Text(verbatim: "Installed · \(prefix.name)") }

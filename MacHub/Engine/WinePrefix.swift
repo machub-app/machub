@@ -130,18 +130,59 @@ struct PrefixStore: Sendable {
         try save(settings, at: prefix.url)
     }
 
+    /// Runs wineboot, writing its output to a log in ~/Library/Logs/app.machub.MacHub/Wine. A failed first attempt
+    /// is retried once after stopping the prefix's wineserver (a first start on a new Mac can stall while Rosetta
+    /// translates Wine). The error then carries the exit code, Wine's last lines and the log's path.
     private func boot(_ prefix: InstalledPrefix, runtime: WineRuntime, arguments: [String]) async throws {
         let env = WineEnvironment(runtime: runtime, prefix: prefix).variables
-        let boot: ProcessResult
-        do {
-            boot = try await ProcessRunner.run(runtime.wine, ["wineboot"] + arguments, timeout: 900, environment: env)
-        } catch let error as NSError where RuntimeManager.isBadArchitecture(error) {
-            throw RuntimeError.rosettaMissing
+        let log = Self.bootLog(for: prefix)
+        var failure = ""
+        for attempt in 1...2 {
+            let boot: ProcessResult
+            do {
+                boot = try await ProcessRunner.run(runtime.wine, ["wineboot"] + arguments, timeout: 900, environment: env)
+            } catch let error as NSError where RuntimeManager.isBadArchitecture(error) {
+                throw RuntimeError.rosettaMissing
+            }
+            Self.append(boot, attempt: attempt, to: log)
+            if boot.status == 0 {
+                // wineboot returns before wineserver has written the registry; wait for it to finish.
+                _ = try await ProcessRunner.run(runtime.wineserver, ["-w"], timeout: 120, environment: env)
+                if prefix.hasDriveC { return }
+                failure = String(localized: "drive_c is missing after wineboot.")
+            } else {
+                failure = Self.describeExit(boot)
+            }
+            _ = try? await ProcessRunner.run(runtime.wineserver, ["-k"], timeout: 30, environment: env)
         }
-        guard boot.status == 0 else { throw PrefixError.bootFailed(boot.stderr.suffix(400).description) }
-        // wineboot returns before wineserver has written the registry; wait for it to finish.
-        _ = try await ProcessRunner.run(runtime.wineserver, ["-w"], timeout: 120, environment: env)
-        guard prefix.hasDriveC else { throw PrefixError.bootFailed("drive_c missing after wineboot") }
+        throw PrefixError.bootFailed(failure + "\n" + String(localized: "Log: \(log.path)"))
+    }
+
+    static func bootLog(for prefix: InstalledPrefix) -> URL {
+        let stamp = ISO8601DateFormatter().string(from: .now).replacingOccurrences(of: ":", with: "-")
+        return EmbeddedWineEngine.logDirectory.appending(path: "wineboot-\(prefix.settings.name)-\(stamp).log")
+    }
+
+    private static func append(_ result: ProcessResult, attempt: Int, to log: URL) {
+        let fm = FileManager.default
+        try? fm.createDirectory(at: log.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let text = "=== wineboot attempt \(attempt), exit \(result.status)\n\(result.stdout)\(result.stderr)\n"
+        if let handle = try? FileHandle(forWritingTo: log) {
+            handle.seekToEndOfFile()
+            handle.write(Data(text.utf8))
+            try? handle.close()
+        } else {
+            try? text.write(to: log, atomically: true, encoding: .utf8)
+        }
+    }
+
+    /// Exit code plus the last meaningful lines Wine printed (empty when Wine printed nothing, as on a crash).
+    static func describeExit(_ result: ProcessResult) -> String {
+        let lines = (result.stderr + "\n" + result.stdout).split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        let tail = lines.suffix(4).joined(separator: "\n")
+        let code = String(localized: "Wine stopped with code \(Int(result.status)).")
+        return tail.isEmpty ? code + " " + String(localized: "It printed nothing.") : code + "\n" + tail
     }
 }
 
