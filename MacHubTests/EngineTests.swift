@@ -392,3 +392,16 @@ import Testing
         #expect(summary.peakMemoryMB == 720.10)
     }
 }
+
+struct WinebootFailureTests {
+    @Test func silentFailureSaysSo() {
+        let text = PrefixStore.describeExit(ProcessResult(status: 1, stdout: "", stderr: "\n  \n"))
+        #expect(text.contains("1") && !text.contains("\n"))
+    }
+
+    @Test func keepsWinesLastLines() {
+        let text = PrefixStore.describeExit(ProcessResult(status: 3, stdout: "", stderr: "a\nb\nc\nd\ne\nwine: could not load ntdll.so\n"))
+        #expect(text.hasSuffix("wine: could not load ntdll.so"))
+        #expect(!text.contains("\na\n"))
+    }
+}
