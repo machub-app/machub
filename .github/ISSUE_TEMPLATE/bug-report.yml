@@ -1,0 +1,21 @@
+name: Bug report
+description: Something in MacHub doesn't work
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes: {label: What happened, description: "And what you expected instead"}
+    validations: {required: true}
+  - type: textarea
+    id: steps
+    attributes: {label: Steps to reproduce, placeholder: "1. Open …\n2. Click …"}
+  - type: input
+    id: mac
+    attributes: {label: Mac and macOS, placeholder: "MacBook Air M2, macOS 26.1"}
+    validations: {required: true}
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: "Click Copy Report in Settings, then paste here (no account data)"
+      render: text
