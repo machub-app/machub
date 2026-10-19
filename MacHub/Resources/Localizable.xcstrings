@@ -191,6 +191,16 @@
         }
       }
     },
+    "%lld games, from Steam for Windows": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld jeux, depuis Steam pour Windows"
+          }
+        }
+      }
+    },
     "%lld h %lld min": {
       "localizations": {
         "fr": {
@@ -625,6 +635,16 @@
         }
       }
     },
+    "An estimate from public reports, not a promise. Tried it? Report how it ran on MacHub's GitHub page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une estimation tirée de rapports publics, pas une promesse. Tu l'as essayé ? Raconte-nous sur la page GitHub de MacHub."
+          }
+        }
+      }
+    },
     "An installer": {
       "localizations": {
         "fr": {
@@ -641,6 +661,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Une mise à jour est disponible. Steam l'applique au prochain lancement, ou choisis « Mettre à jour » dans le menu …."
+          }
+        }
+      }
+    },
+    "Anti-cheat": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anti-triche"
+          }
+        }
+      }
+    },
+    "Anti-cheat: uncertain": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anti-triche : incertain"
           }
         }
       }
@@ -809,6 +849,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Retour à la fiche"
+          }
+        }
+      }
+    },
+    "Blocked by anti-cheat": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqué par l'anti-triche"
           }
         }
       }
@@ -1235,6 +1285,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vérification et installation…"
+          }
+        }
+      }
+    },
+    "Checking compatibility reports…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification des rapports de compatibilité…"
           }
         }
       }
@@ -2481,6 +2541,16 @@
         }
       }
     },
+    "DirectX": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DirectX"
+          }
+        }
+      }
+    },
     "DirectX 12 (D3DMetal)": {
       "localizations": {
         "fr": {
@@ -3703,6 +3773,16 @@
         }
       }
     },
+    "Install Steam for Windows and sign in: MacHub then reads your library from it, games shared through Steam Families included. Or add your personal Web API key.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installe Steam pour Windows et connecte-toi : MacHub y lit ensuite ta bibliothèque, jeux partagés via les Familles Steam compris. Ou ajoute ta clé Web API personnelle."
+          }
+        }
+      }
+    },
     "Install a Windows Program…": {
       "localizations": {
         "fr": {
@@ -4101,12 +4181,42 @@
         }
       }
     },
+    "It needs DirectX 12, which MacHub can't run yet (Apple's D3DMetal is needed and isn't wired in).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il exige DirectX 12, que MacHub ne sait pas encore faire tourner (il faut D3DMetal d'Apple, pas encore branché)."
+          }
+        }
+      }
+    },
     "It printed nothing.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Il n'a rien affiché."
+          }
+        }
+      }
+    },
+    "It uses anti-cheat that accepts Linux, but MacHub hasn't seen it work with macOS's Wine. Online modes may refuse to start.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il utilise un anti-triche qui accepte Linux, mais MacHub ne l'a pas vu fonctionner avec Wine sur macOS. Les modes en ligne risquent de refuser de démarrer."
+          }
+        }
+      }
+    },
+    "Its anti-cheat refuses Wine, so it won't start, or will be blocked online.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son anti-triche refuse Wine : il ne démarrera pas, ou sera bloqué en ligne."
           }
         }
       }
@@ -4413,6 +4523,16 @@
         }
       }
     },
+    "Likely to run": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devrait tourner"
+          }
+        }
+      }
+    },
     "Limited controller: not a full gamepad": {
       "localizations": {
         "fr": {
@@ -4625,6 +4745,26 @@
         }
       }
     },
+    "Mac compatibility": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compatibilité Mac"
+          }
+        }
+      }
+    },
+    "Mac version": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version Mac"
+          }
+        }
+      }
+    },
     "MacHub": {
       "localizations": {
         "fr": {
@@ -4747,6 +4887,16 @@
         }
       }
     },
+    "MacHub has played this game on a real Mac.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub a joué à ce jeu sur un vrai Mac."
+          }
+        }
+      }
+    },
     "MacHub is up to date": {
       "localizations": {
         "fr": {
@@ -4863,6 +5013,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Import manuel : télécharge un .zip sur un site communautaire, MacHub l'installe en sécurité et peut l'annuler."
+          }
+        }
+      }
+    },
+    "May have issues": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problèmes possibles"
           }
         }
       }
@@ -5246,6 +5406,16 @@
         }
       }
     },
+    "Needs DirectX 12": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exige DirectX 12"
+          }
+        }
+      }
+    },
     "New bottle “%@”": {
       "localizations": {
         "fr": {
@@ -5560,6 +5730,26 @@
         }
       }
     },
+    "No compatibility reports for this game yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de rapport de compatibilité pour ce jeu."
+          }
+        }
+      }
+    },
+    "No compatibility reports for this program.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de rapport de compatibilité pour ce programme."
+          }
+        }
+      }
+    },
     "No controller connected": {
       "localizations": {
         "fr": {
@@ -5762,6 +5952,16 @@
         }
       }
     },
+    "No reports yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore de rapport"
+          }
+        }
+      }
+    },
     "No set-up Whisky bottle yet, so there is nothing to check on the Windows side.": {
       "localizations": {
         "fr": {
@@ -5814,6 +6014,26 @@
         }
       }
     },
+    "None listed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun signalé"
+          }
+        }
+      }
+    },
+    "None yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun pour l'instant"
+          }
+        }
+      }
+    },
     "Not a supported Windows file": {
       "localizations": {
         "fr": {
@@ -5842,6 +6062,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "未连接"
+          }
+        }
+      }
+    },
+    "Not connected · Connect Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non connecté · Se connecter à Steam"
           }
         }
       }
@@ -5918,6 +6148,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Non installé"
+          }
+        }
+      }
+    },
+    "Not listed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non indiqué"
           }
         }
       }
@@ -6386,6 +6626,16 @@
         }
       }
     },
+    "Open the game's ProtonDB page": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir la page ProtonDB du jeu"
+          }
+        }
+      }
+    },
     "Open the launcher": {
       "localizations": {
         "fr": {
@@ -6644,6 +6894,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "可游玩"
+          }
+        }
+      }
+    },
+    "Players report it doesn't run with Wine (ProtonDB).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les joueurs signalent qu'il ne tourne pas avec Wine (ProtonDB)."
+          }
+        }
+      }
+    },
+    "Players report it runs well with Wine (ProtonDB). Linux has more graphics paths than macOS, so this is a good sign, not a guarantee.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les joueurs signalent qu'il tourne bien avec Wine (ProtonDB). Linux a plus de chemins graphiques que macOS : c'est bon signe, pas une garantie."
+          }
+        }
+      }
+    },
+    "Players report it runs with Wine, with problems (ProtonDB). Expect glitches or extra steps.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les joueurs signalent qu'il tourne avec Wine, avec des problèmes (ProtonDB). Attends-toi à des bugs ou à des réglages en plus."
           }
         }
       }
@@ -7038,6 +7318,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "竞速与模拟"
+          }
+        }
+      }
+    },
+    "Read from Steam for Windows on this Mac, games shared through Steam Families included. Add a Web API key in Settings to also see playtime.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lue depuis Steam pour Windows sur ce Mac, jeux partagés via les Familles Steam compris. Ajoute une clé Web API dans les Réglages pour voir aussi le temps de jeu."
           }
         }
       }
@@ -8058,6 +8348,16 @@
         }
       }
     },
+    "Settings (⌘,)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglages (⌘,)"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "fr": {
@@ -8270,6 +8570,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "请在浏览器中登录 Steam 官网。MacHub 永远不会看到你的密码，只会收到经 Steam 验证的公开 SteamID。"
+          }
+        }
+      }
+    },
+    "Sign in to Steam for Windows and open its Library once: MacHub then reads your games from it. Or add your personal Web API key.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecte-toi à Steam pour Windows et ouvre sa Bibliothèque une fois : MacHub y lit ensuite tes jeux. Ou ajoute ta clé Web API personnelle."
           }
         }
       }
@@ -8845,6 +9155,16 @@
         }
       }
     },
+    "Steam connected · Steam account settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam connecté · Réglages du compte Steam"
+          }
+        }
+      }
+    },
     "Steam couldn't be reached to confirm the sign-in.": {
       "localizations": {
         "fr": {
@@ -8989,6 +9309,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam pour Windows a reçu la demande d'installer ce jeu. Confirme l'installation dans la fenêtre de Steam ; MacHub suit le téléchargement."
+          }
+        }
+      }
+    },
+    "Steam has a native macOS version: play it with Steam for Mac, without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam propose une version macOS native : joue avec Steam pour Mac, sans Wine."
           }
         }
       }
@@ -9573,6 +9903,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tester avec le Bloc-notes"
+          }
+        }
+      }
+    },
+    "Tested by MacHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testé par MacHub"
+          }
+        }
+      }
+    },
+    "Tested: plays": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testé : jouable"
           }
         }
       }
@@ -10381,6 +10731,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "未知"
+          }
+        }
+      }
+    },
+    "Unlikely to run": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peu probable"
           }
         }
       }
@@ -11245,6 +11605,16 @@
         }
       }
     },
+    "Wine reports (ProtonDB)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapports Wine (ProtonDB)"
+          }
+        }
+      }
+    },
     "Wine runtime": {
       "localizations": {
         "fr": {
@@ -11283,6 +11653,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le rendu de Wine via OpenGL : pour les jeux DirectX 9 et plus anciens."
+          }
+        }
+      }
+    },
+    "Without a key, MacHub reads your library from Steam for Windows on this Mac once you are signed in there (games shared through Steam Families included). A personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine) adds playtime and the games Steam for Windows hasn't shown yet. MacHub keeps it in the macOS Keychain only and never writes it to files or logs.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans clé, MacHub lit ta bibliothèque depuis Steam pour Windows sur ce Mac dès que tu y es connecté (jeux partagés via les Familles Steam compris). Une clé personnelle sur steamcommunity.com/dev/apikey (pour le domaine, « localhost » convient) ajoute le temps de jeu et les jeux que Steam pour Windows n'a pas encore affichés. MacHub la garde uniquement dans le Trousseau macOS et ne l'écrit jamais dans des fichiers ou des journaux."
           }
         }
       }
