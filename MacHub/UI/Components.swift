@@ -236,7 +236,11 @@ struct MetaLine: View {
     var body: some View {
         HStack(spacing: 10) {
             if !title.isDemo { AvailabilityBadge(title: title) }
-            CompatibilityBadge(compatibility: title.compatibility, isDemo: title.isDemo)
+            if !title.isDemo, let appID = title.steamAppID {
+                EstimateBadge(appID: appID)
+            } else {
+                CompatibilityBadge(compatibility: title.compatibility, isDemo: title.isDemo)
+            }
             if let year = title.releaseYear {
                 Text(verbatim: String(year))
             }
@@ -576,6 +580,9 @@ struct TitleCard: View {
             ArtworkImage(title: title, artwork: style.artwork)
                 .frame(width: w, height: w * size.height / size.width)
                 .clipShape(.rect(cornerRadius: Theme.cardRadius))
+                .overlay(alignment: .bottomLeading) {
+                    if !title.isDemo, title.nativeApp == nil, let appID = title.steamAppID { EstimatePill(appID: appID) }
+                }
                 .overlay(alignment: .topTrailing) {
                     if title.isDemo {
                         Image(systemName: "flask.fill")
