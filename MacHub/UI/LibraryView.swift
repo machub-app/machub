@@ -149,6 +149,13 @@ struct LibraryView: View {
                 } else {
                     TitleGrid(titles: titles)
                 }
+                if store.steam.account != nil {
+                    // Steam gives apps the games an account owns, never the ones shared through Steam Families.
+                    Label("Games shared with you through Steam Families appear here once installed with Steam for Windows: Steam doesn't give apps the list of shared games. To get one, find it in Discover and click Install.",
+                          systemImage: "person.2")
+                        .font(.caption).foregroundStyle(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if showDemo {
                     Text("Sample games").font(.title2.weight(.bold)).padding(.top, 12)
                     TitleGrid(titles: DemoLibrary.titles.filter { $0.kind == .game })
