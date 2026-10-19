@@ -1,3 +1,4 @@
+import AVKit
 import SwiftUI
 
 struct TitleDetailView: View {
@@ -31,6 +32,9 @@ struct TitleDetailView: View {
                 }
                 .padding(.horizontal, Theme.gutter)
 
+                if let trailers = details?.trailers, !trailers.isEmpty {
+                    TrailerRow(trailers: trailers)
+                }
                 if let shots = details?.screenshots, !shots.isEmpty {
                     ScreenshotRow(urls: shots)
                 }
@@ -270,6 +274,75 @@ private struct RequirementsPanel: View {
         .padding(.vertical, 10)
         .overlay(alignment: .bottom) { Rectangle().fill(Theme.stroke).frame(height: 1) }
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Store trailers as a row of thumbnails; one opens in a player sheet, streamed from Steam (HLS) only on demand.
+private struct TrailerRow: View {
+    let trailers: [StoreDetails.Trailer]
+    @State private var playing: StoreDetails.Trailer?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Trailers").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary).padding(.horizontal, Theme.gutter)
+            ScrollView(.horizontal) {
+                LazyHStack(alignment: .top, spacing: 14) {
+                    ForEach(trailers.prefix(8)) { trailer in
+                        Button { playing = trailer } label: {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Color.black
+                                    .frame(width: 320, height: 180)
+                                    .overlay {
+                                        AsyncImage(url: trailer.thumbnail) { $0.resizable().aspectRatio(contentMode: .fill) } placeholder: { Theme.surface }
+                                    }
+                                    .overlay {
+                                        Image(systemName: "play.fill")
+                                            .font(.system(size: 22, weight: .semibold)).foregroundStyle(.white)
+                                            .frame(width: 54, height: 54)
+                                            .background(.black.opacity(0.55), in: .circle)
+                                    }
+                                    .clipShape(.rect(cornerRadius: Theme.cardRadius))
+                                Text(verbatim: trailer.name).font(.callout).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                                    .frame(width: 320, alignment: .leading)
+                            }
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                        .help(Text(verbatim: trailer.name))
+                    }
+                }
+                .padding(.horizontal, Theme.gutter)
+            }
+            .scrollIndicators(.never)
+        }
+        .sheet(item: $playing) { TrailerPlayer(trailer: $0) }
+    }
+}
+
+private struct TrailerPlayer: View {
+    let trailer: StoreDetails.Trailer
+    @Environment(\.dismiss) private var dismiss
+    @State private var player: AVPlayer?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text(verbatim: trailer.name).font(.headline).lineLimit(1)
+                Spacer()
+                Button("Done") { dismiss() }.keyboardShortcut(.cancelAction)
+            }
+            .padding(12)
+            VideoPlayer(player: player)
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .background(.black)
+        }
+        .frame(width: 960)
+        .onAppear {
+            let player = AVPlayer(url: trailer.stream)
+            self.player = player
+            player.play()
+        }
+        .onDisappear { player?.pause() }
     }
 }
 

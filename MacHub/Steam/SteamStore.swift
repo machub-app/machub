@@ -33,6 +33,16 @@ struct StoreDetails: Equatable, Sendable {
     var directX: Int?
     /// Steam genre IDs (language-independent), e.g. "57" Utilities.
     var genreIDs: [String] = []
+    /// Store trailers, the highlighted ones first.
+    var trailers: [Trailer] = []
+
+    struct Trailer: Equatable, Hashable, Sendable, Identifiable {
+        let id: Int
+        let name: String
+        let thumbnail: URL?
+        /// HLS (H.264) stream, which AVPlayer plays natively; older pages only have an MP4.
+        let stream: URL
+    }
 
     /// Steam's software genres (Animation & Modeling … Game Development): apps the store files as "game" but that
     /// are tools, players or editors.
@@ -158,6 +168,14 @@ enum SteamStore {
             struct Release: Decodable { let date: String?; let coming_soon: Bool? }
             struct Platforms: Decodable { let windows, mac: Bool? }
             struct Shot: Decodable { let path_thumbnail: String? }
+            struct Movie: Decodable {
+                let id: Int?
+                let name: String?
+                let thumbnail: String?
+                let hls_h264: String?
+                let mp4: [String: String]?
+                let highlight: Bool?
+            }
             struct Meta: Decodable { let score: Int? }
             struct Price: Decodable { let final_formatted: String? }
             let name: String
@@ -170,6 +188,7 @@ enum SteamStore {
             let platforms: Platforms?
             let header_image, background_raw: String?
             let screenshots: [Shot]?
+            let movies: [Movie]?
             let metacritic: Meta?
             let price_overview: Price?
         }
@@ -185,7 +204,12 @@ enum SteamStore {
             screenshots: (d.screenshots ?? []).compactMap { $0.path_thumbnail.flatMap(URL.init(string:)) },
             metacritic: d.metacritic?.score, price: d.price_overview?.final_formatted,
             directX: directXVersion(in: data, appID: appID),
-            genreIDs: d.genres?.compactMap { $0.id?.value } ?? []
+            genreIDs: d.genres?.compactMap { $0.id?.value } ?? [],
+            trailers: (d.movies ?? []).sorted { ($0.highlight ?? false) && !($1.highlight ?? false) }.compactMap { movie in
+                guard let stream = (movie.hls_h264 ?? movie.mp4?["max"] ?? movie.mp4?["480"]).flatMap(URL.init(string:)) else { return nil }
+                return StoreDetails.Trailer(id: movie.id ?? stream.hashValue, name: decodeEntities(movie.name ?? ""),
+                                            thumbnail: movie.thumbnail.flatMap(URL.init(string:)), stream: stream)
+            }
         )
     }
 
