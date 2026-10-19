@@ -89,13 +89,28 @@ You sign in to Steam, pick a game, click **Install**, then **Play**.
 
    <img src="docs/screenshots/install.png" width="460" alt="Drag MacHub to Applications">
 
-3. Open MacHub. It is signed and notarized by Apple, so it opens like any other app.
+3. **Open MacHub the first time** (see [First launch](#first-launch) below: macOS asks you to confirm once).
 4. If Rosetta 2 isn't installed yet, MacHub shows the one command to run (Wine runs through Apple's translator).
 5. In **Settings › Windows Engine**, MacHub downloads its engine (about 240 MB, once).
 6. In **Settings › Steam for Windows**, click **Install Steam for Windows**, then sign in in Steam's window.
 7. Pick a game, click **Install**, then **Play**.
 
 **Requirements:** a Mac with Apple silicon (M1 or later), macOS 15 or later, and space for your games.
+
+### First launch
+
+MacHub isn't notarized by Apple yet (that needs a paid developer account), so the first time, macOS says it can't verify the app. This is normal for open-source Mac apps, and you only do it once:
+
+1. Open MacHub from Applications. macOS shows a warning: click **Done**.
+2. Open **System Settings › Privacy & Security**, scroll down and click **Open Anyway** next to MacHub, then confirm with your password or Touch ID.
+
+Or, in Terminal:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/MacHub.app
+```
+
+You can check what you run: the source code is all here, and each release lists the SHA-256 of its `.dmg`.
 
 ## How it works
 
@@ -151,6 +166,11 @@ MacHub doesn't claim a game works until it has been tested. Tried a game? [Tell 
 <details>
 <summary><b>Is it free?</b></summary>
 Yes, free and open source under GPLv3. You still need to own your games.
+</details>
+
+<details>
+<summary><b>Why does macOS warn me the first time?</b></summary>
+Apple only skips this warning for apps signed and notarized with a paid developer account. MacHub isn't yet, so macOS asks you to confirm once. See <a href="#first-launch">First launch</a>.
 </details>
 
 <details>

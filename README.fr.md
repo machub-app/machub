@@ -89,13 +89,28 @@ Tu te connectes à Steam, tu choisis un jeu, tu cliques sur **Installer**, puis 
 
    <img src="docs/screenshots/install.png" width="460" alt="Glisse MacHub dans Applications">
 
-3. Ouvre MacHub. L'app est signée et notarisée par Apple : elle s'ouvre comme n'importe quelle app.
+3. **Ouvre MacHub une première fois** (voir [Premier lancement](#premier-lancement) ci-dessous : macOS demande une confirmation, une seule fois).
 4. Si Rosetta 2 n'est pas encore installé, MacHub affiche la commande à lancer (Wine passe par le traducteur d'Apple).
 5. Dans **Réglages › Moteur Windows**, MacHub télécharge son moteur (environ 240 Mo, une seule fois).
 6. Dans **Réglages › Steam pour Windows**, clique sur **Installer Steam pour Windows**, puis connecte-toi dans la fenêtre de Steam.
 7. Choisis un jeu, clique sur **Installer**, puis sur **Jouer**.
 
 **Configuration requise :** un Mac à puce Apple (M1 ou plus récent), macOS 15 ou plus récent, et de la place pour tes jeux.
+
+### Premier lancement
+
+MacHub n'est pas encore notarisé par Apple (il faut pour cela un compte développeur payant). La première fois, macOS dit donc qu'il ne peut pas vérifier l'app. C'est normal pour les apps Mac open source, et ça ne se fait qu'une fois :
+
+1. Ouvre MacHub depuis Applications. macOS affiche un avertissement : clique sur **Terminé**.
+2. Ouvre **Réglages Système › Confidentialité et sécurité**, descends et clique sur **Ouvrir quand même** à côté de MacHub, puis confirme avec ton mot de passe ou Touch ID.
+
+Ou, dans Terminal :
+
+```bash
+xattr -dr com.apple.quarantine /Applications/MacHub.app
+```
+
+Tu peux vérifier ce que tu lances : tout le code source est ici, et chaque version indique l'empreinte SHA-256 de son `.dmg`.
 
 ## Comment ça marche
 
@@ -151,6 +166,11 @@ MacHub n'annonce un jeu compatible qu'après l'avoir testé. Tu as essayé un je
 <details>
 <summary><b>C'est gratuit ?</b></summary>
 Oui, gratuit et open source sous GPLv3. Il faut bien sûr posséder tes jeux.
+</details>
+
+<details>
+<summary><b>Pourquoi macOS m'avertit-il la première fois ?</b></summary>
+Apple ne retire cet avertissement que pour les apps signées et notarisées avec un compte développeur payant. Ce n'est pas encore le cas de MacHub, donc macOS te demande de confirmer une fois. Voir <a href="#premier-lancement">Premier lancement</a>.
 </details>
 
 <details>
