@@ -38,7 +38,12 @@ struct OwnedStateNotice: View {
         switch store.ownedState {
         case .needsKey:
             NoticeCard(symbol: "key", title: "Your Steam library",
-                       message: "Steam only shares the list of games you own through its official Web API, which needs your personal key. Sign-in itself doesn't need it.") {
+                       message: store.steamPrefix == nil
+                           ? "Install Steam for Windows and sign in: MacHub then reads your library from it, games shared through Steam Families included. Or add your personal Web API key."
+                           : "Sign in to Steam for Windows and open its Library once: MacHub then reads your games from it. Or add your personal Web API key.") {
+                if store.steamPrefix == nil {
+                    Button("Install Steam for Windows") { Task { await store.setUpSteam() } }.buttonStyle(SecondaryActionStyle())
+                }
                 Button("Add a key in Settings") { navigation.selection = .settings }.buttonStyle(SecondaryActionStyle())
             }
         case .privateProfile:
@@ -59,6 +64,11 @@ struct OwnedStateNotice: View {
             }
         case .loading:
             NoticeCard(symbol: "arrow.triangle.2.circlepath", title: "Your Steam library", message: "Loading your games from Steam…")
+        case .fromSteamClient:
+            Label("Read from Steam for Windows on this Mac, games shared through Steam Families included. Add a Web API key in Settings to also see playtime.",
+                  systemImage: "checkmark.circle")
+                .font(.caption).foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, Theme.gutter)
         case .signedOut, .loaded:
             EmptyView()
         }

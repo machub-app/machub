@@ -53,6 +53,8 @@ final class LibraryStore {
 
     enum OwnedState: Equatable {
         case signedOut, needsKey, loading, loaded, privateProfile, invalidKey
+        /// No Web API key: the games come from Steam for Windows' own library cache on this Mac.
+        case fromSteamClient
         case failed(String)
     }
 
@@ -74,6 +76,8 @@ final class LibraryStore {
     private(set) var steamUpdates: [Int: SteamApp] = [:]
     private(set) var steamSetup: SteamSetupState?
     private var downloadWatch: Task<Void, Never>?
+    private var libraryCacheWatch: Task<Void, Never>?
+    private var libraryCacheCount = -1
     private(set) var ownedTitles: [Title] = []
     private(set) var ownedState: OwnedState = .signedOut
     private(set) var imported: [ImportedProgram] = LocalData.load([ImportedProgram].self, from: "software.json") ?? []
@@ -84,6 +88,9 @@ final class LibraryStore {
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
     private(set) var details: [Int: StoreDetails] = [:]
+    /// Compatibility estimates per Steam app, filled as cards and pages appear (see CompatibilityEstimate).
+    private(set) var estimates: [Int: CompatibilityEstimate] = [:]
+    private var estimating: Set<Int> = []
     private(set) var loadErrors: [String] = []
     private(set) var isLoading = false
     private(set) var launchStates: [Title.ID: LaunchState] = [:] {
@@ -424,6 +431,30 @@ final class LibraryStore {
         steamUpdates = updates
         pendingSteamActions = pendingSteamActions.filter { id in installed.contains { $0.steamAppID == id } }
         if !downloads.isEmpty || updates.values.contains(where: { $0.isUpdating || $0.isValidating || $0.isUninstalling }) { watchDownloads() }
+        refreshOwnedIfSteamLibraryChanged()
+    }
+
+    /// Without a key the library comes from Steam for Windows' cache, which fills in once Steam is signed in and its
+    /// library has been shown: reload the games whenever the number of cached apps changes.
+    private func refreshOwnedIfSteamLibraryChanged() {
+        guard steam.account != nil, !steam.hasAPIKey, let prefix = steamPrefix,
+              let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else { return }
+        let count = SteamLibrary.libraryCacheAppIDs(steamRoot: root).count
+        guard count != libraryCacheCount else { return }
+        libraryCacheCount = count
+        Task { await refreshOwned() }
+    }
+
+    /// While Steam for Windows waits for its first sign-in, look at its library cache every 15 s for 10 minutes.
+    private func watchLibraryCache() {
+        libraryCacheWatch?.cancel()
+        libraryCacheWatch = Task { [weak self] in
+            for _ in 0..<40 {
+                try? await Task.sleep(for: .seconds(15))
+                guard !Task.isCancelled else { return }
+                self?.refreshOwnedIfSteamLibraryChanged()
+            }
+        }
     }
 
     /// Fraction of a Steam download, read from disk.
@@ -543,6 +574,7 @@ final class LibraryStore {
             }
         }
         steamSetup = .waitingForSignIn
+        watchLibraryCache()
         // Steam's window appears only after its self-update (a minute or more on first start).
         _ = await SteamSetup.revealSteamWindow(runtime: runtime)
     }
@@ -630,7 +662,7 @@ final class LibraryStore {
 
     func refreshOwned() async {
         guard let account = steam.account else { ownedState = .signedOut; ownedTitles = []; return }
-        guard let key = SteamAPIKeyStore.load() else { ownedState = .needsKey; ownedTitles = []; return }
+        guard let key = SteamAPIKeyStore.load() else { await refreshOwnedFromSteamClient(); return }
         ownedState = .loading
         do {
             switch try await SteamWebAPI.ownedGames(steamID: account.steamID64, key: key) {
@@ -647,6 +679,51 @@ final class LibraryStore {
             ownedState = .failed(Self.describe(error))
         }
     }
+
+    /// Without a key, the signed-in Steam for Windows still knows the library: its artwork cache has one folder per
+    /// app. The store tells which of them are games (DLC, demos, SDKs and redistributables are left out); answers
+    /// are kept on disk so each app is asked about once.
+    private func refreshOwnedFromSteamClient() async {
+        guard let prefix = steamPrefix, let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else {
+            ownedState = .needsKey; ownedTitles = []; return
+        }
+        let ids = SteamLibrary.libraryCacheAppIDs(steamRoot: root)
+        guard !ids.isEmpty else { ownedState = .needsKey; ownedTitles = []; return }
+        if ownedTitles.isEmpty { ownedState = .loading }
+        var known = LocalData.load([String: AppKind].self, from: Self.appKindsFile) ?? [:]
+        let missing = ids.filter { known[String($0)] == nil }
+        await withTaskGroup(of: (Int, AppKind?).self) { group in
+            var next = missing.makeIterator()
+            func add() {
+                guard let id = next.next() else { return }
+                group.addTask {
+                    do {
+                        guard let details = try await SteamStore.details(appID: id) else { return (id, AppKind(type: "unknown", name: "")) }
+                        return (id, AppKind(type: details.isPlayableGame ? "game" : (details.type == "game" ? "software" : details.type), name: details.name))
+                    } catch { return (id, nil) }   // offline or rate-limited: ask again next time
+                }
+            }
+            for _ in 0..<4 { add() }
+            for await (id, kind) in group {
+                if let kind { known[String(id)] = kind }
+                add()
+            }
+        }
+        LocalData.save(known, to: Self.appKindsFile)
+        let games = ids.compactMap { id -> SteamWebAPI.OwnedGame? in
+            guard let kind = known[String(id)], kind.type == "game" else { return nil }
+            return SteamWebAPI.OwnedGame(appID: id, name: kind.name, playtimeMinutes: 0, lastPlayed: nil)
+        }
+        ownedTitles = games.map(Title.init(owned:))
+        ownedState = games.isEmpty ? .needsKey : .fromSteamClient
+    }
+
+    struct AppKind: Codable, Equatable, Sendable {
+        let type: String
+        let name: String
+    }
+
+    static let appKindsFile = "steam-app-kinds-v2.json"
 
     func refreshFeatured() async {
         featuredState = .loading
@@ -667,6 +744,19 @@ final class LibraryStore {
         guard let fetched = try? await SteamStore.details(appID: appID) else { return nil }
         details[appID] = fetched
         return fetched
+    }
+
+    /// Builds a title's compatibility estimate once: store details (native Mac, DirectX), anti-cheat, ProtonDB.
+    func loadEstimate(appID: Int) async {
+        guard estimates[appID] == nil, !estimating.contains(appID) else { return }
+        estimating.insert(appID)
+        defer { estimating.remove(appID) }
+        async let detailsTask = loadDetails(appID: appID)
+        async let antiCheatsTask = CompatibilitySources.antiCheats()
+        async let protonTask = CompatibilitySources.protonDB(appID: appID)
+        let (details, antiCheats, proton) = await (detailsTask, antiCheatsTask, protonTask)
+        estimates[appID] = .make(appID: appID, nativeMac: details?.mac, directX: details?.directX,
+                                 antiCheat: antiCheats[appID], protonTier: proton?.tier, protonReports: proton?.reports ?? 0)
     }
 
     // MARK: Actions

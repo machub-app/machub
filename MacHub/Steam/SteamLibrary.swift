@@ -135,6 +135,13 @@ enum SteamLibrary {
             .first { fileManager.fileExists(atPath: $0.appending(path: "steam.exe").path) }
     }
 
+    /// App IDs the signed-in Steam client keeps library artwork for (`appcache/librarycache/<id>`): every app its
+    /// library shows, games shared through Steam Families included, mixed with DLC, demos and tools.
+    static func libraryCacheAppIDs(steamRoot: URL, fileManager: FileManager = .default) -> [Int] {
+        let cache = steamRoot.appending(path: "appcache/librarycache")
+        return ((try? fileManager.contentsOfDirectory(atPath: cache.path)) ?? []).compactMap(Int.init).sorted()
+    }
+
     /// Every library folder Steam knows (its own folder first), as macOS URLs inside the prefix.
     static func libraryFolders(steamRoot: URL, prefix: URL) -> [URL] {
         var folders = [steamRoot]
