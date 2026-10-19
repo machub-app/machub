@@ -1,0 +1,64 @@
+# Builds, signs, notarizes and publishes MacHub when a version tag is pushed (git tag v0.1.0 && git push origin v0.1.0).
+# The release is created as a draft: check its notes, then publish it by hand.
+#
+# Repository secrets it needs (Settings › Secrets and variables › Actions):
+#   DEVELOPER_ID_P12           base64 of the "Developer ID Application" certificate exported as .p12
+#   DEVELOPER_ID_P12_PASSWORD  the password chosen when exporting it
+#   NOTARY_KEY_P8              base64 of an App Store Connect API key (.p8, "Developer" access)
+#   NOTARY_KEY_ID              that key's ID
+#   NOTARY_ISSUER_ID           the Issuer ID shown above the keys list
+#
+# Not yet run on GitHub: scripts/make-dmg.sh was checked locally on 2026-10-19.
+name: Release app
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Import signing certificate and notary key
+        env:
+          P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+          KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(uuidgen)"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain"
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          echo "$KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+          xcrun notarytool store-credentials machub-notary --key "$RUNNER_TEMP/notary.p8" \
+            --key-id "$KEY_ID" --issuer "$ISSUER_ID" --keychain "$keychain"
+          rm "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP/notary.p8"
+          echo "NOTARY_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+
+      - name: Build, sign, notarize
+        run: NOTARY_PROFILE=machub-notary scripts/make-dmg.sh build/release
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          dmg="build/release/MacHub-$version.dmg"
+          cp "$dmg" build/release/MacHub.dmg   # stable name for the "latest" download link
+          notes="$(awk -v v="$version" '$0 ~ "^## \\[" v "\\]" {on=1; next} /^## \[/ {on=0} on' CHANGELOG.md)"
+          gh release create "$GITHUB_REF_NAME" --draft --prerelease --title "MacHub $version" --notes "$notes" \
+            build/release/MacHub.dmg "$dmg" "$dmg.sha256"

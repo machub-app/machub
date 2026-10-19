@@ -2,5 +2,6 @@
   "version": "1.0.5",
   "archive": "MacHubRuntime-1.0.5.tar.xz",
   "sha256": "70631a3a8cd004a7cd99f7aa2a6ffb716401c8a568829220dcb61021fca7deb0",
-  "size": 237789184
+  "size": 237789184,
+  "url": "https://github.com/machub-app/machub/releases/download/runtime-1.0.5/MacHubRuntime-1.0.5.tar.xz"
 }
