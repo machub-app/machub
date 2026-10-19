@@ -1147,12 +1147,32 @@
         }
       }
     },
+    "Check for Updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher des mises à jour"
+          }
+        }
+      }
+    },
     "Check for updates": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Rechercher des mises à jour"
+          }
+        }
+      }
+    },
+    "Check for updates automatically": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher les mises à jour automatiquement"
           }
         }
       }
@@ -1911,6 +1931,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法加载你的游戏：%@"
+          }
+        }
+      }
+    },
+    "Couldn't reach GitHub. Check your connection and try again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre GitHub. Vérifie ta connexion et réessaie."
           }
         }
       }
@@ -3653,6 +3683,16 @@
         }
       }
     },
+    "Install MacHub %@ and Relaunch": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer MacHub %@ et relancer"
+          }
+        }
+      }
+    },
     "Install Steam for Windows": {
       "localizations": {
         "fr": {
@@ -3721,6 +3761,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installe un jeu avec Steam pour Windows et il apparaîtra ici."
+          }
+        }
+      }
+    },
+    "Install and Relaunch": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer et relancer"
           }
         }
       }
@@ -4217,6 +4267,16 @@
         }
       }
     },
+    "Last checked %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière vérification %@"
+          }
+        }
+      }
+    },
     "Last launch: %@": {
       "localizations": {
         "fr": {
@@ -4575,12 +4635,32 @@
         }
       }
     },
+    "MacHub %@ is available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub %@ est disponible"
+          }
+        }
+      }
+    },
     "MacHub adds it as it is, from where it is now. Keep the file in place.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "MacHub l'ajoute tel quel, là où il se trouve. Laisse le fichier à sa place."
+          }
+        }
+      }
+    },
+    "MacHub can't replace itself from this folder. Move it to Applications, or download the new version from its page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub ne peut pas se remplacer depuis ce dossier. Déplace-le dans Applications, ou télécharge la nouvelle version depuis sa page."
           }
         }
       }
@@ -4663,6 +4743,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "MacHub n'a pas d'intégration de mods pour ce jeu."
+          }
+        }
+      }
+    },
+    "MacHub is up to date": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub est à jour"
+          }
+        }
+      }
+    },
+    "MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at most once a day. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub cherche les nouvelles versions sur sa page GitHub (github.com/machub-app/machub) au plus une fois par jour. Chaque mise à jour est vérifiée avec son empreinte SHA-256 publiée, puis MacHub se remplace et se relance."
           }
         }
       }
@@ -7296,6 +7396,16 @@
         }
       }
     },
+    "Restarting MacHub…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redémarrage de MacHub…"
+          }
+        }
+      }
+    },
     "Retina renders at the screen's full resolution: sharper, but up to four times more pixels for the GPU. Background shader compilation removes most DXVK stutter, at the cost of objects popping in for a moment.": {
       "localizations": {
         "fr": {
@@ -9621,6 +9731,16 @@
         }
       }
     },
+    "The downloaded update doesn't match its published fingerprint, so it wasn't installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mise à jour téléchargée ne correspond pas à son empreinte publiée : elle n'a pas été installée."
+          }
+        }
+      }
+    },
     "The engine archive couldn't be unpacked: %@": {
       "localizations": {
         "fr": {
@@ -9855,6 +9975,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "登录响应无效，已忽略。"
+          }
+        }
+      }
+    },
+    "The update couldn't be installed. You can download it from its page.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mise à jour n'a pas pu être installée. Tu peux la télécharger depuis sa page."
           }
         }
       }
@@ -10327,6 +10457,16 @@
         }
       }
     },
+    "Updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mises à jour"
+          }
+        }
+      }
+    },
     "Use": {
       "localizations": {
         "fr": {
@@ -10533,6 +10673,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ce que voit ton Mac, un test rapide des boutons, et ce que reçoivent les jeux Windows via Whisky."
+          }
+        }
+      }
+    },
+    "What's New": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveautés"
           }
         }
       }
@@ -11185,6 +11335,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tu peux aussi glisser un .exe ou un .msi sur cette fenêtre, ou utiliser Ouvrir avec > MacHub dans le Finder."
+          }
+        }
+      }
+    },
+    "You have %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu as la %@."
           }
         }
       }

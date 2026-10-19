@@ -124,6 +124,52 @@ private struct GeneralSettingsSections: View {
             Text("Demo titles let you explore MacHub before your own games are installed. They are labelled and can't be launched.")
         }
         WindowsFilesSection()
+        UpdatesSection()
+    }
+}
+
+/// Settings › General › Updates: the running version, a manual check and the daily automatic one.
+private struct UpdatesSection: View {
+    @State private var updater = AppUpdater.shared
+
+    var body: some View {
+        Section {
+            LabeledContent("Version") { Text(verbatim: AppUpdates.currentVersion) }
+            Toggle("Check for updates automatically", isOn: Binding(get: { updater.automatic }, set: { updater.automatic = $0 }))
+            HStack {
+                Button("Check for Updates") { Task { await updater.check() } }
+                    .disabled(updater.state == .checking)
+                if updater.state == .checking { ProgressView().controlSize(.small) }
+                Spacer()
+                status
+            }
+            if let release = updater.offered {
+                HStack {
+                    Button("Install MacHub \(release.version) and Relaunch") { Task { await updater.install() } }
+                        .buttonStyle(.borderedProminent)
+                    Link("What's New", destination: release.page)
+                }
+            }
+        } header: {
+            Text("Updates")
+        } footer: {
+            Text("MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at most once a day. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.")
+        }
+    }
+
+    @ViewBuilder private var status: some View {
+        switch updater.state {
+        case .upToDate:
+            Label("MacHub is up to date", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+        case .available(let release):
+            Text("MacHub \(release.version) is available").foregroundStyle(.secondary)
+        case .installFailed(_, let message), .failed(let message):
+            Text(verbatim: message).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+        default:
+            if let last = updater.lastCheck {
+                Text("Last checked \(last.formatted(.relative(presentation: .named)))").foregroundStyle(.secondary)
+            }
+        }
     }
 }
 
