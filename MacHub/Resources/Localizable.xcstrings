@@ -1621,24 +1621,12 @@
         }
       }
     },
-    "Connect Steam and add your Web API key to see the games you own, or install games in a Whisky bottle.": {
+    "Connect Steam and add your Web API key to see the games you own, or install games with Steam for Windows.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Connectez Steam et ajoutez votre clé Web API pour voir vos jeux, ou installez des jeux dans une bouteille Whisky."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "所有ゲームを表示するには Steam に接続して Web API キーを追加するか、Whisky のボトルにゲームをインストールしてください。"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接 Steam 并添加 Web API 密钥即可查看你拥有的游戏，或在 Whisky 容器中安装游戏。"
+            "value": "Connecte Steam et ajoute ta clé Web API pour voir les jeux que tu possèdes, ou installe des jeux avec Steam pour Windows."
           }
         }
       }
@@ -3137,24 +3125,24 @@
         }
       }
     },
-    "Games you own on Steam and games installed in your Whisky bottles.": {
+    "Games you own on Steam and games installed on this Mac.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos jeux Steam et les jeux installés dans vos bouteilles Whisky."
+            "value": "Les jeux que tu possèdes sur Steam et ceux installés sur ce Mac."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Steam で所有しているゲームと、Whisky のボトルにインストールされたゲーム。"
+            "value": "Steam で所有しているゲームと、この Mac にインストールされたゲーム。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "你在 Steam 上拥有的游戏，以及安装在 Whisky 容器中的游戏。"
+            "value": "你在 Steam 上拥有的游戏，以及安装在这台 Mac 上的游戏。"
           }
         }
       }
@@ -3697,24 +3685,12 @@
         }
       }
     },
-    "Install a game with Steam for Windows inside a Whisky bottle and it will appear here.": {
+    "Install a game with Steam for Windows and it will appear here.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Installez un jeu avec Steam pour Windows dans une bouteille Whisky : il apparaîtra ici."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whisky のボトル内の Windows 版 Steam でゲームをインストールすると、ここに表示されます。"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 Whisky 容器中用 Windows 版 Steam 安装游戏后，它会显示在这里。"
+            "value": "Installe un jeu avec Steam pour Windows et il apparaîtra ici."
           }
         }
       }
@@ -9435,24 +9411,12 @@
         }
       }
     },
-    "The Steam store, searched on demand. Being on Steam doesn't mean a game runs under Whisky.": {
+    "The Steam store, searched on demand. Being on Steam doesn't mean a game runs on Mac.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le Store Steam, interrogé à la demande. Être sur Steam ne signifie pas qu'un jeu fonctionne sous Whisky."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "必要なときに検索する Steam ストアです。Steam にあっても Whisky で動作するとは限りません。"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按需搜索 Steam 商店。在 Steam 上并不代表游戏能在 Whisky 下运行。"
+            "value": "La boutique Steam, consultée à la demande. Être sur Steam ne veut pas dire qu'un jeu tourne sur Mac."
           }
         }
       }

@@ -11,7 +11,7 @@ struct DiscoverView: View {
         @Bindable var model = model
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                PageHeader(title: "Discover", subtitle: "The Steam store, searched on demand. Being on Steam doesn't mean a game runs under Whisky.")
+                PageHeader(title: "Discover", subtitle: "The Steam store, searched on demand. Being on Steam doesn't mean a game runs on Mac.")
                 HStack(spacing: 12) {
                     TextField("Search the Steam store", text: $model.term)
                         .textFieldStyle(.roundedBorder)
@@ -122,7 +122,7 @@ struct LibraryView: View {
         let titles = filtered
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                PageHeader(title: "Library", subtitle: "Games you own on Steam and games installed in your Whisky bottles.")
+                PageHeader(title: "Library", subtitle: "Games you own on Steam and games installed on this Mac.")
                 Picker("Show", selection: $filter) {
                     Text("All").tag(Filter.all)
                     Text("Installed").tag(Filter.installed)
@@ -177,8 +177,8 @@ struct LibraryView: View {
     private var emptyMessage: LocalizedStringKey {
         switch filter {
         case .recent: "Games you start from MacHub appear here."
-        case .installed: "Install a game with Steam for Windows inside a Whisky bottle and it will appear here."
-        default: "Connect Steam and add your Web API key to see the games you own, or install games in a Whisky bottle."
+        case .installed: "Install a game with Steam for Windows and it will appear here."
+        default: "Connect Steam and add your Web API key to see the games you own, or install games with Steam for Windows."
         }
     }
 }

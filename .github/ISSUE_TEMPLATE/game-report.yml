@@ -1,0 +1,30 @@
+name: Game report
+description: Tell us how a Windows game runs in MacHub
+title: "[Game] "
+labels: [game-report]
+body:
+  - type: input
+    id: game
+    attributes: {label: Game, placeholder: "BeamNG.drive"}
+    validations: {required: true}
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options: ["Plays well", "Plays with issues", "Starts but can't play", "Doesn't start"]
+    validations: {required: true}
+  - type: dropdown
+    id: graphics
+    attributes:
+      label: Direct3D layer
+      options: ["Automatic", "DXMT", "DXVK", "Wine (OpenGL)", "D3DMetal", "Don't know"]
+  - type: input
+    id: mac
+    attributes: {label: Mac and macOS, placeholder: "MacBook Pro M3, macOS 26.1"}
+    validations: {required: true}
+  - type: input
+    id: engine
+    attributes: {label: MacHub and engine version, placeholder: "MacHub 0.1.0, engine 1.0.5"}
+  - type: textarea
+    id: notes
+    attributes: {label: Notes, description: "Launch options used, average FPS, what goes wrong"}
