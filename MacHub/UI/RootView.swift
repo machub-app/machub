@@ -65,11 +65,14 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 8) {
-                    ControllerChip { navigation.open(.controllers) }
+                    SetupChip { navigation.selection = .settings }
+                    ControllerChip { navigation.selection = .settings }
                     SteamAccountChip { navigation.selection = .settings }
-                    WhiskyStatusChip { navigation.selection = .settings }
                 }
                 .padding(12)
+                .animation(.snappy, value: controllers.controllers.count)
+                .animation(.snappy, value: store.engineState)
+                .animation(.snappy, value: store.steamPrefix?.url)
             }
         } detail: {
             NavigationStack(path: $path) {
@@ -244,101 +247,141 @@ struct AmbientBackdrop: View {
     }
 }
 
-/// Real Whisky state at a glance, at the foot of the sidebar.
-/// MacHub's Windows engine at a glance; opens Settings › Windows Engine.
-private struct WhiskyStatusChip: View {
+/// What still needs doing before a Windows game can run, at the foot of the sidebar: install the engine, then
+/// Steam for Windows, each with its own button and progress. Hidden once both are ready, so the sidebar stays quiet.
+private struct SetupChip: View {
     let action: () -> Void
     @Environment(LibraryStore.self) private var store
     @AppStorage("settings.category") private var category = SettingsCategory.general
 
     var body: some View {
-        Button {
-            category = .engine
-            action()
-        } label: {
-            HStack(spacing: 8) {
-                Circle().fill(color).frame(width: 8, height: 8)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(headline).font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
-                    Text(detail).font(.caption2).foregroundStyle(Theme.textSecondary).lineLimit(2)
+        if let step {
+            VStack(alignment: .leading, spacing: 8) {
+                Button {
+                    category = step.category
+                    action()
+                } label: {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: step.symbol).font(.system(size: 14)).foregroundStyle(step.tint).frame(width: 22)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(step.title).font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
+                            Text(step.detail).font(.caption2).foregroundStyle(Theme.textSecondary).lineLimit(3)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .contentShape(.rect)
                 }
-                Spacer(minLength: 0)
+                .buttonStyle(.plain)
+                .help("Open the Windows engine settings")
+                if let progress = step.progress {
+                    ProgressView(value: progress).controlSize(.small)
+                } else if step.isWorking {
+                    ProgressView().controlSize(.small).frame(maxWidth: .infinity, alignment: .leading)
+                } else if let label = step.buttonLabel {
+                    Button(label) { Task { await step.run(store) } }
+                        .buttonStyle(.borderedProminent).controlSize(.small)
+                }
             }
             .padding(10)
             .background(Theme.surface, in: .rect(cornerRadius: 10))
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
         }
-        .buttonStyle(.plain)
-        .help("Open the Windows engine settings")
     }
 
-    private var color: Color {
+    private struct Step {
+        var title: LocalizedStringKey
+        var detail: LocalizedStringKey
+        var symbol = "cpu"
+        var tint = Theme.textSecondary
+        var category = SettingsCategory.engine
+        var buttonLabel: LocalizedStringKey?
+        var progress: Double?
+        var isWorking = false
+        var run: @MainActor (LibraryStore) async -> Void = { _ in }
+    }
+
+    private var step: Step? {
         switch store.engineState {
-        case .ready: store.steamPrefix == nil ? Compatibility.issues.tint : Compatibility.great.tint
-        case .checking, .installing: Theme.textSecondary
-        case .notInstalled, .needsRosetta, .failed: Compatibility.unsupported.tint
+        case .checking:
+            return nil
+        case .notInstalled:
+            return Step(title: "Windows engine needed", detail: "Installs once, about 240 MB. Needed to play Windows games.",
+                        symbol: "arrow.down.circle", tint: Theme.textPrimary, buttonLabel: "Install",
+                        run: { await $0.downloadRuntime() })
+        case .installing(let received, let total):
+            return Step(title: "Installing the Windows engine…",
+                        detail: "\(received.formatted(.byteCount(style: .file))) of \(total.formatted(.byteCount(style: .file)))",
+                        symbol: "arrow.down.circle", progress: total > 0 ? Double(received) / Double(total) : nil, isWorking: true)
+        case .needsRosetta:
+            return Step(title: "Rosetta 2 needed", detail: "Open Settings to see the one command to run.",
+                        symbol: "exclamationmark.triangle.fill", tint: Compatibility.unsupported.tint)
+        case .failed:
+            return Step(title: "Windows engine problem", detail: "Open Settings for details.",
+                        symbol: "exclamationmark.triangle.fill", tint: Compatibility.unsupported.tint, buttonLabel: "Try Again",
+                        run: { await $0.refreshEngine() })
+        case .ready:
+            guard store.steamPrefix == nil else { return nil }
+            switch store.steamSetup {
+            case .working?:
+                return Step(title: "Setting up Steam for Windows…", detail: "This takes a minute or two the first time.",
+                            symbol: "gearshape.2", category: .steamWindows, isWorking: true)
+            case .failed?:
+                return Step(title: "Steam for Windows couldn't be set up", detail: "Open Settings for the reason and the logs.",
+                            symbol: "exclamationmark.triangle.fill", tint: Compatibility.unsupported.tint,
+                            category: .steamWindows, buttonLabel: "Try Again", run: { await $0.setUpSteam() })
+            case .waitingForSignIn?, nil:
+                return Step(title: "Steam for Windows", detail: "Install it once to download and play your Windows games.",
+                            symbol: "arrow.down.circle", tint: Theme.textPrimary, category: .steamWindows,
+                            buttonLabel: "Install", run: { await $0.setUpSteam() })
+            }
         }
-    }
-
-    private var headline: LocalizedStringKey {
-        switch store.engineState {
-        case .ready(let version, _): "Windows engine \(version)"
-        case .checking: "Checking the engine…"
-        case .installing: "Installing the engine…"
-        case .notInstalled: "Windows engine not installed"
-        case .needsRosetta: "Rosetta 2 needed"
-        case .failed: "Windows engine problem"
-        }
-    }
-
-    private var detail: LocalizedStringKey {
-        guard case .ready = store.engineState else { return "Open Settings for details" }
-        let environments = store.prefixes.count
-        return store.steamPrefix == nil
-            ? "\(environments) environment(s) · Steam not set up"
-            : "\(environments) environment(s) · \(store.installedTitles.count) game(s)"
     }
 }
 
-/// Connected controller at a glance; opens Settings > Controllers. Always shown so the page is easy to find.
+/// The connected controller, shown only while one is connected; opens Settings › Controllers.
 private struct ControllerChip: View {
     let action: () -> Void
     @Environment(ControllerMonitor.self) private var monitor
+    @AppStorage("settings.category") private var category = SettingsCategory.general
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: monitor.controllers.first?.family.symbol ?? "gamecontroller")
-                    .font(.system(size: 14))
-                    .foregroundStyle(monitor.controllers.isEmpty ? Theme.textSecondary : Theme.textPrimary)
-                    .frame(width: 22)
-                VStack(alignment: .leading, spacing: 1) {
-                    if let first = monitor.controllers.first {
+        if let first = monitor.controllers.first {
+            Button {
+                category = .controllers
+                action()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: first.family.symbol)
+                        .font(.system(size: 14)).foregroundStyle(Theme.textPrimary).frame(width: 22)
+                    VStack(alignment: .leading, spacing: 1) {
                         Text(verbatim: first.displayName).font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary).lineLimit(1)
-                        Text("Controller connected").font(.caption2).foregroundStyle(Theme.textSecondary)
-                    } else {
-                        Text("Controllers").font(.caption.weight(.semibold)).foregroundStyle(Theme.textPrimary)
-                        Text("None connected").font(.caption2).foregroundStyle(Theme.textSecondary)
+                        Text(monitor.controllers.count > 1 ? "\(monitor.controllers.count) controllers connected" : "Controller connected")
+                            .font(.caption2).foregroundStyle(Theme.textSecondary)
                     }
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
+                .padding(10)
+                .background(Theme.surface, in: .rect(cornerRadius: 10))
+                .contentShape(.rect)
             }
-            .padding(10)
-            .background(Theme.surface, in: .rect(cornerRadius: 10))
-            .animation(.snappy, value: monitor.controllers.first?.id)
+            .buttonStyle(.plain)
+            .help("Controller settings")
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
         }
-        .buttonStyle(.plain)
-        .help("Connect and test controllers")
     }
 }
 
-/// Who is signed in to Steam, at the foot of the sidebar. Only a verified OpenID sign-in shows a name.
 private struct SteamAccountChip: View {
     let action: () -> Void
     @Environment(LibraryStore.self) private var store
+    @AppStorage("settings.category") private var category = SettingsCategory.general
 
     var body: some View {
         let steam = store.steam
-        Button(action: action) {
+        Button {
+            category = .steamAccount
+            action()
+        } label: {
             HStack(spacing: 8) {
                 SteamAvatar(account: steam.account, size: 22)
                 VStack(alignment: .leading, spacing: 1) {
