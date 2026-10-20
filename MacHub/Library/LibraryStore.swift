@@ -15,6 +15,8 @@ final class LibraryStore {
         case blocked(LaunchProblem)
         /// Steam for Windows wasn't running in the bottle: waiting for steam.exe to appear.
         case startingSteam
+        /// The running Steam logged nothing after the launch request: MacHub quits it and starts it again.
+        case restartingSteam
         /// The program was handed to Wine (software); waiting for its process.
         case startingProcess
         /// Steam received the launch request; MacHub is watching for the game's own process.
@@ -36,7 +38,7 @@ final class LibraryStore {
 
         var isInProgress: Bool {
             switch self {
-            case .preparing, .checkingBottle, .startingSteam, .startingProcess, .waitingForGame: true
+            case .preparing, .checkingBottle, .startingSteam, .restartingSteam, .startingProcess, .waitingForGame: true
             default: false
             }
         }
@@ -46,7 +48,10 @@ final class LibraryStore {
     struct LaunchSession: Equatable {
         let title: Title
         let route: LaunchPlan.Route
-        let steamAlreadyRunning: Bool
+        /// Becomes false when MacHub has to restart a Steam that stopped answering: the Steam step is shown then.
+        var steamAlreadyRunning: Bool
+        /// MacHub had to restart Steam during this launch.
+        var steamRestarted = false
         var stepStartedAt: Date
         let startedAt: Date
     }
@@ -590,7 +595,7 @@ final class LibraryStore {
     func restartSteamIfSettingsChanged(prefix: InstalledPrefix, runtime: WineRuntime, launching id: Title.ID,
                                        extra: [String: String] = [:]) async {
         let snapshot = await ProcessWatch.snapshot()
-        guard !ProcessWatch.matches(in: snapshot, target: .executable(LaunchPlan.steamExecutable)).isEmpty else {
+        guard ProcessWatch.isSteamRunning(in: snapshot, engineRoot: runtime.root.deletingLastPathComponent()) else {
             recordSteamEnvironment(prefix: prefix, runtime: runtime, extra: extra)   // the launch will start Steam with them
             return
         }
@@ -613,13 +618,14 @@ final class LibraryStore {
         let engine = EmbeddedWineEngine(runtime: runtime)
         steamSetup = .working(.starting)
         let graphicsReady = (try? await SteamSetup.prepareGraphics(runtime: runtime, prefix: prefix)) ?? false
-        if ProcessWatch.matches(in: await ProcessWatch.snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty {
+        let engineRoot = RuntimeManager.live.directory
+        if !ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: engineRoot) {
             recordSteamEnvironment(prefix: prefix, runtime: runtime)
             Task.detached {
                 // Becomes the Steam client: returns only when Steam quits.
                 _ = try? await engine.run(SteamSetup.steamExe, bottle: prefix.name, arguments: [], timeout: 7 * 24 * 3600)
             }
-            guard await ProcessWatch.waitForProgram(named: LaunchPlan.steamExecutable, timeout: .seconds(120)) != nil else {
+            guard await Self.waitForSteam(engineRoot: engineRoot, timeout: .seconds(120)) else {
                 steamSetup = .failed(String(localized: "Steam for Windows didn't start within 2 minutes"))
                 return
             }
@@ -650,19 +656,57 @@ final class LibraryStore {
             return
         }
         steamSetup = .working(.starting)
-        if ProcessWatch.matches(in: await ProcessWatch.snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty {
+        let engineRoot = engineRoot(forBottle: name)
+        if !ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: engineRoot) {
             let cli = WhiskyCLI(install: install)
             Task.detached {
                 // Becomes the Steam client: returns only when Steam quits.
                 _ = try? await cli.run(SteamSetup.steamExe, bottle: name, arguments: [], timeout: 7 * 24 * 3600)
             }
-            guard await ProcessWatch.waitForProgram(named: LaunchPlan.steamExecutable, timeout: .seconds(120)) != nil else {
+            guard await Self.waitForSteam(engineRoot: engineRoot, timeout: .seconds(120)) else {
                 steamSetup = .failed(String(localized: "Steam for Windows didn't start within 2 minutes"))
                 return
             }
         }
         steamSetup = .waitingForSignIn
         watchLibraryCache()
+    }
+
+    /// Waits until Steam runs on one engine (Whisky's or MacHub's); another engine's Steam doesn't count.
+    static func waitForSteam(engineRoot: URL, timeout: Duration) async -> Bool {
+        let deadline = ContinuousClock.now + timeout
+        while ContinuousClock.now < deadline {
+            if ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: engineRoot) { return true }
+            try? await Task.sleep(for: .seconds(1))
+        }
+        return false
+    }
+
+    /// The folder holding the Wine that runs a bottle: MacHub's runtimes, or Whisky's libraries.
+    func engineRoot(forBottle name: String) -> URL {
+        if registeredBottles.first(where: { $0.name == name })?.engine == .embedded { return RuntimeManager.live.directory }
+        let whisky = whiskyInstall?.bundleIdentifier ?? WhiskyLocator.forkBundleID
+        return FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library/Application Support/\(whisky)/Libraries")
+    }
+
+    /// A Steam that stopped taking launch requests: ask it to quit (it syncs cloud saves), and if it doesn't within
+    /// 20 s, end that environment's Wine processes. Other environments, and Whisky's other bottles, are left alone.
+    func restartUnresponsiveSteam(in environment: BottleInfo) async {
+        guard let name = environment.name, let engine = engine(forBottle: name) else { return }
+        let root = engineRoot(forBottle: name)
+        Task.detached { _ = try? await engine.run(SteamSetup.steamExe, bottle: name, arguments: ["-shutdown"], timeout: 60) }
+        let deadline = ContinuousClock.now + .seconds(20)
+        while ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .seconds(2))
+            if !ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: root) { return }
+        }
+        if let embedded = engine as? EmbeddedWineEngine {
+            try? await embedded.stopAll(in: name)
+        } else {
+            let wineserver = root.appending(path: "Wine/bin/wineserver")
+            _ = try? await ProcessRunner.run(wineserver, ["-k"], timeout: 30, environment: ["WINEPREFIX": environment.url.path])
+        }
+        try? await Task.sleep(for: .seconds(2))
     }
 
     /// Asks Steam to quit cleanly (it syncs cloud saves on the way out), then ends what's left in the prefix.
@@ -859,8 +903,8 @@ final class LibraryStore {
             .program(path: title.installPath ?? "")
         }
         let steamRunning: Bool
-        if case .steam = route {
-            steamRunning = !ProcessWatch.matches(in: await ProcessWatch.snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty
+        if case .steam = route, let bottle = title.bottle {
+            steamRunning = ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: engineRoot(forBottle: bottle))
         } else {
             steamRunning = false
         }
@@ -938,6 +982,13 @@ final class LibraryStore {
             }
         }
         runner.latestLog = { engine.latestLog()?.path }
+        if route.isSteam, let environment = registeredBottles.first(where: { $0.name == bottle }) {
+            let root = engineRoot(forBottle: bottle)
+            runner.steamIsRunning = { ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: root) }
+            let consoleLog = environment.url.appending(path: "drive_c/Program Files (x86)/Steam/logs/console_log.txt")
+            runner.steamActivity = { SteamSetup.logSize(consoleLog) }
+            runner.restartSteam = { [weak self] in await self?.restartUnresponsiveSteam(in: environment) }
+        }
         if let embedded = engine as? EmbeddedWineEngine, let install = title.install,
            let prefix = prefixes.first(where: { $0.name == install.bottle }) {
             if route.isSteam {
@@ -963,6 +1014,10 @@ final class LibraryStore {
         await runner.run(LaunchPlan(route: route, bottle: bottle, target: target)) { [weak self] state in
             guard let self, self.launchStates[id] != .cancelled || !state.isInProgress else { return }
             self.launchStates[id] = state
+            if state == .restartingSteam {
+                self.launchSessions[id]?.steamAlreadyRunning = false
+                self.launchSessions[id]?.steamRestarted = true
+            }
             if case .running = state, !announced, title.kind == .game {
                 announced = true
                 let (name, appID) = (title.name, title.steamAppID)

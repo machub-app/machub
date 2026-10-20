@@ -100,6 +100,28 @@ enum ProcessWatch {
         for pid in pids where kill(pid, 0) == 0 { kill(pid, SIGKILL) }
     }
 
+    /// The real path of a folder as the kernel reports binaries (/private/var, not /var), ending with "/".
+    static func kernelPath(_ url: URL) -> String {
+        (realpath(url.path, nil).map { resolved in defer { free(resolved) }; return String(cString: resolved) } ?? url.path)
+            .trimmingSuffix("/") + "/"
+    }
+
+    static func binaryPath(of pid: Int32) -> String? {
+        var buffer = [CChar](repeating: 0, count: 4096)
+        guard proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 else { return nil }
+        return String(cString: buffer)
+    }
+
+    /// Whether Steam for Windows runs on one engine. Every Steam shows up in `ps` as `C:\…\steam.exe`, whichever
+    /// engine runs it; the Wine binary behind the process (Whisky's libraries or MacHub's runtimes) tells them apart.
+    /// Without this, Whisky's Steam made MacHub believe its own Steam was already started (2026-10-20).
+    static func isSteamRunning(in psOutput: String, engineRoot: URL, binaryPath: (Int32) -> String? = binaryPath(of:)) -> Bool {
+        let root = kernelPath(engineRoot)
+        return matches(in: psOutput, target: .executable(LaunchPlan.steamExecutable)).contains { match in
+            binaryPath(match.pid)?.hasPrefix(root) == true
+        }
+    }
+
     /// Every process running a binary from MacHub's runtimes (Wine itself, its wineserver, every Windows program).
     /// Wine programs show their Windows path in `ps`, so their binary path (proc_pidpath) is what identifies them.
     static func runtimeProcesses(under root: URL) -> [(pid: Int32, isServer: Bool)] {

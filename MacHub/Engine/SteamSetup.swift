@@ -33,6 +33,11 @@ enum SteamSetup {
             .contains { fileManager.fileExists(atPath: root.appending(path: $0).path) }
     }
 
+    /// Size of one of Steam's logs: it grows whenever Steam takes a request. nil if the log doesn't exist.
+    static func logSize(_ url: URL) -> Int64? {
+        (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64) ?? nil
+    }
+
     /// Valve's installer already on this Mac (MacHub's cache, or the copy an earlier MacHub kept in `installers/`),
     /// if it is still a Windows executable. Steam updates itself after installing, so an older copy is fine.
     static func cachedInstaller(in folder: URL = cache, fileManager: FileManager = .default) -> URL? {

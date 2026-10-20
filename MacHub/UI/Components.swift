@@ -429,7 +429,7 @@ struct PlayButton: View {
                 }
             } label: {
                 switch state {
-                case .preparing, .checkingBottle, .startingSteam, .startingProcess, .waitingForGame:
+                case .preparing, .checkingBottle, .startingSteam, .restartingSteam, .startingProcess, .waitingForGame:
                     HStack(spacing: 8) { ProgressView().controlSize(.small).tint(.white); Text("Starting…") }
                 case .running:
                     Label("Running", systemImage: "play.circle.fill")
@@ -515,6 +515,7 @@ struct PlayStatus: View {
         case .blocked(let problem): return problem.message
         case .preparing, .checkingBottle: return "Checking the bottle…"
         case .startingSteam: return "Starting Steam for Windows in the bottle…"
+        case .restartingSteam: return "Steam wasn't answering: MacHub is restarting it, then launches the game again…"
         case .startingProcess: return "Starting the program in Wine…"
         case .cancelled: return "MacHub stopped waiting. If the title still starts, it opens normally."
         case .notStarted: return "No process of the game appeared within 3 minutes. The Wine log may explain why."

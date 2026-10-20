@@ -11147,6 +11147,16 @@
         }
       }
     },
+    "Steam stopped answering requests. MacHub restarted it; it takes a minute to come back.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam ne répondait plus aux demandes. MacHub l'a redémarré ; il lui faut environ une minute pour revenir."
+          }
+        }
+      }
+    },
     "Steam store": {
       "localizations": {
         "fr": {
@@ -11165,6 +11175,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 商店"
+          }
+        }
+      }
+    },
+    "Steam wasn't answering: MacHub is restarting it, then launches the game again…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam ne répondait plus : MacHub le redémarre, puis relance le jeu…"
           }
         }
       }

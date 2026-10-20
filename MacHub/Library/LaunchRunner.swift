@@ -52,31 +52,49 @@ struct LaunchRunner: Sendable {
     var leftoverGrace: Duration = .seconds(20)
     var terminate: @Sendable ([Int32]) async -> Void = { await ProcessWatch.terminate($0) }
     var latestLog: @Sendable () -> String? = { ProcessWatch.latestWineLog()?.path }
+    /// Whether Steam already runs on the title's engine. The default looks at every engine; the store narrows it.
+    var steamIsRunning: @Sendable () async -> Bool = {
+        !ProcessWatch.matches(in: await ProcessWatch.snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty
+    }
+    /// How much Steam has written to its console log (nil when unknown). Steam logs every launch request it takes.
+    var steamActivity: (@Sendable () -> Int64?)?
+    /// Quits a Steam that stopped answering, in the title's environment only.
+    var restartSteam: (@Sendable () async -> Void)?
+    /// A running Steam that logs nothing this long after a launch request isn't taking requests any more.
+    var steamAnswerTimeout: Duration = .seconds(25)
     /// Hands the plan to Wine. For Steam it may only return when Steam quits, so it always runs detached.
     let handoff: Handoff
 
     func run(_ plan: LaunchPlan, update: @escaping @MainActor (LibraryStore.LaunchState) -> Void) async {
-        let outcome = HandoffOutcome()
-        let steamWasRunning: Bool
-        if case .steam = plan.route {
-            steamWasRunning = !ProcessWatch.matches(in: await snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty
-        } else {
-            steamWasRunning = false
-        }
+        var outcome = HandoffOutcome()
+        let steamWasRunning = plan.route.isSteam ? await steamIsRunning() : false
+        let activityBefore = steamActivity?()
 
         if !plan.route.isSteam { await update(.startingProcess) }
-        Task.detached {
-            do { try await handoff(plan) } catch { await outcome.fail(error) }
-        }
+        hand(plan, to: outcome)
 
         // Steam for Windows takes a while to come up in a cold bottle: that's a step of its own.
-        if case .steam = plan.route, !steamWasRunning {
+        if plan.route.isSteam, !steamWasRunning {
             await update(.startingSteam)
-            switch await poll(.executable(LaunchPlan.steamExecutable), timeout: steamTimeout, outcome: outcome) {
-            case .found: break
+            if let failure = await waitForSteam(outcome: outcome) { return await update(failure) }
+        }
+
+        // A running Steam must log the request. If it stays silent (seen after a game closed, 2026-10-18 and -20:
+        // Steam alive but deaf to -applaunch for hours), quit it in this environment and launch again.
+        if plan.route.isSteam, steamWasRunning, let activity = steamActivity, let restart = restartSteam {
+            await update(.waitingForGame)
+            switch await waitForSteamAnswer(plan.target, before: activityBefore, activity: activity, outcome: outcome) {
+            case .answered: break
             case .failed(let error): return await update(.failed(LibraryStore.describe(error), log: logPath(for: error)))
             case .cancelled: return await update(.cancelled)
-            case .timedOut: return await update(.notStarted(log: latestLog()))
+            case .silent:
+                await update(.restartingSteam)
+                await restart()
+                if Task.isCancelled { return await update(.cancelled) }
+                outcome = HandoffOutcome()
+                hand(plan, to: outcome)
+                await update(.startingSteam)
+                if let failure = await waitForSteam(outcome: outcome) { return await update(failure) }
             }
         }
 
@@ -120,6 +138,44 @@ struct LaunchRunner: Sendable {
             leftoverSince = since
             if ContinuousClock.now - since >= leftoverGrace { await terminate(Array(pids)) }
         }
+    }
+
+    private func hand(_ plan: LaunchPlan, to outcome: HandoffOutcome) {
+        Task.detached {
+            do { try await handoff(plan) } catch { await outcome.fail(error) }
+        }
+    }
+
+    /// Waits for Steam to run on the title's engine; returns the state to report when it doesn't.
+    private func waitForSteam(outcome: HandoffOutcome) async -> LibraryStore.LaunchState? {
+        let deadline = ContinuousClock.now + steamTimeout
+        while ContinuousClock.now < deadline {
+            if Task.isCancelled { return .cancelled }
+            if await steamIsRunning() { return nil }
+            if let error = await outcome.error {
+                let message = await MainActor.run { LibraryStore.describe(error) }
+                return .failed(message, log: logPath(for: error))
+            }
+            try? await Task.sleep(for: pollInterval)
+        }
+        return .notStarted(log: latestLog())
+    }
+
+    private enum SteamAnswer { case answered, silent, failed(Error), cancelled }
+
+    /// Answered: the game appeared, or Steam wrote to its log. Silent: neither, within `steamAnswerTimeout`.
+    private func waitForSteamAnswer(_ target: ProcessWatch.Target, before: Int64?, activity: @Sendable () -> Int64?,
+                                    outcome: HandoffOutcome) async -> SteamAnswer {
+        let deadline = ContinuousClock.now + steamAnswerTimeout
+        while ContinuousClock.now < deadline {
+            if Task.isCancelled { return .cancelled }
+            if !ProcessWatch.matches(in: await snapshot(), target: target).isEmpty { return .answered }
+            if let now = activity(), now != before { return .answered }
+            if let error = await outcome.error { return .failed(error) }
+            try? await Task.sleep(for: pollInterval)
+        }
+        // Unknown activity (no log) proves nothing: keep the old behaviour and just wait for the game.
+        return activity() == nil ? .answered : .silent
     }
 
     private enum PollResult {
@@ -176,7 +232,7 @@ enum LaunchTimeline {
         switch state {
         case .preparing: .prepare
         case .checkingBottle, .blocked: .checkBottle
-        case .startingSteam: .startSteam
+        case .startingSteam, .restartingSteam: .startSteam
         case .startingProcess: route.isSteam ? .waitForGame : .handOff
         case .waitingForGame, .notStarted, .cancelled, .failed: if case .program = route { .handOff } else { .waitForGame }
         case .running, .closed, .crashedAtStart, .exited: .running
