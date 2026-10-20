@@ -35,10 +35,10 @@ Autour du moteur :
 
 ```bash
 MACOS_LIBS=<dossier wine/lib du paquet WineHQ 11.0> scripts/build-wine.sh <wine-11.0.tar.xz> <dossier de travail> <dossier d'installation>
-VARIANT=source WINE_BUILD=<dossier d'installation> WINE_SOURCES=<wine-11.0.tar.xz> VERSION_OVERRIDE=1.0.5 LLVM_MINGW=<dossier llvm-mingw> scripts/build-runtime.sh <cache> <sortie>
+WINE_BUILD=<dossier d'installation> WINE_SOURCES=<wine-11.0.tar.xz> VERSION=1.0.6 LLVM_MINGW=<dossier llvm-mingw> scripts/build-runtime.sh <cache> <sortie>
 ```
 
-`build-wine.sh` applique les correctifs de `tools/wine-patches/` : `0001` (pas d'icône Dock pour les processus d'arrière-plan listés dans `MACHUB_NO_DOCK_ICON`, vérifié sur `argv[0]` et `argv[1]`) et `0002` (export de `macdrv_functions` et vue cliente pour DXMT). Les scripts `build-winecx.sh` et la variante `cx-source` restent pour mémoire (essais CrossOver abandonnés).
+`build-wine.sh` applique les correctifs de `tools/wine-patches/` : `0001` (pas d'icône Dock pour les processus d'arrière-plan listés dans `MACHUB_NO_DOCK_ICON`, vérifié sur `argv[0]` et `argv[1]`) et `0002` (export de `macdrv_functions` et vue cliente pour DXMT). Le manifeste produit contient déjà l'adresse de téléchargement (`releases/download/runtime-<version>/…`) : publier l'archive sous ce tag, puis copier le manifeste dans `MacHub/Engine/runtime-manifest.json`. Les essais CrossOver (WineCX) ont été abandonnés et retirés du dépôt (voir l'historique plus bas).
 
 Prérequis :
 - Xcode ;
@@ -65,17 +65,19 @@ Apple garde Rosetta pour tous les usages jusqu'à macOS 27, puis seulement une p
 
 ## Tests
 
-**Unitaires** (84 tests, sans réseau ni Wine) :
+**Unitaires** (sans réseau ni Wine) :
 
 ```bash
-xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-testing:MacHubTests/RealWhiskyTests -skip-testing:MacHubTests/RealEngineTests -skip-testing:MacHubTests/RealSteamEngineTests
+xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-testing:MacHubTests/RealWhiskyTests -skip-testing:MacHubTests/RealEngineTests -skip-testing:MacHubTests/RealSteamEngineTests -skip-testing:MacHubTests/FreshInstallTests -skip-testing:MacHubTests/RealUpdateTests
 ```
 
 **Réels, sur ce Mac** :
 - `TEST_RUNNER_MACHUB_ENGINE_ARCHIVE=<archive> … -only-testing:MacHubTests/RealEngineTests` installe le moteur, crée un environnement et ouvre le Bloc-notes.
 - `TEST_RUNNER_MACHUB_ENGINE_STEAM=1 … -only-testing:MacHubTests/RealSteamEngineTests` installe et démarre Steam.
+- `TEST_RUNNER_MACHUB_FRESH_INSTALL=1 … -only-testing:MacHubTests/FreshInstallTests` télécharge le moteur publié dans un dossier vide et crée un environnement (premier lancement).
+- `TEST_RUNNER_MACHUB_UPDATE_CHECK=1 … -only-testing:MacHubTests/RealUpdateTests` trouve la dernière release sur GitHub et la prépare comme une mise à jour.
 
-## Historique des essais du 18/10/2026
+## Historique des essais du 18/10/2026 (pour mémoire)
 
 1. **Wine 11 (paquet WineHQ, moteur 1.0.0).** Installation, environnement et Bloc-notes fonctionnent sans Whisky. Steam s'installe, mais sa fenêtre de connexion reste noire. Essayés sans succès :
    - DXVK pour `steamwebhelper` (dans system32 + AppDefaults) ;
@@ -85,34 +87,23 @@ xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-te
 2. **WineCX 24, build Gcenx (1.1.0).** Les fenêtres de Steam s'affichent, mais Steam boucle sur « Unexpected Transport Error (0x3008) » : `WebUITransport: Connection rejected`. C'est un défaut connu des versions antérieures à CrossOver 25.
 3. **WineCX 26.2 compilé par MacHub (1.2.0).** Le Bloc-notes fonctionne, Steam s'installe, et **l'erreur 0x3008 a disparu** (la connexion locale est acceptée). Sur mes captures, la fenêtre de connexion paraît encore noire, mais ces captures ne sont pas fiables pour les surfaces dessinées par la carte graphique. **À vérifier à l'œil.**
 
-## État
+## État (moteur 1.0.5, MacHub 0.3.1, 20/10/2026)
 
 | Fonction | État |
 |---|---|
-| Moteur intégré : installation, versions, environnements, Bloc-notes, sans Whisky | ✅ vérifié |
-| Steam pour Windows : installation silencieuse, mise à jour, démarrage | ✅ vérifié |
-| Fenêtre de connexion de Steam | ✅ **affichée** (moteur 1.2.2) grâce au relais `tools/steam-cef-shim` (`--disable-gpu --single-process` injecté dans `steamwebhelper.exe` seulement). `--in-process-gpu` seul ne suffisait pas |
-| Connexion de Steam à ses serveurs | ✅ avec le moteur **1.0.1** (Wine 11 officiel + relais) : mise à jour en quelques secondes, serveurs joints, vrai QR code affiché, CPU au repos ~2 %. ❌ avec les Wine CrossOver (24 et 26.2) : Steam ne lance jamais sa connexion (`EConnect called` en boucle, cause non trouvée). ❌ avec `ROSETTA_ADVERTISE_AVX=1` + `WINE_LARGE_ADDRESS_AWARE=1` : mise à jour figée à 100 % CPU (ces options sont désormais désactivées par défaut) |
-| Connexion du compte Steam (même SteamID que MacHub), installation de BeamNG.drive (19,5 Go, ~89 Mbit/s) | ✅ vérifié, progression affichée dans MacHub |
-| Moteur 1.0.2 : notre Wine 11.0 compilé (`scripts/build-wine.sh`) + relais Steam + correctif Dock | ✅ Steam y tourne, une seule icône |
-| **BeamNG.drive lancé depuis MacHub, rendu Direct3D 11 via DXMT** (moteur 1.0.4) | ✅ menu, réglages et plusieurs minutes de jeu (rapport utilisateur, 18/10/2026). Il a fallu le correctif `0002` : exporter `macdrv_functions` dans winemac au format attendu par DXMT, et créer une vue cliente (`macdrv_client_surface_create`) pour les fenêtres Direct3D, qui n'en ont pas dans le Wine officiel (cf. ticket DXMT n°170) |
-| Lanceur de BeamNG resté ouvert à 100 % CPU après la fin du jeu | ✅ corrigé : MacHub arrête après 20 s les processus d'un jeu restés seuls après la fermeture du jeu, et un bouton « Stop » ferme tous ses processus |
-| Réglages (compteur d'images, synchronisation…) appliqués aux jeux | ✅ MacHub redémarre Steam avant un lancement si Steam tourne avec d'anciens réglages (les jeux héritent de l'environnement de Steam) |
-| Graphismes par jeu : détection, DXMT, DXVK, wined3d, AppDefaults, panneau sur la page du jeu | ✅ code et tests ; ⏳ aucun jeu lancé avec |
-| DXMT : `winemetal` intégré au moteur 1.2.1 | ✅ archive construite ; ⏳ non installée ni testée |
-| D3DMetal : import guidé | ✅ code et tests. L'acheminement des jeux DirectX 12 vers D3DMetal reste désactivé tant qu'il n'est pas testé |
-| Réglages par catégories | ✅ vérifié sur captures |
-| CI GitHub | ⏳ écrite, jamais exécutée |
-| Traductions des nouveaux textes | ✅ français complet (724 textes) ; ❌ japonais et chinois pas à jour |
-| Une seule icône Steam dans le Dock, même lancé depuis un terminal | ✅ moteur 1.0.5 (correctif `0001` qui regarde aussi `argv[1]`) |
-| Raccourcis `.desktop`/`.url` créés par Steam sur le Bureau du Mac | ✅ corrigé : dossiers utilisateur du préfixe isolés du Mac, `winemenubuilder` désactivé |
-| Processus Wine restés ouverts après un arrêt forcé | ✅ corrigé : « Force Quit All Windows Programs » (Réglages › Moteur) arrête `wineserver` puis les processus orphelins du moteur |
-| Options de lancement par jeu (`-gfx dx11` pour BeamNG, qui saute le lanceur) | ✅ vérifié |
-| Résumé de performances après une session | ✅ lecture du journal vérifiée ; ⏳ mesure propre à refaire (la première a été faite pendant que d'autres programmes chargeaient le Mac) |
-| Mettre à jour / Vérifier / Désinstaller / Propriétés depuis MacHub | ✅ code et tests ; ⏳ pas encore essayé sur un vrai jeu |
-| Catalogue Nexus Mods (recherche, fiche, installation, activation, suppression) | ✅ recherche vérifiée en réel ; ⏳ téléchargement et installation à essayer avec une clé de l'utilisateur |
-| Installation automatique de Steam Service sur un nouvel environnement | ⏳ code écrit, pas vérifié sur un environnement neuf |
-| Comparatif de performances Whisky / moteur intégré | ⏳ à faire sur un Mac au repos |
+| Moteur intégré : installation vérifiée (SHA-256), versions côte à côte, environnements, sans Whisky | ✅ vérifié, y compris un premier téléchargement depuis GitHub dans un dossier vide (`FreshInstallTests`) |
+| Steam pour Windows : installation silencieuse, connexion du compte, téléchargements, mises à jour | ✅ vérifié (fenêtre de Steam affichée grâce au relais `tools/steam-cef-shim`, une seule icône dans le Dock grâce au correctif `0001`) |
+| **BeamNG.drive** en Direct3D 11 via DXMT | ✅ joué plusieurs minutes (correctif `0002` pour DXMT) ; `-gfx dx11` saute le lanceur |
+| Graphismes par jeu (DXMT, DXVK, wined3d), options de lancement, résumé de performances | ✅ code et tests ; seul BeamNG a été lancé |
+| Menu d'un jeu (mettre à jour, vérifier, dossier, propriétés, arrêter, désinstaller), arrêt forcé | ✅ code et tests ; ⏳ désinstaller / vérifier pas encore essayés sur un vrai jeu |
+| Échec de création d'un environnement chez Johan (message vide) | ⏳ non reproduit ici ; depuis 0.2.0, nouvelle tentative automatique, journal `wineboot-*.log` et code de sortie affichés |
+| Bibliothèque sans clé, lue dans le cache de Steam pour Windows (jeux de la Famille Steam compris) | ✅ vérifié sur ce Mac (5 jeux, outils filtrés) |
+| Estimation de compatibilité (tests MacHub, version Mac, anti-triche, DirectX 12, ProtonDB) | ✅ vérifiée sur Découvrir |
+| Mods Nexus (recherche, installation, activation, suppression) | ✅ recherche ; ⏳ installation jamais essayée (il faut la clé API de l'utilisateur) |
+| **DirectX 12 / D3DMetal** | ⏳ import guidé seulement ; l'envoi des jeux DX12 vers D3DMetal reste désactivé (`GPTKStore.canRunDirectX12 = false`) : D3DMetal vise le Wine de CrossOver, son fonctionnement avec notre Wine 11 officiel reste à vérifier |
+| Mises à jour automatiques de l'app (releases GitHub) | ✅ vérifiées de bout en bout (0.1.9 → 0.2.0 en 6 s) |
+| CI GitHub (`runtime.yml`, `release.yml`) | ⏳ écrite, jamais exécutée |
+| Traductions | ✅ anglais et français complets ; ❌ japonais et chinois pas à jour |
 
 ## Limites connues
 

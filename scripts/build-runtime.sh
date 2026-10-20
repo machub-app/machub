@@ -1,40 +1,25 @@
 #!/bin/bash
-# Assembles MacHub's Wine runtime from pinned upstream releases, verifying each download.
+# Packs MacHub's Windows engine: the Wine that scripts/build-wine.sh compiled, the macOS libraries, Wine Mono and
+# Gecko from the WineHQ package, DXMT, DXVK and the Steam CEF shim. Every download is checked against a pinned SHA-256.
 #
-#   scripts/build-runtime.sh [download-cache-dir] [output-dir]
-#   VARIANT=source WINE_BUILD=<install dir of scripts/build-wine.sh> WINE_SOURCES=<wine-x.y.tar.xz> scripts/build-runtime.sh …
-#       (WineHQ Wine we compiled with Gcenx's and MacHub's patches: the runtime MacHub ships)
-#   VARIANT=winecx scripts/build-runtime.sh …   (prebuilt WineCX 24, Sikarugir/Gcenx: test only)
-#   VARIANT=cx-source WINE_BUILD=<install dir of scripts/build-winecx.sh> scripts/build-runtime.sh …
-#       (Wine compiled from CodeWeavers' CrossOver sources: Steam never connects with it, kept for tests)
+#   WINE_BUILD=<install dir of scripts/build-wine.sh> WINE_SOURCES=<wine-x.y.tar.xz> VERSION=<engine version> \
+#   LLVM_MINGW=<llvm-mingw dir> scripts/build-runtime.sh [download-cache-dir] [output-dir]
 #
-# Output: MacHubRuntime-<version>.tar.xz and runtime-manifest.json (version, archive name, SHA-256, size).
-# The manifest is what the app trusts: copy it to MacHub/Engine/runtime-manifest.json when publishing.
+# Output: MacHubRuntime-<version>.tar.xz and runtime-manifest.json (version, archive, SHA-256, size, download URL).
+# Publish the archive as the GitHub release `runtime-<version>`, then copy the manifest to
+# MacHub/Engine/runtime-manifest.json. (Earlier CrossOver-based variants were dropped: Steam never connected with
+# them, see docs/ENGINE.md.)
 set -euo pipefail
 
-VARIANT="${VARIANT:-wine}"
+: "${WINE_BUILD:?set WINE_BUILD to the install dir of scripts/build-wine.sh}"
+: "${WINE_SOURCES:?set WINE_SOURCES to the wine-x.y.tar.xz it was built from}"
+VERSION="${VERSION:-${VERSION_OVERRIDE:?set VERSION to the engine version, e.g. 1.0.6}}"
+RELEASES="https://github.com/machub-app/machub/releases/download"
 
 # name|version|license|source repo|release tag|asset|sha256 (GitHub's published digest)
-GCENX_WINE="wine|11.0_1 (wine-stable)|LGPL-2.1-or-later|Gcenx/macOS_Wine_builds|11.0_1|wine-stable-11.0_1-osx64.tar.xz|b50dc50ec7f41d58b115a6b685d4d1315ba3c797bd3aa0f49213f2703cb82388"
-if [[ "$VARIANT" == "source" ]]; then
-  VERSION="${VERSION_OVERRIDE:-1.0.2}"
-  COMPONENTS=("${GCENX_WINE/wine|/macos-libraries|}")
-elif [[ "$VARIANT" == "cx-source" ]]; then
-  VERSION="1.2.2"
-  # Mono, Gecko and the macOS libraries come from the WineHQ package (same versions Wine 11 expects).
-  COMPONENTS=("${GCENX_WINE/wine|/macos-libraries|}")
-elif [[ "$VARIANT" == "winecx" ]]; then
-  VERSION="1.1.0"
-  # WineCX ships no macOS libraries (Wineskin engines get them from the wrapper): they come from the
-  # official WineHQ macOS package, which bundles the same set (gnutls, freetype, MoltenVK, SDL2…).
-  COMPONENTS=(
-    "winecx|24.0.7 revision 6 (CrossOver sources, Sikarugir/Gcenx build)|LGPL-2.1-or-later|Sikarugir-App/Engines|v1.0|WS12WineCX24.0.7_7.tar.xz|203f9e9fd6c2cc77e6525d798a434ced326145db34a356355e05659d3445fd1c"
-    "${GCENX_WINE/wine|/macos-libraries|}"
-  )
-else
-  VERSION="${VERSION_OVERRIDE:-1.0.0}"
-  COMPONENTS=("$GCENX_WINE")
-fi
+COMPONENTS=(
+  "macos-libraries|11.0_1 (wine-stable)|LGPL-2.1-or-later|Gcenx/macOS_Wine_builds|11.0_1|wine-stable-11.0_1-osx64.tar.xz|b50dc50ec7f41d58b115a6b685d4d1315ba3c797bd3aa0f49213f2703cb82388"
+)
 COMPONENTS+=(
   "dxmt|0.80|MIT|3Shain/dxmt|v0.80|dxmt-v0.80-builtin.tar.gz|8f260e36b5739e68f3bad613381441385c4dc7b85b78ba8de653d5a6a264529d"
   "dxvk|1.10.3-20230507 (macOS async repack)|Zlib|Gcenx/DXVK-macOS|v1.10.3-20230507-repack|dxvk-macOS-async-v1.10.3-20230507-repack-builtin.tar.gz|810b1e5caf8ce975b784fae866a130ad23fa0ea233b0e5609cbc4a45f3ef6f00"
@@ -48,23 +33,10 @@ trap 'rm -rf "$STAGE"' EXIT
 ROOT="$STAGE/MacHubRuntime-$VERSION"
 mkdir -p "$ROOT"
 
-components_json=""
-if [[ "$VARIANT" == "source" ]]; then
-  : "${WINE_BUILD:?set WINE_BUILD to the install dir of scripts/build-wine.sh}"
-  : "${WINE_SOURCES:?set WINE_SOURCES to the wine-x.y.tar.xz it was built from}"
-  mkdir -p "$ROOT/wine"
-  cp -a "$WINE_BUILD/." "$ROOT/wine/"
-  src_sha="$(shasum -a 256 "$WINE_SOURCES" | cut -d' ' -f1)"
-  components_json+=$(printf '\n    {"name": "wine", "version": "%s (WineHQ sources + Gcenx and MacHub patches, built by MacHub)", "license": "LGPL-2.1-or-later", "source": "https://dl.winehq.org/wine/source/", "sha256": "%s"}' "$(basename "$WINE_SOURCES" .tar.xz)" "$src_sha")
-fi
-if [[ "$VARIANT" == "cx-source" ]]; then
-  : "${WINE_BUILD:?set WINE_BUILD to the install dir of scripts/build-winecx.sh}"
-  CX_SOURCES="${CX_SOURCES:-$CACHE/crossover-sources-26.2.0.tar.gz}"
-  mkdir -p "$ROOT/wine"
-  cp -a "$WINE_BUILD/." "$ROOT/wine/"
-  cx_sha="$(shasum -a 256 "$CX_SOURCES" | cut -d' ' -f1)"
-  components_json+=$(printf '\n    {"name": "winecx", "version": "26.2.0 (Wine 11.0, built by MacHub from CrossOver sources)", "license": "LGPL-2.1-or-later", "source": "https://media.codeweavers.com/pub/crossover/source/crossover-sources-26.2.0.tar.gz", "sha256": "%s"}' "$cx_sha")
-fi
+mkdir -p "$ROOT/wine"
+cp -a "$WINE_BUILD/." "$ROOT/wine/"
+src_sha="$(shasum -a 256 "$WINE_SOURCES" | cut -d' ' -f1)"
+components_json=$(printf '\n    {"name": "wine", "version": "%s (WineHQ sources + Gcenx and MacHub patches, built by MacHub)", "license": "LGPL-2.1-or-later", "source": "https://dl.winehq.org/wine/source/", "sha256": "%s"}' "$(basename "$WINE_SOURCES" .tar.xz)" "$src_sha")
 for entry in "${COMPONENTS[@]}"; do
   IFS='|' read -r name version license repo tag asset sha <<<"$entry"
   file="$CACHE/$asset"
@@ -83,8 +55,6 @@ for entry in "${COMPONENTS[@]}"; do
   mkdir -p "$unpack"
   tar -xf "$file" -C "$unpack"
   case "$name" in
-    wine) mv "$unpack/"*.app/Contents/Resources/wine "$ROOT/wine" ;;
-    winecx) mv "$unpack/wswine.bundle" "$ROOT/wine" ;;
     macos-libraries)
       mkdir -p "$ROOT/wine/lib" "$ROOT/wine/share/wine"
       cp -a "$unpack/"*.app/Contents/Resources/wine/lib/*.dylib "$ROOT/wine/lib/"
@@ -95,7 +65,7 @@ for entry in "${COMPONENTS[@]}"; do
     *) mkdir -p "$ROOT/$name" && cp -R "$unpack"/*/* "$ROOT/$name/" ;;
   esac
 
-  [[ -n "$components_json" ]] && components_json+=","
+  components_json+=","
   components_json+=$(printf '\n    {"name": "%s", "version": "%s", "license": "%s", "source": "https://github.com/%s/releases/tag/%s", "sha256": "%s"}' \
     "$name" "$version" "$license" "$repo" "$tag" "$sha")
 done
@@ -137,7 +107,8 @@ cat >"$OUT/runtime-manifest.json" <<EOF
   "version": "$VERSION",
   "archive": "$ARCHIVE",
   "sha256": "$sha",
-  "size": $size
+  "size": $size,
+  "url": "$RELEASES/runtime-$VERSION/$ARCHIVE"
 }
 EOF
 echo "Done: $OUT/$ARCHIVE ($size bytes, sha256 $sha)"
