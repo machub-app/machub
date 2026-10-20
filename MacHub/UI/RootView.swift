@@ -68,7 +68,7 @@ struct RootView: View {
                 await updater.check()
                 await updater.install()
             } else {
-                await updater.checkIfDue()
+                await updater.watchForUpdates()
             }
         }
         .task(id: customPath) {

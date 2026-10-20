@@ -5607,12 +5607,12 @@
         }
       }
     },
-    "MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at most once a day. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.": {
+    "MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at launch, then every hour while it's open. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHub cherche les nouvelles versions sur sa page GitHub (github.com/machub-app/machub) au plus une fois par jour. Chaque mise à jour est vérifiée avec son empreinte SHA-256 publiée, puis MacHub se remplace et se relance."
+            "value": "MacHub cherche les nouvelles versions sur sa page GitHub (github.com/machub-app/machub) au lancement, puis toutes les heures tant qu'il est ouvert. Chaque mise à jour est vérifiée avec son empreinte SHA-256 publiée, puis MacHub se remplace et se relance."
           }
         }
       }

@@ -159,7 +159,7 @@ private struct GeneralSettingsSections: View {
     }
 }
 
-/// Settings › General › Updates: the running version, a manual check and the daily automatic one.
+/// Settings › General › Updates: the running version, a manual check and the hourly automatic one.
 private struct UpdatesSection: View {
     @State private var updater = AppUpdater.shared
 
@@ -184,7 +184,7 @@ private struct UpdatesSection: View {
         } header: {
             Text("Updates")
         } footer: {
-            Text("MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at most once a day. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.")
+            Text("MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at launch, then every hour while it's open. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.")
         }
     }
 

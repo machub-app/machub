@@ -157,7 +157,7 @@ enum UpdateInstaller {
     }
 }
 
-/// Checks for a new MacHub at launch (at most once a day, unless turned off) and installs it on request.
+/// Checks for a new MacHub at launch and every hour (unless turned off) and installs it on request.
 @MainActor @Observable
 final class AppUpdater {
     static let shared = AppUpdater()
@@ -191,15 +191,37 @@ final class AppUpdater {
         }
     }
 
+    /// Automatic checks: at launch, then every hour while MacHub stays open, so the sidebar card shows up by itself.
+    static let checkInterval: TimeInterval = 3600
+
+    static func isDue(lastCheck: Date?, now: Date = .now) -> Bool {
+        guard let lastCheck else { return true }
+        return now.timeIntervalSince(lastCheck) >= checkInterval || now < lastCheck
+    }
+
     func checkIfDue() async {
-        guard automatic else { return }
-        if let lastCheck, Date.now.timeIntervalSince(lastCheck) < 24 * 3600, offered == nil { return }
+        guard automatic, Self.isDue(lastCheck: lastCheck) else { return }
         await check(quietly: true)
     }
 
+    /// Runs for the app's lifetime (a `.task` on the window): checks now if due, then once an hour.
+    func watchForUpdates() async {
+        await checkIfDue()
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(Self.checkInterval))
+            guard !Task.isCancelled else { return }
+            await checkIfDue()
+        }
+    }
+
     func check(quietly: Bool = false) async {
-        if case .downloading = state { return }
-        state = .checking
+        switch state {
+        case .downloading, .installing, .checking: return
+        default: break
+        }
+        let previous = state
+        // A quiet re-check keeps the card on screen instead of flashing "Checking…".
+        if !quietly || offered == nil { state = .checking }
         do {
             let newest = try await AppUpdates.fetchNewest()
             UserDefaults.standard.set(Date.now, forKey: AppUpdates.lastCheckKey)
@@ -210,7 +232,7 @@ final class AppUpdater {
             }
         } catch {
             // A failed automatic check (offline…) stays silent; a manual one says why.
-            state = quietly ? .idle : .failed(String(localized: "Couldn't reach GitHub. Check your connection and try again."))
+            state = quietly ? previous : .failed(String(localized: "Couldn't reach GitHub. Check your connection and try again."))
         }
     }
 
