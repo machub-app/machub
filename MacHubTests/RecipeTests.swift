@@ -71,3 +71,31 @@ struct RealRecipeTests {
         _ = try? await ProcessRunner.run(runtime.wineserver, ["-k"], timeout: 30, environment: env)
     }
 }
+
+struct TitleAdvancedTests {
+    @Test func overridesBecomeVariables() {
+        var advanced = TitleAdvanced()
+        #expect(advanced.environment(supportsMsync: false).isEmpty && advanced.isDefault)
+        advanced.sync = .msync
+        advanced.advertiseAVX = true
+        advanced.metalHUD = false
+        advanced.dllOverrides = "dinput8=n,b"
+        let env = advanced.environment(supportsMsync: false)
+        #expect(env["WINEESYNC"] == "1" && env["WINEMSYNC"] == "0")   // no msync in the WineHQ engine: esync instead
+        #expect(env["ROSETTA_ADVERTISE_AVX"] == "1" && env["MTL_HUD_ENABLED"] == "0" && env["WINEDLLOVERRIDES"] == "dinput8=n,b")
+        #expect(env["WINE_LARGE_ADDRESS_AWARE"] == nil)
+    }
+
+    @Test func dllOverridesAreAppended() {
+        var env = ["WINEDLLOVERRIDES": "winemenubuilder.exe=d", "A": "1"]
+        WineEnvironment.merge(["WINEDLLOVERRIDES": "dinput8=n,b", "A": "2"], into: &env)
+        #expect(env["WINEDLLOVERRIDES"] == "winemenubuilder.exe=d;dinput8=n,b" && env["A"] == "2")
+    }
+
+    @Test func virtualDesktopRegistry() {
+        let on = TitleAdvanced.desktopDocument(executables: ["Game.exe"], size: "1920x1080")
+        #expect(on.contains(#""MacHub"="1920x1080""#) && on.contains(#"[HKEY_CURRENT_USER\Software\Wine\AppDefaults\Game.exe\Explorer]"#))
+        let off = TitleAdvanced.desktopDocument(executables: ["Game.exe"], size: nil)
+        #expect(off.contains(#"[-HKEY_CURRENT_USER\Software\Wine\AppDefaults\Game.exe\Explorer]"#))
+    }
+}

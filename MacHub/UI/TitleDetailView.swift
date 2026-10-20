@@ -463,6 +463,7 @@ private struct TitleGraphicsPanel: View {
                     Text("Turn on the Metal performance overlay in Settings › Graphics to measure frame rates: MacHub then shows a summary here after each session.")
                         .font(.caption).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
+                TitleAdvancedSection(title: title)
                 if let used = store.lastGraphics[title.id], !used.isEmpty {
                     Text("Last launch: \(used.sorted { $0.key < $1.key }.map { "\($0.key) → \($0.value.rawValue)" }.joined(separator: ", "))")
                         .font(.caption).foregroundStyle(Theme.textSecondary)

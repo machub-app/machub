@@ -7,8 +7,26 @@ enum RecipeState: Equatable, Sendable {
 }
 
 extension LibraryStore {
-    /// Variables a title is started with: from recipes it had applied, and its advanced settings.
-    func titleEnvironment(for title: Title) -> [String: String] { settings(for: title).environment }
+    /// Variables a title is started with: from recipes it had applied, then its advanced settings.
+    func titleEnvironment(for title: Title) -> [String: String] {
+        let own = settings(for: title)
+        var env = own.environment
+        env.merge(own.advanced.environment(supportsMsync: runtime?.supportsMsync ?? false)) { _, advanced in advanced }
+        return env
+    }
+
+    /// Writes (or removes) the Wine virtual desktop of the title's executables.
+    func applyVirtualDesktop(for title: Title, prefix: InstalledPrefix? = nil, runtime: WineRuntime? = nil) async {
+        guard let runtime = runtime ?? self.runtime, let prefix = prefix ?? self.prefix(of: title),
+              let executables = title.install?.executables, !executables.isEmpty else { return }
+        let names = executables.map { URL(filePath: $0.replacingOccurrences(of: "\\", with: "/")).lastPathComponent }
+        let document = TitleAdvanced.desktopDocument(executables: names, size: settings(for: title).advanced.virtualDesktop)
+        let file = prefix.url.appending(path: "drive_c/users/Public/machub-desktop.reg")
+        try? document.write(to: file, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: file) }
+        let env = WineEnvironment(runtime: runtime, prefix: prefix).variables
+        _ = try? await ProcessRunner.run(runtime.wine, ["regedit", "/S", file.path], timeout: 60, environment: env)
+    }
 
     func prefix(of title: Title) -> InstalledPrefix? {
         guard let bottle = title.install?.bottle else { return nil }

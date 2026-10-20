@@ -41,7 +41,7 @@ struct EmbeddedWineEngine: CompatibilityEngine {
         let log = logs.appending(path: Self.logName(for: path))
         var env = WineEnvironment(runtime: runtime, prefix: prefix).variables
         if path.lowercased().hasSuffix("steam.exe") { env.merge(SteamSetup.environment) { _, steam in steam } }
-        env.merge(extraEnvironment) { _, own in own }
+        WineEnvironment.merge(extraEnvironment, into: &env)
         let result = try await ProcessRunner.run(runtime.wine, Self.command(for: path) + arguments,
                                                  timeout: timeout, environment: env, log: log)
         guard result.status == 0 else { throw EngineError.programExit(code: result.status, log: log) }

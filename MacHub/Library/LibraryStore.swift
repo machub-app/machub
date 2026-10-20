@@ -536,7 +536,7 @@ final class LibraryStore {
     func steamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime, extra: [String: String] = [:]) -> String {
         var env = WineEnvironment(runtime: runtime, prefix: prefix).variables
         env.merge(SteamSetup.environment) { _, steam in steam }
-        env.merge(extra) { _, own in own }
+        WineEnvironment.merge(extra, into: &env)
         env["MACHUB_RUNTIME"] = runtime.version
         return env.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: "\n")
     }
@@ -881,6 +881,9 @@ final class LibraryStore {
             } catch {
                 launchStates[id] = .failed(Self.describe(error), log: nil)
                 return
+            }
+            if settings(for: title).advanced.virtualDesktop != nil {
+                await applyVirtualDesktop(for: title, prefix: prefix, runtime: embedded.runtime)
             }
         }
         let sessionStart = Date.now
