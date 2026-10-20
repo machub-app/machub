@@ -6,10 +6,10 @@ MacHub est distribué sous **GPLv3** (fichier `LICENSE`). Il est gratuit et open
 
 Chaque composant reste sous sa propre licence. Le moteur est un ensemble de programmes séparés que MacHub lance comme processus : il n'est jamais lié au code de MacHub.
 
-| Composant | Version (moteur 1.0.5) | Licence | Source | Obligations |
+| Composant | Version (moteur 1.0.6) | Licence | Source | Obligations |
 |---|---|---|---|---|
 | Wine, sources officielles de WineHQ + correctifs Gcenx et MacHub, compilé par MacHub (`scripts/build-wine.sh`, `tools/wine-patches/`) | 11.0 | LGPL-2.1-or-later | dl.winehq.org/wine/source/11.0/wine-11.0.tar.xz | Publier les sources exactes, les correctifs et les scripts de compilation avec chaque archive (fait par `.github/workflows/runtime.yml`) ; conserver les avis de licence ; permettre de remplacer Wine (il est dans son propre dossier) |
-| Relais Steam `winmm.dll` (`tools/steam-cef-shim`) | moteur 1.0.5 | GPLv3 (code MacHub) | ce dépôt | Aucune au-delà de la GPLv3 |
+| Relais Steam `winmm.dll` (`tools/steam-cef-shim`) | moteur 1.0.6 | GPLv3 (code MacHub) | ce dépôt | Aucune au-delà de la GPLv3 |
 | Bibliothèques macOS x86_64 du paquet WineHQ (freetype, gnutls, MoltenVK, SDL2, libpng, nettle…) | issues de wine-stable 11.0_1 | FreeType License / GPLv2, LGPL-2.1+, Apache-2.0, Zlib… (licence propre à chaque bibliothèque) | github.com/Gcenx/macOS_Wine_builds | Conserver les avis ; sources disponibles chez Gcenx/MacPorts (à joindre aux releases avant toute distribution publique) |
 | Wine Mono, Wine Gecko | 10.4.1, Gecko du paquet WineHQ | MIT et divers (Mono), MPL-2.0 (Gecko) | WineHQ | Conserver les avis |
 | DXMT | 0.80 | MIT (LGPL-2.1 à partir de la 1.0) | github.com/3Shain/dxmt | Conserver l'avis de licence |
