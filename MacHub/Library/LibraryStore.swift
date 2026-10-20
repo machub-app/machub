@@ -88,6 +88,8 @@ final class LibraryStore {
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
     private(set) var details: [Int: StoreDetails] = [:]
+    /// Progress and result of applying recipes, per title and per Windows component (see LibraryStore+Recipes).
+    var recipeStates: [String: RecipeState] = [:]
     /// Compatibility estimates per Steam app, filled as cards and pages appear (see CompatibilityEstimate).
     private(set) var estimates: [Int: CompatibilityEstimate] = [:]
     private var estimating: Set<Int> = []
@@ -529,28 +531,31 @@ final class LibraryStore {
 
     /// Games inherit Steam's environment (they are its children), so a setting changed in MacHub (FPS overlay, sync,
     /// AVX…) only reaches them once Steam restarts with it. MacHub records what Steam was started with.
-    func steamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime) -> String {
+    func steamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime, extra: [String: String] = [:]) -> String {
         var env = WineEnvironment(runtime: runtime, prefix: prefix).variables
         env.merge(SteamSetup.environment) { _, steam in steam }
+        env.merge(extra) { _, own in own }
         env["MACHUB_RUNTIME"] = runtime.version
         return env.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: "\n")
     }
 
     private func steamEnvironmentFile(_ prefix: InstalledPrefix) -> URL { prefix.url.appending(path: "machub-steam-env.txt") }
 
-    func recordSteamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime) {
-        try? steamEnvironment(prefix: prefix, runtime: runtime).write(to: steamEnvironmentFile(prefix), atomically: true, encoding: .utf8)
+    func recordSteamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime, extra: [String: String] = [:]) {
+        try? steamEnvironment(prefix: prefix, runtime: runtime, extra: extra)
+            .write(to: steamEnvironmentFile(prefix), atomically: true, encoding: .utf8)
     }
 
     /// Restarts Steam when it runs with older settings than MacHub's, unless another title is running.
-    func restartSteamIfSettingsChanged(prefix: InstalledPrefix, runtime: WineRuntime, launching id: Title.ID) async {
+    func restartSteamIfSettingsChanged(prefix: InstalledPrefix, runtime: WineRuntime, launching id: Title.ID,
+                                       extra: [String: String] = [:]) async {
         let snapshot = await ProcessWatch.snapshot()
         guard !ProcessWatch.matches(in: snapshot, target: .executable(LaunchPlan.steamExecutable)).isEmpty else {
-            recordSteamEnvironment(prefix: prefix, runtime: runtime)   // the launch will start Steam with the current settings
+            recordSteamEnvironment(prefix: prefix, runtime: runtime, extra: extra)   // the launch will start Steam with them
             return
         }
         let recorded = try? String(contentsOf: steamEnvironmentFile(prefix), encoding: .utf8)
-        guard recorded != steamEnvironment(prefix: prefix, runtime: runtime) else { return }
+        guard recorded != steamEnvironment(prefix: prefix, runtime: runtime, extra: extra) else { return }
         let othersRunning = launchStates.contains { entry in
             guard entry.key != id else { return false }
             if case .running = entry.value { return true }
@@ -558,7 +563,7 @@ final class LibraryStore {
         }
         guard !othersRunning else { return }
         await stopSteam()
-        recordSteamEnvironment(prefix: prefix, runtime: runtime)
+        recordSteamEnvironment(prefix: prefix, runtime: runtime, extra: extra)
     }
 
     /// Starts Steam for Windows in the Steam prefix and brings its window forward.
@@ -827,10 +832,17 @@ final class LibraryStore {
             return
         }
         guard let bottle = title.bottle else { return }
-        guard let engine = engine(forBottle: bottle) else {
+        guard let bottleEngine = engine(forBottle: bottle) else {
             let isEmbedded = registeredBottles.first { $0.name == bottle }?.engine == .embedded
             launchStates[id] = .blocked(isEmbedded ? .engineNotReady : .whiskyNotReady)
             return
+        }
+        let engine: CompatibilityEngine
+        if var embedded = bottleEngine as? EmbeddedWineEngine {
+            embedded.extraEnvironment = titleEnvironment(for: title)
+            engine = embedded
+        } else {
+            engine = bottleEngine
         }
         recordLaunch(title)
         let target: ProcessWatch.Target = switch route {
@@ -854,7 +866,10 @@ final class LibraryStore {
         runner.latestLog = { engine.latestLog()?.path }
         if let embedded = engine as? EmbeddedWineEngine, let install = title.install,
            let prefix = prefixes.first(where: { $0.name == install.bottle }) {
-            if route.isSteam { await restartSteamIfSettingsChanged(prefix: prefix, runtime: embedded.runtime, launching: id) }
+            if route.isSteam {
+                await restartSteamIfSettingsChanged(prefix: prefix, runtime: embedded.runtime, launching: id,
+                                                    extra: titleEnvironment(for: title))
+            }
             let folder = route.isSteam ? URL(filePath: install.path) : URL(filePath: install.path).deletingLastPathComponent()
             let executables = route.isSteam ? install.executables : [URL(filePath: install.path).lastPathComponent]
             do {

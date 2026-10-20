@@ -23,7 +23,10 @@ struct TitleDetailView: View {
                         about
                         RequirementsPanel(title: title, details: details, detailsLoaded: detailsLoaded)
                         ModsEntry(title: title)
-                        if title.install != nil, !title.isDemo { TitleGraphicsPanel(title: title) }
+                        if title.install != nil, !title.isDemo {
+                            TitleGraphicsPanel(title: title)
+                            RecipePanel(title: title)
+                        }
                         compatibility
                     }
                     .frame(maxWidth: 640, alignment: .leading)

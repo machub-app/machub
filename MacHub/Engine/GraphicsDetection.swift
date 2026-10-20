@@ -94,11 +94,15 @@ struct TitleSettings: Codable, Equatable, Sendable {
     var arguments = ""
     /// Follow highball-db's renderer and launch options while the title's own are left on Automatic / empty.
     var useRecommended = true
+    /// Variables the game is started with (from applied recipes or the user's advanced settings).
+    var environment: [String: String] = [:]
 
-    init(graphics: GraphicsChoice = .automatic, arguments: String = "", useRecommended: Bool = true) {
+    init(graphics: GraphicsChoice = .automatic, arguments: String = "", useRecommended: Bool = true,
+         environment: [String: String] = [:]) {
         self.graphics = graphics
         self.arguments = arguments
         self.useRecommended = useRecommended
+        self.environment = environment
     }
 
     /// Settings saved by older versions lack the newer keys: each falls back to its default.
@@ -107,6 +111,7 @@ struct TitleSettings: Codable, Equatable, Sendable {
         graphics = try c.decodeIfPresent(GraphicsChoice.self, forKey: .graphics) ?? .automatic
         arguments = try c.decodeIfPresent(String.self, forKey: .arguments) ?? ""
         useRecommended = try c.decodeIfPresent(Bool.self, forKey: .useRecommended) ?? true
+        environment = try c.decodeIfPresent([String: String].self, forKey: .environment) ?? [:]
     }
 
     static let fileName = "title-settings.json"

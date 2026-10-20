@@ -378,6 +378,7 @@ private struct PrefixDetails: View {
             ForEach(Self.windowsVersions, id: \.0) { Text(verbatim: $0.1).tag($0.0) }
         }
         .disabled(!prefix.hasDriveC)
+        WindowsComponentsRow(prefix: prefix)
         HStack {
             Button("Test with Notepad", action: onTest).disabled(test == .running || !prefix.hasDriveC)
             switch test {

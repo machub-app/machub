@@ -25,6 +25,8 @@ enum EngineError: Error, Equatable {
 /// Runs programs with MacHub's own runtime. No Whisky process is involved at any point.
 struct EmbeddedWineEngine: CompatibilityEngine {
     let runtime: WineRuntime
+    /// Added last to every process it starts (a title's own variables, passed through Steam).
+    var extraEnvironment: [String: String] = [:]
     var prefixes: PrefixStore = .live
     var logs: URL = EmbeddedWineEngine.logDirectory
 
@@ -39,6 +41,7 @@ struct EmbeddedWineEngine: CompatibilityEngine {
         let log = logs.appending(path: Self.logName(for: path))
         var env = WineEnvironment(runtime: runtime, prefix: prefix).variables
         if path.lowercased().hasSuffix("steam.exe") { env.merge(SteamSetup.environment) { _, steam in steam } }
+        env.merge(extraEnvironment) { _, own in own }
         let result = try await ProcessRunner.run(runtime.wine, Self.command(for: path) + arguments,
                                                  timeout: timeout, environment: env, log: log)
         guard result.status == 0 else { throw EngineError.programExit(code: result.status, log: log) }

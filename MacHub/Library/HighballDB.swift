@@ -17,6 +17,8 @@ enum HighballDB {
     }
 
     struct Game: Equatable, Sendable {
+        /// highball-db's slug, also the name of the game's recipe (recipes/games/<id>.json).
+        var id = ""
         let title: String
         /// verified-local · reported-upstream · community · blocked-anticheat
         let status: String
@@ -68,7 +70,7 @@ enum HighballDB {
             }
             let native = game["nativeMac"] as? [String: Any]
             return .curated(Game(
-                title: game["title"] as? String ?? "", status: status, statusMeaning: root["status_meaning"] as? String,
+                id: game["id"] as? String ?? "", title: game["title"] as? String ?? "", status: status, statusMeaning: root["status_meaning"] as? String,
                 renderer: game["renderer"] as? String, notes: game["notes"] as? String, provenance: game["provenance"] as? String,
                 launchArgs: game["launchArgs"] as? [String] ?? [], knownIssues: issues, reports: root["reports"] as? Int ?? 0,
                 hasRecipe: root["recipe"] as? Bool ?? false,
