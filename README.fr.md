@@ -81,6 +81,11 @@ Tu te connectes à Steam, tu choisis un jeu, tu cliques sur **Installer**, puis 
 - **Assetto Corsa :** import sécurisé de voitures et de circuits en `.zip`.
 - Chaque fichier remplacé par MacHub est sauvegardé d'abord, et retirer un mod le remet en place.
 
+### 🛍️ Epic Games, raccourcis, stockage
+- **Bibliothèque Epic Games** via l'outil open source Legendary : connecte-toi avec le code à usage unique d'Epic, installe et joue à tes jeux Epic avec le moteur de MacHub.
+- **Correctifs en un clic** tirés des recettes de highball-db (Visual C++, registre…), **réglages avancés par jeu** (résolution, synchro, DLL…) derrière un bouton Avancé.
+- **Raccourci Mac par jeu** dans le Launchpad et le Dock, **signalements** à partager avec la communauté après une session, et **Réglages › Stockage** pour l'espace disque, un dossier de jeux sur disque externe et une désinstallation propre.
+
 ### 🕹️ Manettes
 - Vois toutes les manettes détectées par macOS (Xbox, DualSense, DualShock, Switch Pro, MFi), teste chaque bouton et la vibration, et vérifie ce que reçoivent les jeux Windows.
 

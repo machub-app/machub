@@ -18,6 +18,11 @@ Read first: `README.md` (what users get), `docs/ENGINE.md` (engine architecture,
 | `MacHub/Steam` | OpenID sign-in, store and Web API (`SteamStore`), cached HTTP with pacing (`SteamHTTP`), Steam for Windows files (`SteamLibrary`: ACF manifests, library cache) |
 | `MacHub/Library` | `LibraryStore` (the app's main observable state and actions), `Title`, launches (`LaunchRunner`), compatibility estimate, Discover model |
 | `MacHub/Mods` | Nexus Mods (+ installer per game), Modrinth/Minecraft, Assetto Corsa archive import |
+| `MacHub/Library/HighballDB.swift`, `CompatibilityEstimate.swift` | highball-db (gethighball.com/data/steam/<id>.json) and the verdict order |
+| `MacHub/Engine/Recipes.swift`, `LibraryStore+Recipes.swift` | highball-db recipes: one-click fixes, Windows components, per-title variables |
+| `MacHub/Epic/Legendary.swift`, `LibraryStore+Epic.swift` | Epic library through Legendary (pinned binary, `legendary launch --wine`) |
+| `MacHub/Library/GameReport.swift`, `MacShortcut.swift`, `Storage.swift` | Reports to highball-db/MacHub, per-game Mac shortcuts, Settings › Storage |
+| `MacHub/App/DiscordPresence.swift` | Discord Rich Presence over its local socket; off while `clientID` is empty |
 | `MacHub/Input`, `MacHub/Install` | Controllers; importing a Windows installer into a prefix |
 | `MacHub/Whisky` | Legacy Whisky fallback, plus `ProcessRunner` / `ProcessWatch` used everywhere |
 | `MacHub/UI` | SwiftUI views (`RootView` = window, sidebar and its cards) |
@@ -89,6 +94,10 @@ Logs: `~/Library/Logs/app.machub.MacHub/Wine/` (per launch, and `wineboot-*.log`
 - `ProcessRunner` writes output to temp files (no pipe deadlocks). In zsh, `log` is a builtin: use `/usr/bin/log`.
 
 ## Open work
+
+- **Discord**: register a "MacHub" application on discord.com/developers and put its Application ID in
+  `DiscordPresence.clientID`, then check the status with Discord open.
+- **Epic**: sign-in, listing, install and launch need a real Epic account to verify.
 
 - **DirectX 12 via D3DMetal**: import exists, routing disabled (`GPTKStore.canRunDirectX12 = false`); first check
   D3DMetal loads with upstream Wine 11, then route DX12 games and test one for real.

@@ -81,6 +81,11 @@ You sign in to Steam, pick a game, click **Install**, then **Play**.
 - **Assetto Corsa:** safe import of cars and tracks from a `.zip`.
 - Every file MacHub replaces is backed up first, and removing a mod puts it back.
 
+### 🛍️ Epic Games, shortcuts, storage
+- **Epic Games library** through the open-source Legendary: sign in with Epic's one-time code, install and play your Epic games with MacHub's engine.
+- **One-click fixes** from highball-db recipes (Visual C++, registry keys…), **advanced settings per game** (resolution, sync, DLL overrides…) behind an Advanced button.
+- **Mac shortcut per game** in Launchpad and the Dock, **reports** you can share with the community after a session, and **Settings › Storage** for disk use, a games folder on an external drive and a clean uninstall.
+
 ### 🕹️ Controllers
 - See every controller macOS detects (Xbox, DualSense, DualShock, Switch Pro, MFi), test each button and the vibration, and check what Windows games receive.
 
