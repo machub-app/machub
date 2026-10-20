@@ -158,9 +158,7 @@ struct RootView: View {
         .onChange(of: store.steam.account) { Task { await store.refreshOwned() } }
         .onChange(of: store.steam.hasAPIKey) { Task { await store.refreshOwned() } }
         .onChange(of: navigation.searchFocusRequest) { searchFocused = true }
-        #if DEBUG
         .onAppear(perform: openFromLaunchArgument)
-        #endif
         .onChange(of: navigation.selection) {
             path = NavigationPath()
             query = ""
@@ -198,7 +196,10 @@ struct RootView: View {
         Task { await store.launch(title) }
     }
 
-    /// Debug-only deep link for screenshots: `--open discover|library|software|settings|title:<steam id>|search:<text>`.
+    #endif
+
+    /// Deep link for screenshots and checks, also in release builds (it only navigates):
+    /// `--open discover|library|software|settings|title:<steam id>|search:<text>`.
     private func openFromLaunchArgument() {
         let args = CommandLine.arguments
         guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return }
@@ -217,7 +218,6 @@ struct RootView: View {
             }
         }
     }
-    #endif
 
     @ViewBuilder
     private var page: some View {

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import MacHub
 
@@ -71,5 +72,17 @@ struct StoreTrailerTests {
         #expect(details.trailers[1].stream.absoluteString == "https://e.com/1.mp4")
         #expect(details.trailers[1].name == "Old & small")
         #expect(details.directX == nil)   // pc_requirements as an empty array must not break parsing
+    }
+}
+
+@MainActor
+struct TrailerPlayerTests {
+    /// 0.3.1 aborted as soon as the trailer sheet was built (SwiftUI VideoPlayer); building and laying it out must work.
+    @Test func trailerSheetRenders() {
+        let trailer = StoreDetails.Trailer(id: 1, name: "Trailer", thumbnail: nil, stream: URL(string: "https://example.com/t.m3u8")!)
+        let host = NSHostingView(rootView: TrailerPlayer(trailer: trailer).environment(LibraryStore()))
+        host.frame = CGRect(x: 0, y: 0, width: 960, height: 600)
+        host.layoutSubtreeIfNeeded()
+        #expect(host.fittingSize.width > 0)
     }
 }

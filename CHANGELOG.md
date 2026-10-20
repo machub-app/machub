@@ -2,6 +2,11 @@
 
 All notable changes to MacHub. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.3.2] - 2026-10-20
+
+### Fixed
+- Opening a trailer quit MacHub. The release build linked SwiftUI's video player without AVKit, the framework it is built on, so it aborted the moment it appeared; trailers now use AVKit's own player view.
+
 ## [0.3.1] - 2026-10-20
 
 ### Added
