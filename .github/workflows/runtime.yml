@@ -51,8 +51,8 @@ jobs:
 
       - name: Assemble engine
         run: |
-          VARIANT=source WINE_BUILD="$WORK/install" WINE_SOURCES="$WORK/wine-$WINE_VERSION.tar.xz" \
-            VERSION_OVERRIDE="${{ inputs.engine_version }}" LLVM_MINGW="$(ls -d "$WORK"/llvm-mingw-*/ | head -1)" \
+          WINE_BUILD="$WORK/install" WINE_SOURCES="$WORK/wine-$WINE_VERSION.tar.xz" \
+            VERSION="${{ inputs.engine_version }}" LLVM_MINGW="$(ls -d "$WORK"/llvm-mingw-*/ | head -1)" \
             scripts/build-runtime.sh build/runtime-cache build/runtime
           cat build/runtime/runtime-manifest.json
 
