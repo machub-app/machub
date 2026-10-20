@@ -160,6 +160,8 @@ private struct InfoPanel: View {
             row("Source", title.isDemo ? Text("Demo data") : nil)
             row("Bottle", title.bottle.map { Text(verbatim: $0) })
             row("Steam App ID", title.steamAppID.map { Text(verbatim: String($0)) })
+            row("Switch title ID", title.switchTitleID.map { Text(verbatim: $0) })
+            row("Game file", title.switchFile.map { Text(verbatim: $0.path) }, monospaced: true)
             row("Price on Steam", details?.isFree == true ? Text("Free") : details?.price.map { Text(verbatim: $0) })
             row("Metacritic", details?.metacritic.map { Text(verbatim: String($0)) })
             row("Playtime", title.owned.map { Text("\($0.playtimeMinutes / 60) h \($0.playtimeMinutes % 60) min") })
@@ -214,6 +216,11 @@ private struct RequirementsPanel: View {
             VStack(alignment: .leading, spacing: 0) {
                 if title.isDemo {
                     item(.info, "Demo title", "Sample content, not connected to Steam.")
+                } else if title.switchTitleID != nil {
+                    item(Astris.app != nil ? .ok : .missing, "Astris installed", Astris.app.map { $0.path } ?? "The Switch emulator Astris runs these games.")
+                    item(title.switchFile != nil ? .ok : .missing, "Game file found",
+                         title.switchFile?.lastPathComponent ?? "Not found in Astris' game folders. Add its folder in Astris.")
+                    item(.info, "Your own games", "MacHub opens game files you already have with Astris. It doesn't provide games or console keys.")
                 } else {
                     if title.kind == .game {
                         item(details != nil ? .ok : (detailsLoaded ? .missing : .unknown), "Listed on the Steam store",
@@ -225,7 +232,7 @@ private struct RequirementsPanel: View {
                         item(.ok, "Runs on Mac", "Native macOS version: no Windows engine needed.")
                     }
                 }
-                if !title.isDemo, title.macInstall == nil {
+                if !title.isDemo, title.macInstall == nil, title.switchTitleID == nil {
                     item(title.install != nil ? .ok : .missing, "Installed in a Windows environment",
                          title.bottle.map { "Environment “\($0)”" })
                     if title.install != nil {

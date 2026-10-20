@@ -240,7 +240,7 @@ struct MetaLine: View {
             if !title.isDemo { AvailabilityBadge(title: title) }
             if !title.isDemo, let appID = title.steamAppID {
                 EstimateBadge(appID: appID)
-            } else {
+            } else if title.switchTitleID == nil {   // Switch games: Astris' own compatibility, not Wine's
                 CompatibilityBadge(compatibility: title.compatibility, isDemo: title.isDemo)
             }
             if let year = title.releaseYear {
@@ -307,6 +307,8 @@ enum TitleAction: Equatable {
     case play
     /// Native Mac game: its own launcher opens it.
     case openNative(URL)
+    /// Nintendo Switch game: Astris opens its file.
+    case playSwitch
     /// Installed in Steam for Mac: Steam for Mac starts it.
     case playOnMac
     /// A native macOS build exists and isn't installed: Steam for Mac installs it (or shows its store page).
@@ -320,6 +322,7 @@ enum TitleAction: Equatable {
 extension LibraryStore {
     func action(for title: Title) -> TitleAction {
         if let app = title.nativeApp { return .openNative(app) }
+        if title.switchTitleID != nil { return title.switchFile != nil && Astris.app != nil ? .playSwitch : .unavailable }
         if let appID = title.steamAppID, let mac = macSteamApps[appID] {
             if mac.isInstalled, !mac.isUpdating { return .playOnMac }
             return .downloading(macDownloadProgress(appID: appID))
@@ -421,6 +424,14 @@ struct PlayButton: View {
                 Label("Open the launcher", systemImage: "play.fill")
             }
             .buttonStyle(PrimaryActionStyle())
+        case .playSwitch:
+            Button {
+                Task { await store.playSwitch(title) }
+            } label: {
+                Label("Play", systemImage: "play.fill")
+            }
+            .buttonStyle(PrimaryActionStyle())
+            .help("Opens the game in Astris.")
         case .playOnMac:
             Button {
                 Task { await store.playOnMac(title) }
@@ -578,6 +589,11 @@ struct PlayStatus: View {
         if title.isDemo { return "Demo title. It can't be installed or launched." }
         if title.nativeApp != nil { return "Native Mac game: it runs in its own launcher, without Wine." }
         if title.id == ModSupport.minecraftTitleID { return "The Minecraft Launcher isn't installed in Applications." }
+        if title.switchTitleID != nil {
+            if Astris.app == nil { return "Nintendo Switch game: Astris isn't installed anymore." }
+            if title.switchFile == nil { return "Astris knows this game, but its file wasn't found in Astris' game folders." }
+            return "Nintendo Switch game, played in the Astris emulator."
+        }
         if title.macInstall != nil { return "Native Mac version, installed with Steam for Mac: it runs without Wine." }
         if title.macAvailable == true, title.install == nil {
             return MacSteam.app == nil
@@ -602,6 +618,7 @@ struct AvailabilityBadge: View {
 
     var body: some View {
         let (label, symbol, fill, ink): (LocalizedStringKey, String, Color, Color) = switch title.availability {
+        case .installed where title.switchTitleID != nil: ("Switch", "gamecontroller.fill", Theme.textPrimary, Theme.ground)
         case .installed where title.install == nil && title.macInstall != nil: ("Installed (Mac)", "apple.logo", Theme.textPrimary, Theme.ground)
         case .installed: ("Installed", "shippingbox.fill", Theme.textPrimary, Theme.ground)
         case .owned: ("Owned", "checkmark.circle", Theme.surfaceRaised, Theme.textPrimary)
@@ -615,6 +632,7 @@ struct AvailabilityBadge: View {
             .background(fill, in: .capsule)
             .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: title.availability == .store ? 1 : 0))
             .help(title.bottle.map { Text("Installed in bottle “\($0)”") }
+                  ?? (title.switchFile.map { Text(verbatim: $0.lastPathComponent) })
                   ?? (title.macInstall != nil ? Text("Native Mac version, installed with Steam for Mac") : Text(label)))
     }
 }

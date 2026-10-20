@@ -84,6 +84,9 @@ final class LibraryStore {
     private(set) var pinnedTitles: [Title] = []
     /// Native Mac games MacHub manages mods for (today: Minecraft: Java Edition, when installed).
     private(set) var nativeTitles: [Title] = []
+    /// Nintendo Switch games from Astris, and nlib's details for them (by title ID).
+    var switchGames: [Astris.Game] = []
+    var switchInfo: [String: SwitchCatalog.Info] = [:]
     /// Games in Steam for Mac's libraries (installed or downloading), by App ID.
     var macSteamApps: [Int: SteamApp] = [:]
     var macSteamWatch: Task<Void, Never>?
@@ -126,7 +129,7 @@ final class LibraryStore {
     /// Steam games the user has: installed ∪ owned, merged per App ID.
     var library: [Title] {
         var byID: [String: Title] = [:]
-        for t in installedTitles + ownedTitles + nativeTitles + macSteamTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
+        for t in installedTitles + ownedTitles + nativeTitles + macSteamTitles + switchTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
         return byID.values.map(enriched).sorted { lastPlayed($0) > lastPlayed($1) }
     }
 
@@ -159,7 +162,7 @@ final class LibraryStore {
     /// A title as the user has it: store/search entries pick up owned/installed state and cached details.
     func enriched(_ title: Title) -> Title {
         var t = title
-        for mine in (installedTitles + ownedTitles + macSteamTitles) where mine.id == title.id {
+        for mine in (installedTitles + ownedTitles + macSteamTitles + switchTitles) where mine.id == title.id {
             t = mine.merged(with: t)
         }
         if let id = t.steamAppID, let d = details[id] { t.apply(d) }
@@ -716,6 +719,7 @@ final class LibraryStore {
     func refreshWhisky(customPath: String?) async {
         refreshNative()
         refreshMacSteam()
+        refreshSwitch()
         let report = await DiagnosticsReport.make(customPath: customPath)
         self.report = report
         guard let install = whiskyInstall else {
