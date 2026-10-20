@@ -49,7 +49,7 @@ Tu te connectes à Steam, tu choisis un jeu, tu cliques sur **Installer**, puis 
 ### 🎮 Une seule bibliothèque pour tous tes jeux
 - Tes jeux Steam, ce qui est installé sur ce Mac et tes derniers jeux, au même endroit.
 - **Découvrir :** la boutique Steam depuis MacHub, avec une fiche par jeu.
-- **La compatibilité Mac en un coup d'œil :** chaque jeu affiche une estimation (testé par MacHub, version Mac native, bloqué par l'anti-triche, exige DirectX 12, ou devrait tourner d'après les rapports Wine de ProtonDB), avec ses sources sur la fiche du jeu.
+- **La compatibilité Mac en un coup d'œil :** chaque jeu affiche une estimation (testé par MacHub, vérifié ou signalé par des joueurs dans [highball-db](https://github.com/gauthierpiarrette/highball-db), version Mac native, bloqué par l'anti-triche, exige DirectX 12, ou une prédiction), avec ses sources sur la fiche du jeu. MacHub applique aussi les options de lancement et le rendu recommandés par les joueurs (désactivable jeu par jeu).
 - **Sans clé :** dès que Steam pour Windows est connecté, MacHub y lit ta bibliothèque, jeux partagés via les Familles Steam compris.
 - Les jeux Mac natifs sont reconnus et ouverts via Steam pour Mac, sans Wine.
 
@@ -80,6 +80,11 @@ Tu te connectes à Steam, tu choisis un jeu, tu cliques sur **Installer**, puis 
 - **Modrinth** pour Minecraft Java, avec un profil Fabric séparé pour que tes mondes restent intacts.
 - **Assetto Corsa :** import sécurisé de voitures et de circuits en `.zip`.
 - Chaque fichier remplacé par MacHub est sauvegardé d'abord, et retirer un mod le remet en place.
+
+### 🛍️ Epic Games, raccourcis, stockage
+- **Bibliothèque Epic Games** via l'outil open source Legendary : connecte-toi avec le code à usage unique d'Epic, installe et joue à tes jeux Epic avec le moteur de MacHub.
+- **Correctifs en un clic** tirés des recettes de highball-db (Visual C++, registre…), **réglages avancés par jeu** (résolution, synchro, DLL…) derrière un bouton Avancé.
+- **Raccourci Mac par jeu** dans le Launchpad et le Dock, **signalements** à partager avec la communauté après une session, et **Réglages › Stockage** pour l'espace disque, un dossier de jeux sur disque externe et une désinstallation propre.
 
 ### 🕹️ Manettes
 - Vois toutes les manettes détectées par macOS (Xbox, DualSense, DualShock, Switch Pro, MFi), teste chaque bouton et la vibration, et vérifie ce que reçoivent les jeux Windows.
@@ -235,6 +240,7 @@ MacHub repose sur le travail de ces projets open source :
 [MoltenVK](https://github.com/KhronosGroup/MoltenVK) ·
 [llvm-mingw](https://github.com/mstorsjo/llvm-mingw) ·
 [Whisky](https://github.com/Whisky-App/Whisky).
+Les données de compatibilité viennent de [highball-db](https://github.com/gauthierpiarrette/highball-db), la base ouverte du projet [Highball](https://github.com/gauthierpiarrette/highball) (données curées CC0 ; prédictions tirées de [ProtonDB](https://www.protondb.com) sous ODbL), et d'[AreWeAntiCheatYet](https://areweanticheatyet.com).
 Liste complète et licences : [docs/LICENSES.md](docs/LICENSES.md).
 
 ## Licence

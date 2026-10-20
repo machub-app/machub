@@ -86,3 +86,54 @@ struct TrailerPlayerTests {
         #expect(host.fittingSize.width > 0)
     }
 }
+
+struct HighballDBTests {
+    static let curated = Data(#"""
+    {"schema":1,"steam_appid":284160,"kind":"curated","license":"CC0-1.0","url":"https://gethighball.com/games/beamng-drive/",
+     "status_meaning":"Community consensus","reports":7,"recipe":false,
+     "game":{"title":"BeamNG.drive","status":"community","renderer":"d3dmetal","notes":"Plays at 40-60 fps.",
+             "knownIssues":[{"symptom":"Story mode cannot generate a seed","cause":"not diagnosed","fix":"none known yet"}],
+             "launchArgs":["-gfx","dx11"]}}
+    """#.utf8)
+
+    @Test func readsCuratedEntry() throws {
+        guard case .curated(let game)? = HighballDB.parse(Self.curated) else { Issue.record("not curated"); return }
+        #expect(game.status == "community" && game.renderer == "d3dmetal" && game.reports == 7)
+        #expect(game.launchArgs == ["-gfx", "dx11"])
+        #expect(game.knownIssues.first?.symptom == "Story mode cannot generate a seed")
+        #expect(game.page?.absoluteString == "https://gethighball.com/games/beamng-drive/")
+        #expect(game.graphicsChoice == .d3dmetal)
+    }
+
+    @Test func readsPredictionAndRejectsOthers() {
+        let prediction = Data(#"{"kind":"prediction","label":"Likely playable","prediction":{"title":"Subnautica 2","protonTier":"gold","recentReports":467,"macPrediction":"likely"}}"#.utf8)
+        guard case .prediction(let odds)? = HighballDB.parse(prediction) else { Issue.record("not a prediction"); return }
+        #expect(odds.macPrediction == "likely" && odds.recentReports == 467)
+        #expect(HighballDB.parse(Data("Not Found".utf8)) == nil)
+    }
+
+    @Test func highballVerdictsInOrder() {
+        let blocked = HighballDB.Entry.curated(.init(title: "", status: "blocked-anticheat", statusMeaning: nil, renderer: nil, notes: nil,
+                                                    provenance: nil, launchArgs: [], knownIssues: [], reports: 0, hasRecipe: false, nativeMac: nil, page: nil))
+        let community = HighballDB.Entry.curated(.init(title: "", status: "community", statusMeaning: nil, renderer: "dxmt", notes: nil,
+                                                      provenance: nil, launchArgs: [], knownIssues: [], reports: 3, hasRecipe: false, nativeMac: nil, page: nil))
+        let d3dmetalOnly = HighballDB.Entry.curated(.init(title: "", status: "community", statusMeaning: nil, renderer: "d3dmetal", notes: nil,
+                                                         provenance: nil, launchArgs: [], knownIssues: [], reports: 3, hasRecipe: false, nativeMac: nil, page: nil))
+        let likely = HighballDB.Entry.prediction(.init(title: "", macPrediction: "likely", label: "Likely playable", protonTier: "gold", recentReports: 9, page: nil))
+        func verdict(_ entry: HighballDB.Entry, directX: Int? = 11, native: Bool = false) -> CompatibilityEstimate.Verdict {
+            CompatibilityEstimate.make(appID: 1, nativeMac: native, directX: directX, antiCheat: nil, protonTier: nil, protonReports: 0, highball: entry).verdict
+        }
+        #expect(verdict(blocked, native: true) == .antiCheat)
+        #expect(verdict(community) == .community)
+        #expect(verdict(d3dmetalOnly, directX: 12) == .directX12)
+        #expect(verdict(d3dmetalOnly, directX: 11) == .community)   // BeamNG: D3DMetal reported, but DirectX 11 works too
+        #expect(verdict(likely, directX: 12) == .directX12)         // Highball can run DX12; MacHub can't yet
+        #expect(verdict(likely) == .likely)
+    }
+
+    @Test func oldTitleSettingsStillDecode() throws {
+        let old = Data(#"{"graphics":"dxmt","arguments":"-gfx dx11"}"#.utf8)
+        let settings = try JSONDecoder().decode(TitleSettings.self, from: old)
+        #expect(settings.graphics == .dxmt && settings.arguments == "-gfx dx11" && settings.useRecommended)
+    }
+}

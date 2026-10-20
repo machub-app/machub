@@ -2,6 +2,18 @@
 
 All notable changes to MacHub. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.4.0] - 2026-10-20
+
+### Added
+- **Compatibility from highball-db**, the open database of the Highball project: verified and player-reported verdicts, the renderer and launch options players used (applied automatically, can be turned off per game), known issues with their fixes, and predictions for 12,000 more games. Shown with its source and licence.
+- **One-click fixes**: a game's recipe from highball-db (Visual C++, registry keys, variables, notes…) applied in its Windows environment, every download checked by SHA-256. **Windows components** (Visual C++, fonts, XACT) per environment.
+- **Report how a game ran**: after a session, a short form pre-fills a report (Mac, macOS, engine, renderer, session length, frame rate) to share with highball-db or MacHub on GitHub.
+- **Advanced settings per game**: synchronization, AVX, 4 GB memory, Metal overlay, a fixed resolution (Wine virtual desktop), DLL overrides and environment variables.
+- **Mac shortcut per game**: an app in Applications › MacHub Games that launches the game directly (`machub://play/<id>`).
+- **Settings › Storage**: disk use per game, environment and engine; a games folder on an external drive for Steam; uninstall all of MacHub's data to the Trash.
+- **Epic Games library** through Legendary: sign in with Epic's one-time code, see your games, install and play them with MacHub's engine.
+- **Discord status** (“Playing … via MacHub”), ready but off until MacHub's Discord application is registered.
+
 ## [0.3.2] - 2026-10-20
 
 ### Fixed

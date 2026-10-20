@@ -21,6 +21,15 @@ Chaque composant reste sous sa propre licence. Le moteur est un ensemble de prog
 - **Steam pour Windows** : installé depuis le CDN officiel de Valve (`SteamSetup.exe`), à la demande de l'utilisateur, qui accepte lui-même les conditions de Steam dans la fenêtre de Steam.
 - **Code de Whisky** (GPLv3) : aucune ligne copiée à ce jour. Ses choix techniques ont servi de référence documentée (variables d'environnement pour Steam, marqueur « Wine builtin DLL »), et une reprise de code resterait compatible avec la GPLv3 de MacHub.
 
+## Données de compatibilité (lues en ligne, non redistribuées)
+
+| Source | Licence | Utilisation |
+|---|---|---|
+| highball-db, fiches curées et recettes (github.com/gauthierpiarrette/highball-db, via gethighball.com/data) | CC0-1.0 | Verdict, rendu et options recommandés, problèmes connus, affichés avec leur source |
+| highball-db, prédictions (dérivées de ProtonDB) | ODbL-1.0 | Affichées avec l'attribution « ProtonDB via highball-db » |
+| AreWeAntiCheatYet | MIT | Anti-triche, en secours quand highball-db n'a pas la fiche |
+| ProtonDB (résumés) | conditions de ProtonDB | Palier Wine/Proton, seulement pour les jeux absents de highball-db |
+
 ## Marques
 
 Steam est une marque de Valve, Nexus Mods de Black Tree Gaming, Metal, macOS et Rosetta d'Apple, CrossOver de CodeWeavers. MacHub n'est affilié à aucune de ces sociétés et cite ces noms seulement pour décrire la compatibilité.

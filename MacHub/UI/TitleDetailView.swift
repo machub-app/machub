@@ -23,7 +23,10 @@ struct TitleDetailView: View {
                         about
                         RequirementsPanel(title: title, details: details, detailsLoaded: detailsLoaded)
                         ModsEntry(title: title)
-                        if title.install != nil, !title.isDemo { TitleGraphicsPanel(title: title) }
+                        if title.install != nil, !title.isDemo {
+                            TitleGraphicsPanel(title: title)
+                            RecipePanel(title: title)
+                        }
                         compatibility
                     }
                     .frame(maxWidth: 640, alignment: .leading)
@@ -410,11 +413,26 @@ private struct TitleGraphicsPanel: View {
                         var settings = store.settings(for: title)
                         settings.arguments = new
                         store.updateSettings(settings, for: title)
-                    }), prompt: Text(verbatim: title.steamAppID == ModSupport.beamNGAppID ? "-gfx dx11" : "-windowed"))
+                    }), prompt: Text(verbatim: recommended?.launchArgs.joined(separator: " ").nilIfEmpty ?? "-windowed"))
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 380)
                 Text("Passed to the game at launch, like Steam's own launch options.")
                     .font(.caption).foregroundStyle(Theme.textSecondary)
+                if let recommended, recommended.renderer != nil || !recommended.launchArgs.isEmpty {
+                    Toggle(isOn: Binding(
+                        get: { store.settings(for: title).useRecommended },
+                        set: { new in
+                            var settings = store.settings(for: title)
+                            settings.useRecommended = new
+                            store.updateSettings(settings, for: title)
+                        })) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Use the community's recommendations")
+                            Text(recommendationSummary(recommended)).font(.caption).foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+                    .toggleStyle(.switch)
+                }
                 Picker("Direct3D", selection: Binding(
                     get: { store.settings(for: title).graphics },
                     set: { new in
@@ -426,6 +444,10 @@ private struct TitleGraphicsPanel: View {
                 }
                 .frame(maxWidth: 380)
                 Text(store.settings(for: title).graphics.explanation).font(.callout).foregroundStyle(Theme.textSecondary)
+                if store.settings(for: title).graphics == .automatic, store.settings(for: title).useRecommended,
+                   let choice = recommended?.graphicsChoice, choice != .d3dmetal {
+                    Text("Automatic uses \(choice.label) for this game, as players recommend.").font(.caption).foregroundStyle(Theme.textSecondary)
+                }
                 if let last = store.performance[title.id]?.first {
                     Label {
                         Text("Last session: \(Int(last.averageFPS.rounded())) FPS on average, lows \(Int(last.lowFPS.rounded())) FPS, \(Int((last.duration / 60).rounded())) min")
@@ -441,6 +463,7 @@ private struct TitleGraphicsPanel: View {
                     Text("Turn on the Metal performance overlay in Settings › Graphics to measure frame rates: MacHub then shows a summary here after each session.")
                         .font(.caption).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
+                TitleAdvancedSection(title: title)
                 if let used = store.lastGraphics[title.id], !used.isEmpty {
                     Text("Last launch: \(used.sorted { $0.key < $1.key }.map { "\($0.key) → \($0.value.rawValue)" }.joined(separator: ", "))")
                         .font(.caption).foregroundStyle(Theme.textSecondary)
@@ -454,5 +477,23 @@ private struct TitleGraphicsPanel: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.surface, in: .rect(cornerRadius: 12))
         }
+        .task(id: title.steamAppID) { if let id = title.steamAppID { await store.loadEstimate(appID: id) } }
     }
+
+    private var recommended: HighballDB.Game? { store.recommendation(for: title) }
+
+    private func recommendationSummary(_ game: HighballDB.Game) -> String {
+        var parts: [String] = []
+        if let renderer = game.renderer {
+            parts.append(renderer == "d3dmetal"
+                ? String(localized: "D3DMetal (not available in MacHub yet)")
+                : String(localized: "Renderer: \(renderer.uppercased())"))
+        }
+        if !game.launchArgs.isEmpty { parts.append(String(localized: "Options: \(game.launchArgs.joined(separator: " "))")) }
+        return parts.joined(separator: " · ") + " · highball-db"
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Settings, grouped by topic: a category column on the left, the category's options on the right.
 enum SettingsCategory: String, CaseIterable, Identifiable {
-    case general, steamAccount, steamWindows, engine, graphics, performance, input, environments, mods, controllers, whisky, diagnostics
+    case general, steamAccount, epic, steamWindows, engine, graphics, performance, input, environments, storage, mods, controllers, whisky, diagnostics
 
     var id: Self { self }
 
@@ -10,12 +10,14 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general: "General"
         case .steamAccount: "Steam Account"
+        case .epic: "Epic Games"
         case .steamWindows: "Steam for Windows"
         case .engine: "Windows Engine"
         case .graphics: "Graphics"
         case .performance: "Performance"
         case .input: "Keyboard & Mouse"
         case .environments: "Windows Environments"
+        case .storage: "Storage"
         case .mods: "Mods"
         case .controllers: "Controllers"
         case .whisky: "Whisky (Fallback)"
@@ -27,12 +29,14 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .steamAccount: "person.crop.circle"
+        case .epic: "bag"
         case .steamWindows: "arrow.down.app"
         case .engine: "cpu"
         case .graphics: "display"
         case .performance: "gauge.with.dots.needle.67percent"
         case .input: "keyboard"
         case .environments: "square.stack.3d.up"
+        case .storage: "internaldrive"
         case .mods: "puzzlepiece.extension"
         case .controllers: "gamecontroller"
         case .whisky: "wineglass"
@@ -42,8 +46,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
 
     /// Groups in the category column.
     @MainActor static let groups: [(LocalizedStringKey, [SettingsCategory])] = [
-        ("MacHub", [.general, .steamAccount, .mods, .controllers]),
-        ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments]),
+        ("MacHub", [.general, .steamAccount, .epic, .mods, .controllers]),
+        ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments, .storage]),
         ("Advanced", [.whisky, .diagnostics]),
     ]
 }
@@ -96,7 +100,9 @@ struct SettingsView: View {
         case .performance: PerformanceSettingsSection()
         case .input: InputSettingsSection()
         case .environments: EnvironmentsSettingsSection()
+        case .storage: StorageSettingsSection()
         case .mods: ModsSettingsSection()
+        case .epic: EpicSettingsSection()
         case .controllers: ControllerSettingsSection()
         case .whisky: WhiskySettingsSections()
         case .diagnostics: DiagnosticsSettingsSection()
@@ -125,6 +131,17 @@ private struct GeneralSettingsSections: View {
         }
         WindowsFilesSection()
         UpdatesSection()
+        if !DiscordPresence.clientID.isEmpty {
+            Section {
+                Toggle("Show what I'm playing in Discord", isOn: Binding(
+                    get: { UserDefaults.standard.object(forKey: DiscordPresence.enabledKey) as? Bool ?? true },
+                    set: { UserDefaults.standard.set($0, forKey: DiscordPresence.enabledKey) }))
+            } header: {
+                Text("Discord")
+            } footer: {
+                Text("While a game runs, your Discord friends see “Playing <game> · via MacHub” and for how long. It goes through the Discord app on this Mac; nothing is shown when Discord isn't open.")
+            }
+        }
     }
 }
 

@@ -76,6 +76,7 @@ xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-te
 - `TEST_RUNNER_MACHUB_ENGINE_STEAM=1 … -only-testing:MacHubTests/RealSteamEngineTests` installe et démarre Steam.
 - `TEST_RUNNER_MACHUB_FRESH_INSTALL=1 … -only-testing:MacHubTests/FreshInstallTests` télécharge le moteur publié dans un dossier vide et crée un environnement (premier lancement).
 - `TEST_RUNNER_MACHUB_UPDATE_CHECK=1 … -only-testing:MacHubTests/RealUpdateTests` trouve la dernière release sur GitHub et la prépare comme une mise à jour.
+- `TEST_RUNNER_MACHUB_SHORTCUT_APP_ID=284160 … -only-testing:MacHubTests/RealShortcutTests` crée le raccourci Mac d'un jeu installé dans `~/Applications/MacHub Games` (comme le menu « … » du jeu).
 
 ## Historique des essais du 18/10/2026 (pour mémoire)
 
@@ -102,6 +103,14 @@ xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-te
 | Mods Nexus (recherche, installation, activation, suppression) | ✅ recherche ; ⏳ installation jamais essayée (il faut la clé API de l'utilisateur) |
 | **DirectX 12 / D3DMetal** | ⏳ import guidé seulement ; l'envoi des jeux DX12 vers D3DMetal reste désactivé (`GPTKStore.canRunDirectX12 = false`) : D3DMetal vise le Wine de CrossOver, son fonctionnement avec notre Wine 11 officiel reste à vérifier |
 | Mises à jour automatiques de l'app (releases GitHub) | ✅ vérifiées de bout en bout (0.1.9 → 0.2.0 en 6 s) |
+| Données highball-db (verdict, rendu, options, problèmes connus) et recommandations appliquées | ✅ vérifié sur BeamNG (`-gfx dx11`) et Subnautica 2 |
+| Recettes highball-db (correctifs en un clic, composants Windows) | ✅ vcrun2022 installe le vrai `msvcp140.dll` de Microsoft (`RealRecipeTests`) ; ⏳ pas encore essayé sur la recette d'un vrai jeu |
+| Signalement d'un jeu (formulaires pré-remplis highball-db / MacHub) | ✅ liens testés ; ⏳ pas encore envoyé pour de vrai |
+| Réglages avancés par jeu (synchro, AVX, 4 Go, HUD, résolution, DLL, variables) | ✅ code et tests ; ⏳ pas essayé en jeu |
+| Raccourci Mac par jeu (`machub://play/<id>`) | ✅ vérifié : le raccourci BeamNG lance le jeu, MacHub fermé |
+| Réglages › Stockage (espace disque, dossier de jeux externe, désinstallation) | ✅ tests ; ⏳ ajout d'un dossier externe pas vérifié avec Steam |
+| Bibliothèque Epic (Legendary 0.21.1) | ✅ binaire téléchargé, vérifié et lancé ; ⏳ connexion, liste, installation et lancement non vérifiés (compte Epic nécessaire) |
+| Statut Discord | ⏳ code et trames testés ; désactivé tant que l'Application ID Discord de MacHub n'est pas renseigné |
 | CI GitHub (`runtime.yml`, `release.yml`) | ⏳ écrite, jamais exécutée |
 | Traductions | ✅ anglais et français complets ; ❌ japonais et chinois pas à jour |
 

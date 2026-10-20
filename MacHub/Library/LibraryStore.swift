@@ -88,6 +88,16 @@ final class LibraryStore {
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
     private(set) var details: [Int: StoreDetails] = [:]
+    /// The Epic library (LibraryStore+Epic): titles, account state and installs in progress (fraction by app name).
+    var epicTitles: [Title] = []
+    var epicState: EpicState = .signedOut
+    var epicInstalls: [String: Double] = [:]
+    /// The last install or uninstall error per Epic app name, shown on the game's page.
+    var epicErrors: [String: String] = [:]
+    /// A report waiting for the player's rating after a session (see GameReport).
+    var pendingReport: GameReport?
+    /// Progress and result of applying recipes, per title and per Windows component (see LibraryStore+Recipes).
+    var recipeStates: [String: RecipeState] = [:]
     /// Compatibility estimates per Steam app, filled as cards and pages appear (see CompatibilityEstimate).
     private(set) var estimates: [Int: CompatibilityEstimate] = [:]
     private var estimating: Set<Int> = []
@@ -111,7 +121,7 @@ final class LibraryStore {
     /// Steam games the user has: installed ∪ owned, merged per App ID.
     var library: [Title] {
         var byID: [String: Title] = [:]
-        for t in installedTitles + ownedTitles + nativeTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
+        for t in installedTitles + ownedTitles + nativeTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
         return byID.values.map(enriched).sorted { lastPlayed($0) > lastPlayed($1) }
     }
 
@@ -217,10 +227,28 @@ final class LibraryStore {
         TitleSettings.save(titleSettings)
     }
 
-    /// The choice a launch uses: the title's own, else the engine default.
+    /// The choice a launch uses: the title's own, else the renderer highball-db reports working (when the title follows
+    /// recommendations), else the engine default.
     func graphicsChoice(for title: Title) -> GraphicsChoice {
-        let own = settings(for: title).graphics
-        return own == .automatic ? engineSettings.defaultGraphics : own
+        let own = settings(for: title)
+        if own.graphics != .automatic { return own.graphics }
+        if own.useRecommended, let recommended = recommendation(for: title)?.graphicsChoice, recommended != .d3dmetal {
+            return recommended
+        }
+        return engineSettings.defaultGraphics
+    }
+
+    /// highball-db's curated entry for a Steam title, once its estimate has loaded.
+    func recommendation(for title: Title) -> HighballDB.Game? {
+        guard let appID = title.steamAppID, case .curated(let game)? = estimates[appID]?.highball else { return nil }
+        return game
+    }
+
+    /// The launch options a launch uses: the title's own, else highball-db's (e.g. BeamNG's `-gfx dx11`).
+    func launchOptions(for title: Title) -> [String] {
+        let own = settings(for: title)
+        if !own.argumentList.isEmpty || !own.useRecommended { return own.argumentList }
+        return recommendation(for: title)?.launchArgs ?? []
     }
     private(set) var engineState: EngineState = .checking
     private(set) var prefixes: [InstalledPrefix] = []
@@ -511,28 +539,31 @@ final class LibraryStore {
 
     /// Games inherit Steam's environment (they are its children), so a setting changed in MacHub (FPS overlay, sync,
     /// AVX…) only reaches them once Steam restarts with it. MacHub records what Steam was started with.
-    func steamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime) -> String {
+    func steamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime, extra: [String: String] = [:]) -> String {
         var env = WineEnvironment(runtime: runtime, prefix: prefix).variables
         env.merge(SteamSetup.environment) { _, steam in steam }
+        WineEnvironment.merge(extra, into: &env)
         env["MACHUB_RUNTIME"] = runtime.version
         return env.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: "\n")
     }
 
     private func steamEnvironmentFile(_ prefix: InstalledPrefix) -> URL { prefix.url.appending(path: "machub-steam-env.txt") }
 
-    func recordSteamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime) {
-        try? steamEnvironment(prefix: prefix, runtime: runtime).write(to: steamEnvironmentFile(prefix), atomically: true, encoding: .utf8)
+    func recordSteamEnvironment(prefix: InstalledPrefix, runtime: WineRuntime, extra: [String: String] = [:]) {
+        try? steamEnvironment(prefix: prefix, runtime: runtime, extra: extra)
+            .write(to: steamEnvironmentFile(prefix), atomically: true, encoding: .utf8)
     }
 
     /// Restarts Steam when it runs with older settings than MacHub's, unless another title is running.
-    func restartSteamIfSettingsChanged(prefix: InstalledPrefix, runtime: WineRuntime, launching id: Title.ID) async {
+    func restartSteamIfSettingsChanged(prefix: InstalledPrefix, runtime: WineRuntime, launching id: Title.ID,
+                                       extra: [String: String] = [:]) async {
         let snapshot = await ProcessWatch.snapshot()
         guard !ProcessWatch.matches(in: snapshot, target: .executable(LaunchPlan.steamExecutable)).isEmpty else {
-            recordSteamEnvironment(prefix: prefix, runtime: runtime)   // the launch will start Steam with the current settings
+            recordSteamEnvironment(prefix: prefix, runtime: runtime, extra: extra)   // the launch will start Steam with them
             return
         }
         let recorded = try? String(contentsOf: steamEnvironmentFile(prefix), encoding: .utf8)
-        guard recorded != steamEnvironment(prefix: prefix, runtime: runtime) else { return }
+        guard recorded != steamEnvironment(prefix: prefix, runtime: runtime, extra: extra) else { return }
         let othersRunning = launchStates.contains { entry in
             guard entry.key != id else { return false }
             if case .running = entry.value { return true }
@@ -540,7 +571,7 @@ final class LibraryStore {
         }
         guard !othersRunning else { return }
         await stopSteam()
-        recordSteamEnvironment(prefix: prefix, runtime: runtime)
+        recordSteamEnvironment(prefix: prefix, runtime: runtime, extra: extra)
     }
 
     /// Starts Steam for Windows in the Steam prefix and brings its window forward.
@@ -619,9 +650,10 @@ final class LibraryStore {
         async let store: Void = refreshFeatured()
         async let owned: Void = refreshOwned()
         async let profile: Void = steam.refreshProfile()
+        async let epic: Void = refreshEpic()
         await refreshEngine()
         await refreshWhisky(customPath: customPath)
-        _ = await (store, owned, profile)
+        _ = await (store, owned, profile, epic)
     }
 
     func refreshNative() {
@@ -753,10 +785,13 @@ final class LibraryStore {
         defer { estimating.remove(appID) }
         async let detailsTask = loadDetails(appID: appID)
         async let antiCheatsTask = CompatibilitySources.antiCheats()
-        async let protonTask = CompatibilitySources.protonDB(appID: appID)
-        let (details, antiCheats, proton) = await (detailsTask, antiCheatsTask, protonTask)
+        async let highballTask = HighballDB.entry(appID: appID)
+        let (details, antiCheats, highball) = await (detailsTask, antiCheatsTask, highballTask)
+        // highball-db already folds ProtonDB into its predictions; ask ProtonDB only for games it doesn't cover.
+        let proton = highball == nil ? await CompatibilitySources.protonDB(appID: appID) : nil
         estimates[appID] = .make(appID: appID, nativeMac: details?.mac, directX: details?.directX,
-                                 antiCheat: antiCheats[appID], protonTier: proton?.tier, protonReports: proton?.reports ?? 0)
+                                 antiCheat: antiCheats[appID], protonTier: proton?.tier, protonReports: proton?.reports ?? 0,
+                                 highball: highball)
     }
 
     // MARK: Actions
@@ -764,7 +799,9 @@ final class LibraryStore {
     /// Starts a title and shows the launch screen. Every step is checked; nothing is assumed.
     func launch(_ title: Title) async {
         guard title.canLaunch, !(launchStates[title.id]?.isInProgress ?? false) else { return }
-        let route: LaunchPlan.Route = if title.kind == .game, let appID = title.steamAppID {
+        let route: LaunchPlan.Route = if let appName = title.epicAppName {
+            .epic(appName: appName)
+        } else if title.kind == .game, let appID = title.steamAppID {
             .steam(appID: appID)
         } else {
             .program(path: title.installPath ?? "")
@@ -806,17 +843,26 @@ final class LibraryStore {
             return
         }
         guard let bottle = title.bottle else { return }
-        guard let engine = engine(forBottle: bottle) else {
+        guard let bottleEngine = engine(forBottle: bottle) else {
             let isEmbedded = registeredBottles.first { $0.name == bottle }?.engine == .embedded
             launchStates[id] = .blocked(isEmbedded ? .engineNotReady : .whiskyNotReady)
             return
+        }
+        let engine: CompatibilityEngine
+        if var embedded = bottleEngine as? EmbeddedWineEngine {
+            embedded.extraEnvironment = titleEnvironment(for: title)
+            engine = embedded
+        } else {
+            engine = bottleEngine
         }
         recordLaunch(title)
         let target: ProcessWatch.Target = switch route {
         case .steam: .installFolder(URL(filePath: title.installPath ?? "").lastPathComponent)
         case .program(let path): .executable(URL(filePath: path).lastPathComponent)
+        case .epic: .installFolder(URL(filePath: title.installPath ?? "").lastPathComponent)
         }
-        let options = settings(for: title).argumentList
+        if let appID = title.steamAppID { await loadEstimate(appID: appID) }   // recommendations, if not loaded yet
+        let options = launchOptions(for: title)
         var runner = LaunchRunner { plan in
             switch plan.route {
             case .steam(let appID):
@@ -827,14 +873,27 @@ final class LibraryStore {
                                          arguments: ["-applaunch", String(appID)] + options, timeout: 24 * 3600)
             case .program(let path):
                 _ = try await engine.run(path, bottle: plan.bottle, arguments: options, timeout: 24 * 3600)
+            case .epic(let appName):
+                guard let embedded = engine as? EmbeddedWineEngine, let prefix = PrefixStore.live.prefix(named: plan.bottle) else {
+                    throw EngineError.prefixMissing(plan.bottle)
+                }
+                var env = WineEnvironment(runtime: embedded.runtime, prefix: prefix).variables
+                WineEnvironment.merge(embedded.extraEnvironment, into: &env)
+                let result = try await Legendary.run(Legendary.launchArguments(appName, wine: embedded.runtime.wine, prefix: prefix.url,
+                                                                               options: options),
+                                                     timeout: 24 * 3600, environment: env)
+                guard result.status == 0 else { throw Legendary.Failure.command(String(result.stderr.suffix(400))) }
             }
         }
         runner.latestLog = { engine.latestLog()?.path }
         if let embedded = engine as? EmbeddedWineEngine, let install = title.install,
            let prefix = prefixes.first(where: { $0.name == install.bottle }) {
-            if route.isSteam { await restartSteamIfSettingsChanged(prefix: prefix, runtime: embedded.runtime, launching: id) }
-            let folder = route.isSteam ? URL(filePath: install.path) : URL(filePath: install.path).deletingLastPathComponent()
-            let executables = route.isSteam ? install.executables : [URL(filePath: install.path).lastPathComponent]
+            if route.isSteam {
+                await restartSteamIfSettingsChanged(prefix: prefix, runtime: embedded.runtime, launching: id,
+                                                    extra: titleEnvironment(for: title))
+            }
+            let folder = route.watchesInstallFolder ? URL(filePath: install.path) : URL(filePath: install.path).deletingLastPathComponent()
+            let executables = route.watchesInstallFolder ? install.executables : [URL(filePath: install.path).lastPathComponent]
             do {
                 lastGraphics[id] = try await GraphicsDeployment.prepare(
                     installFolder: folder, executables: executables, choice: graphicsChoice(for: title),
@@ -843,15 +902,59 @@ final class LibraryStore {
                 launchStates[id] = .failed(Self.describe(error), log: nil)
                 return
             }
+            if settings(for: title).advanced.virtualDesktop != nil {
+                await applyVirtualDesktop(for: title, prefix: prefix, runtime: embedded.runtime)
+            }
         }
         let sessionStart = Date.now
+        var announced = false
         await runner.run(LaunchPlan(route: route, bottle: bottle, target: target)) { [weak self] state in
             guard let self, self.launchStates[id] != .cancelled || !state.isInProgress else { return }
             self.launchStates[id] = state
+            if case .running = state, !announced, title.kind == .game {
+                announced = true
+                let (name, appID) = (title.name, title.steamAppID)
+                Task { await DiscordPresence.shared.playing(name, appID: appID, since: .now) }
+            }
         }
-        if engineSettings.metalHUD, let summary = await PerformanceLog.read(since: sessionStart) {
-            performance = PerformanceLog.record(summary, for: id)
+        if announced { await DiscordPresence.shared.stopped() }
+        var summary: PerformanceSummary?
+        if engineSettings.metalHUD, let read = await PerformanceLog.read(since: sessionStart) {
+            summary = read
+            performance = PerformanceLog.record(read, for: id)
         }
+        offerReport(for: title, started: sessionStart, summary: summary)
+    }
+
+    static let askForReportsKey = "reports.ask"
+
+    /// After a session (or a crash at start), asks once how it went, with everything MacHub knows pre-filled.
+    private func offerReport(for title: Title, started: Date, summary: PerformanceSummary?) {
+        guard UserDefaults.standard.object(forKey: Self.askForReportsKey) as? Bool ?? true, title.kind == .game else { return }
+        let minutes = Int(Date.now.timeIntervalSince(started) / 60)
+        switch launchStates[title.id] {
+        case .closed?, .running?:
+            guard minutes >= 2 else { return }   // a quick look isn't a session worth reporting
+            pendingReport = makeReport(for: title, minutes: minutes, summary: summary)
+        case .crashedAtStart?:
+            var report = makeReport(for: title, minutes: nil, summary: nil)
+            report.rating = 1
+            report.crashedAtStart = true
+            pendingReport = report
+        default:
+            return
+        }
+    }
+
+    func makeReport(for title: Title, minutes: Int? = nil, summary: PerformanceSummary? = nil) -> GameReport {
+        var report = GameReport(titleID: title.id, titleName: title.name, steamAppID: title.steamAppID)
+        report.minutes = minutes
+        report.averageFPS = (summary ?? performance[title.id]?.first).map { Int($0.averageFPS.rounded()) }
+        report.renderer = lastGraphics[title.id]?.values.first?.rawValue
+        report.launchOptions = launchOptions(for: title).joined(separator: " ")
+        report.environment = titleEnvironment(for: title)
+        report.engine = runtime.map { "machub-\($0.version)" }
+        return report
     }
 
     /// The on-disk checks before a launch: bottle registered and set up, program present, Steam present.
@@ -868,6 +971,10 @@ final class LibraryStore {
             }
         case .program(let path):
             guard fileManager.fileExists(atPath: path) else { return .executableMissing(path) }
+        case .epic:
+            guard let path = title.installPath, fileManager.fileExists(atPath: path), title.hasExecutable else {
+                return .executableMissing(title.installPath ?? "")
+            }
         }
         return nil
     }
@@ -884,6 +991,7 @@ final class LibraryStore {
 
     /// Asks Steam for Windows inside the bottle to install the game (`steam://install/<id>`).
     func requestInstall(_ title: Title) async {
+        if title.epicAppName != nil { return await installEpic(title) }
         guard let appID = title.steamAppID, let bottle = steamBottle?.name, let engine = engine(forBottle: bottle) else { return }
         launchStates[title.id] = .installRequested
         do {

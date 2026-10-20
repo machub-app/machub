@@ -222,6 +222,19 @@ struct WineEnvironment: Equatable, Sendable {
     }
 }
 
+extension WineEnvironment {
+    /// Adds a title's own variables; its DLL overrides are appended to MacHub's rather than replacing them.
+    static func merge(_ extra: [String: String], into env: inout [String: String]) {
+        for (key, value) in extra {
+            if key == "WINEDLLOVERRIDES", let base = env[key], !base.isEmpty {
+                env[key] = base + ";" + value
+            } else {
+                env[key] = value
+            }
+        }
+    }
+}
+
 extension WineRuntime {
     /// CrossOver's Wine carries msync (server/msync.c); the WineHQ build doesn't.
     var supportsMsync: Bool { info.component("winecx") != nil }

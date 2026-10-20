@@ -46,6 +46,7 @@ struct RootView: View {
     @State private var updater = AppUpdater.shared
     @State private var inbox = ImportInbox.shared
     @State private var nexusInbox = NexusLinkInbox.shared
+    @State private var linkInbox = MacHubLinkInbox.shared
     @State private var importSession: InstallerImport?
     @State private var choosingInstaller = false
     @State private var path = NavigationPath()
@@ -119,6 +120,9 @@ struct RootView: View {
             nexusInbox.pending = []
             for link in links { Task { await store.handle(link) } }
         }
+        .onChange(of: linkInbox.pending) { openNextLink() }
+        // A shortcut can open MacHub cold: its link waits until the installed games are known.
+        .onChange(of: store.report == nil) { openNextLink() }
         .onChange(of: navigation.installRequest) { choosingInstaller = true }
         .toolbar(store.presentedLaunch == nil ? .automatic : .hidden, for: .windowToolbar)
         .searchable(text: $query, placement: .toolbar, prompt: Text("Search games and software"))
@@ -159,6 +163,7 @@ struct RootView: View {
         .onChange(of: store.steam.hasAPIKey) { Task { await store.refreshOwned() } }
         .onChange(of: navigation.searchFocusRequest) { searchFocused = true }
         .onAppear(perform: openFromLaunchArgument)
+        .sheet(item: Binding(get: { store.pendingReport }, set: { store.pendingReport = $0 })) { ReportSheet(report: $0) }
         .onChange(of: navigation.selection) {
             path = NavigationPath()
             query = ""
@@ -185,15 +190,32 @@ struct RootView: View {
         importSession = store.makeImport(url)
     }
 
+    private func openNextLink() {
+        guard store.report != nil, !linkInbox.pending.isEmpty else { return }
+        let links = linkInbox.pending
+        linkInbox.pending = []
+        for case .play(let appID) in links { play(appID: appID) }
+    }
+
+    /// Opens the game's page and, when it is installed and launchable, runs the same launch path as its Play button.
+    private func play(appID: Int) {
+        query = ""
+        if let title = store.library.first(where: { $0.steamAppID == appID && $0.canLaunch }) {
+            path = NavigationPath([title])
+            Task { await store.launch(title) }
+        } else {
+            let title = store.library.first { $0.steamAppID == appID }
+                ?? Title(id: Title.steamID(appID), name: "", kind: .game, steamAppID: appID)
+            path = NavigationPath([title])
+        }
+    }
+
     #if DEBUG
-    /// Debug-only: `--play <steam app id>` opens the installed title and runs the same launch path as its Play button.
+    /// Debug-only: `--play <steam app id>` behaves like a game shortcut's `machub://play/<id>` link.
     private func playFromLaunchArgument() {
         let args = CommandLine.arguments
-        guard let i = args.firstIndex(of: "--play"), i + 1 < args.count, let appID = Int(args[i + 1]),
-              let title = store.library.first(where: { $0.steamAppID == appID && $0.canLaunch })
-        else { return }
-        path.append(title)
-        Task { await store.launch(title) }
+        guard let i = args.firstIndex(of: "--play"), i + 1 < args.count, let appID = Int(args[i + 1]) else { return }
+        play(appID: appID)
     }
 
     #endif

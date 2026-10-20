@@ -92,6 +92,30 @@ struct TitleSettings: Codable, Equatable, Sendable {
     var graphics: GraphicsChoice = .automatic
     /// Extra command-line arguments for programs MacHub starts directly.
     var arguments = ""
+    /// Follow highball-db's renderer and launch options while the title's own are left on Automatic / empty.
+    var useRecommended = true
+    /// Variables the game is started with (from applied recipes or the user's advanced settings).
+    var environment: [String: String] = [:]
+    /// Per-game overrides of the engine's settings (nil = follow Settings › Windows Games).
+    var advanced = TitleAdvanced()
+
+    init(graphics: GraphicsChoice = .automatic, arguments: String = "", useRecommended: Bool = true,
+         environment: [String: String] = [:]) {
+        self.graphics = graphics
+        self.arguments = arguments
+        self.useRecommended = useRecommended
+        self.environment = environment
+    }
+
+    /// Settings saved by older versions lack the newer keys: each falls back to its default.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        graphics = try c.decodeIfPresent(GraphicsChoice.self, forKey: .graphics) ?? .automatic
+        arguments = try c.decodeIfPresent(String.self, forKey: .arguments) ?? ""
+        useRecommended = try c.decodeIfPresent(Bool.self, forKey: .useRecommended) ?? true
+        environment = try c.decodeIfPresent([String: String].self, forKey: .environment) ?? [:]
+        advanced = try c.decodeIfPresent(TitleAdvanced.self, forKey: .advanced) ?? TitleAdvanced()
+    }
 
     static let fileName = "title-settings.json"
 
@@ -113,4 +137,55 @@ struct TitleSettings: Codable, Equatable, Sendable {
 
     static func all() -> [String: TitleSettings] { LocalData.load([String: TitleSettings].self, from: fileName) ?? [:] }
     static func save(_ all: [String: TitleSettings]) { LocalData.save(all, to: fileName) }
+}
+
+/// A game's own engine settings, each one optional so the global setting applies until the user picks something.
+struct TitleAdvanced: Codable, Equatable, Sendable {
+    var sync: EngineSettings.Sync?
+    var advertiseAVX: Bool?
+    var largeAddressAware: Bool?
+    var metalHUD: Bool?
+    /// Wine virtual desktop for the game's executables, "1920x1080"; nil = the game's own windows.
+    var virtualDesktop: String?
+    /// Extra Wine DLL overrides, as WINEDLLOVERRIDES writes them: "dinput8=n,b;xinput1_3=b".
+    var dllOverrides = ""
+
+    var isDefault: Bool { self == TitleAdvanced() }
+
+    /// The variables these overrides set (MSYNC/ESYNC, AVX, 4 GB, Metal HUD, DLL overrides).
+    func environment(supportsMsync: Bool) -> [String: String] {
+        var env: [String: String] = [:]
+        if let sync {
+            env["WINEMSYNC"] = "0"; env["WINEESYNC"] = "0"
+            switch sync {
+            case .msync: env[supportsMsync ? "WINEMSYNC" : "WINEESYNC"] = "1"
+            case .esync: env["WINEESYNC"] = "1"
+            case .off: break
+            }
+        }
+        if let advertiseAVX { env["ROSETTA_ADVERTISE_AVX"] = advertiseAVX ? "1" : "0" }
+        if let largeAddressAware { env["WINE_LARGE_ADDRESS_AWARE"] = largeAddressAware ? "1" : "0" }
+        if let metalHUD {
+            env["MTL_HUD_ENABLED"] = metalHUD ? "1" : "0"
+            env["MTL_HUD_LOG_ENABLED"] = metalHUD ? "1" : "0"
+        }
+        let overrides = dllOverrides.trimmingCharacters(in: .whitespaces)
+        if !overrides.isEmpty { env["WINEDLLOVERRIDES"] = overrides }
+        return env
+    }
+
+    static let desktopSizes = ["1280x720", "1440x900", "1600x900", "1920x1080", "2560x1440"]
+
+    /// Registry for the virtual desktop of each executable: a named desktop, or the key removed.
+    static func desktopDocument(executables: [String], size: String?) -> String {
+        var lines = ["Windows Registry Editor Version 5.00", ""]
+        if let size {
+            lines += [#"[HKEY_CURRENT_USER\Software\Wine\Explorer\Desktops]"#, "\"MacHub\"=\"\(size)\"", ""]
+        }
+        for exe in executables.sorted() {
+            let key = #"HKEY_CURRENT_USER\Software\Wine\AppDefaults\\#(exe)\Explorer"#
+            lines += size == nil ? ["[-\(key)]", ""] : ["[\(key)]", #""Desktop"="MacHub""#, ""]
+        }
+        return lines.joined(separator: "\n")
+    }
 }

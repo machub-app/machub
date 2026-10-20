@@ -15,6 +15,8 @@ struct ArtworkImage: View {
                     default: Theme.surface
                     }
                 }
+            } else if title.capsuleURL != nil || title.backgroundURL != nil {
+                fallback   // Epic games: the store's own artwork
             } else {
                 MonogramPlate(title: title)
             }
@@ -315,6 +317,10 @@ extension LibraryStore {
     func action(for title: Title) -> TitleAction {
         if let app = title.nativeApp { return .openNative(app) }
         if title.canLaunch, let bottle = title.bottle, engine(forBottle: bottle) != nil { return .play }
+        if let appName = title.epicAppName {
+            if let fraction = epicInstalls[appName] { return .downloading(fraction) }
+            if title.install == nil, case .ready = epicState { return .install(bottle: Legendary.prefixName) }
+        }
         if let appID = title.steamAppID, title.install == nil, steamDownloads[appID] != nil { return .downloading(downloadProgress(appID: appID)) }
         if let appID = title.steamAppID, let update = steamUpdates[appID], update.isUpdating {
             return .downloading(SteamLibrary.progress(of: update))
@@ -354,6 +360,12 @@ struct TitleActionsMenu: View {
         @Environment(LibraryStore.self) private var store
 
         var body: some View {
+            if title.install != nil, title.epicAppName != nil {
+                Button("Show Game Folder", systemImage: "folder") { store.revealInstallFolder(title) }
+                Button("Report How It Runs…", systemImage: "text.bubble") { store.pendingReport = store.makeReport(for: title) }
+                Divider()
+                Button("Uninstall…", systemImage: "trash", role: .destructive) { Task { await store.uninstallEpic(title) } }
+            }
             if title.install != nil, let appID = title.steamAppID {
                 if store.steamUpdates[appID]?.needsUpdate == true {
                     Button("Update Now", systemImage: "arrow.down.circle") { Task { await store.perform(.update, on: title) } }
@@ -361,6 +373,9 @@ struct TitleActionsMenu: View {
                 Button("Verify Game Files", systemImage: "checkmark.shield") { Task { await store.perform(.verify, on: title) } }
                 Button("Show Game Folder", systemImage: "folder") { store.revealInstallFolder(title) }
                 Button("Steam Properties…", systemImage: "slider.horizontal.3") { Task { await store.perform(.properties, on: title) } }
+                Button("Report How It Runs…", systemImage: "text.bubble") { store.pendingReport = store.makeReport(for: title) }
+                Button("Create Mac Shortcut", systemImage: "app.badge") { Task { await store.createMacShortcut(for: title) } }
+                    .help("Adds an app for this game to Applications › MacHub Games: open it to play without going through MacHub's window.")
                 if case .running? = store.launchStates[title.id] {
                     Button("Stop", systemImage: "stop.fill") { Task { await store.stop(title) } }
                 }
@@ -524,7 +539,9 @@ struct PlayStatus: View {
         if title.macAvailable == true, title.install == nil { return "A native macOS version exists on Steam: use Steam for Mac rather than Wine." }
         if !store.canRunWindows { return "MacHub's Windows engine isn't ready. See Settings › Windows Engine." }
         if let install = title.install, install.executables.isEmpty { return "Installed, but no Windows executable was found in its folder." }
-        if title.install != nil { return "Compatibility not verified: it may or may not run on Mac." }
+        if title.install != nil, title.steamAppID.flatMap({ store.estimates[$0] })?.verdict ?? .unknown == .unknown {
+            return "Compatibility not verified: it may or may not run on Mac."
+        }
         if title.kind == .game, store.steamBottle == nil { return "To play, set up Steam for Windows in Settings › Windows Engine." }
         if title.owned == nil { return "Not in your Steam library. Buy or add it on Steam first." }
         return nil

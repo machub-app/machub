@@ -57,6 +57,8 @@ struct Title: Identifiable, Hashable, Sendable {
     var macAvailable: Bool?
     /// A game that runs natively on the Mac through its own launcher (Minecraft: Java Edition).
     var nativeApp: URL?
+    /// Epic Games Store app name (Legendary's `app_name`): the game comes from the user's Epic library.
+    var epicAppName: String?
 
     var availability: Availability {
         if install != nil { .installed } else if owned != nil { .owned } else { .store }
@@ -69,7 +71,7 @@ struct Title: Identifiable, Hashable, Sendable {
     /// Play is offered only for an identified, launchable install. Never for store or demo titles.
     var canLaunch: Bool {
         guard !isDemo, hasExecutable else { return false }
-        return kind == .software || steamAppID != nil
+        return kind == .software || steamAppID != nil || epicAppName != nil
     }
 
     static func steamID(_ appID: Int) -> String { "steam:\(appID)" }
@@ -89,6 +91,18 @@ struct Title: Identifiable, Hashable, Sendable {
     init(owned game: SteamWebAPI.OwnedGame) {
         self.init(id: Self.steamID(game.appID), name: game.name, kind: .game, steamAppID: game.appID)
         owned = Owned(playtimeMinutes: game.playtimeMinutes, lastPlayed: game.lastPlayed)
+    }
+
+    static func epicID(_ appName: String) -> String { "epic:\(appName)" }
+
+    /// A game from the user's Epic library; installed when Legendary has it on disk.
+    init(epic game: Legendary.Game, install: Install?) {
+        self.init(id: Self.epicID(game.appName), name: game.title, kind: .game, steamAppID: nil)
+        epicAppName = game.appName
+        owned = Owned(playtimeMinutes: 0, lastPlayed: nil)
+        capsuleURL = game.coverURL
+        backgroundURL = game.headerURL
+        self.install = install
     }
 
     init(store item: StoreItem) {
