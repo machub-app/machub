@@ -449,6 +449,25 @@ private struct TitleGraphicsPanel: View {
                     }
                     .toggleStyle(.switch)
                 }
+                let renderers = GameRenderers.renderers(appID: title.steamAppID)
+                if !renderers.isEmpty {
+                    let chosen = renderers.first { $0.id == store.settings(for: title).gameRenderer }
+                    Picker("Game renderer", selection: Binding(
+                        get: { chosen?.id ?? "" },
+                        set: { new in
+                            var settings = store.settings(for: title)
+                            settings.gameRenderer = new.isEmpty ? nil : new
+                            store.updateSettings(settings, for: title)
+                        })) {
+                        Text("Automatic").tag("")
+                        ForEach(renderers) { Text(LocalizedStringKey($0.label)).tag($0.id) }
+                    }
+                    .frame(maxWidth: 380)
+                    Text(LocalizedStringKey(chosen?.detail ?? "The game's renderer from the launch options above or the community's recommendation."))
+                        .font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text("Starts with: \(store.launchOptions(for: title).joined(separator: " "))")
+                        .font(.caption.monospaced()).foregroundStyle(Theme.textSecondary)
+                }
                 Picker("Direct3D", selection: Binding(
                     get: { store.settings(for: title).graphics },
                     set: { new in

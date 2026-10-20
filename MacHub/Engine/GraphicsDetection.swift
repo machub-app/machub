@@ -98,6 +98,8 @@ struct TitleSettings: Codable, Equatable, Sendable {
     var environment: [String: String] = [:]
     /// Per-game overrides of the engine's settings (nil = follow Settings › Windows Games).
     var advanced = TitleAdvanced()
+    /// The game's own renderer when it picks one by launch option (`GameRenderers`), nil = automatic.
+    var gameRenderer: String?
 
     init(graphics: GraphicsChoice = .automatic, arguments: String = "", useRecommended: Bool = true,
          environment: [String: String] = [:]) {
@@ -115,6 +117,7 @@ struct TitleSettings: Codable, Equatable, Sendable {
         useRecommended = try c.decodeIfPresent(Bool.self, forKey: .useRecommended) ?? true
         environment = try c.decodeIfPresent([String: String].self, forKey: .environment) ?? [:]
         advanced = try c.decodeIfPresent(TitleAdvanced.self, forKey: .advanced) ?? TitleAdvanced()
+        gameRenderer = try c.decodeIfPresent(String.self, forKey: .gameRenderer)
     }
 
     static let fileName = "title-settings.json"

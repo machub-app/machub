@@ -263,8 +263,9 @@ final class LibraryStore {
     /// The launch options a launch uses: the title's own, else highball-db's (e.g. BeamNG's `-gfx dx11`).
     func launchOptions(for title: Title) -> [String] {
         let own = settings(for: title)
-        if !own.argumentList.isEmpty || !own.useRecommended { return own.argumentList }
-        return recommendation(for: title)?.launchArgs ?? []
+        let base = !own.argumentList.isEmpty || !own.useRecommended ? own.argumentList : recommendation(for: title)?.launchArgs ?? []
+        let renderer = GameRenderers.renderers(appID: title.steamAppID).first { $0.id == own.gameRenderer }
+        return GameRenderers.apply(renderer, to: base)
     }
     private(set) var engineState: EngineState = .checking
     private(set) var prefixes: [InstalledPrefix] = []

@@ -1031,6 +1031,16 @@
         }
       }
     },
+    "Automatic": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatique"
+          }
+        }
+      }
+    },
     "Automatic (recommended)": {
       "localizations": {
         "fr": {
@@ -1119,6 +1129,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Retour à la fiche"
+          }
+        }
+      }
+    },
+    "BeamNG's Vulkan renderer, straight to Metal through MoltenVK. Not tested yet: if the game doesn't start or shows a black screen, choose Automatic again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rendu Vulkan de BeamNG, envoyé directement à Metal par MoltenVK. Pas encore testé : si le jeu ne démarre pas ou reste sur un écran noir, choisis de nouveau Automatique."
           }
         }
       }
@@ -2991,6 +3011,16 @@
         }
       }
     },
+    "DirectX 11": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DirectX 11"
+          }
+        }
+      }
+    },
     "DirectX 12 (D3DMetal)": {
       "localizations": {
         "fr": {
@@ -3829,6 +3859,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fichier du jeu trouvé"
+          }
+        }
+      }
+    },
+    "Game renderer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rendu du jeu"
           }
         }
       }
@@ -10766,6 +10806,16 @@
         }
       }
     },
+    "Starts with: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancé avec : %@"
+          }
+        }
+      }
+    },
     "Status": {
       "localizations": {
         "fr": {
@@ -12265,6 +12315,16 @@
         }
       }
     },
+    "The game's renderer from the launch options above or the community's recommendation.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rendu choisi par les options de lancement ci-dessus ou par la recommandation de la communauté."
+          }
+        }
+      }
+    },
     "The installer added these programs. The first one is MacHub's best guess.": {
       "localizations": {
         "fr": {
@@ -12619,6 +12679,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fils d'exécution"
+          }
+        }
+      }
+    },
+    "Through MacHub's Direct3D layer (DXMT by default). Tested on this Mac.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Via la couche Direct3D de MacHub (DXMT par défaut). Testé sur ce Mac."
           }
         }
       }
@@ -13259,6 +13329,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volume par application"
+          }
+        }
+      }
+    },
+    "Vulkan (MoltenVK)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vulkan (MoltenVK)"
           }
         }
       }
