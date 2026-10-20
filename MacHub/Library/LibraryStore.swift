@@ -204,6 +204,8 @@ final class LibraryStore {
     var awaitingNexusLinks: Set<Int> = []
     /// Bumped whenever a Nexus install changes, so lists reload.
     var nexusRevision = 0
+    /// The name of the mod being installed from a file, while it installs.
+    var localModWork: String?
     /// The layer each executable got at its last launch (shown on the title page).
     private(set) var lastGraphics: [Title.ID: [String: GraphicsLayer]] = [:]
 
@@ -437,6 +439,15 @@ final class LibraryStore {
         prefixes.first { $0.settings.role == .steam && SteamLibrary.steamRoot(inPrefix: $0.url) != nil }
     }
 
+    /// Steam for Windows the user already installed in a Whisky bottle. MacHub uses it as it is: nothing to download,
+    /// nothing to install, and the bottle is never changed.
+    var whiskySteamBottle: BottleInfo? {
+        whiskyBottles.first { $0.hasDriveC && SteamSetup.hasSteam(inPrefix: $0.url) }
+    }
+
+    /// Steam for Windows is available somewhere MacHub can use it, so the "Install Steam" step isn't needed.
+    var hasSteamForWindows: Bool { steamPrefix != nil || whiskySteamBottle != nil }
+
     /// Reads installed and downloading games from every MacHub prefix that has Steam. No Steam or Whisky call.
     func refreshSteamGames() {
         var installed: [Title] = []
@@ -512,6 +523,11 @@ final class LibraryStore {
 
     /// One click: Steam prefix → Valve's installer (silent) → Steam started for the user to sign in.
     func setUpSteam() async {
+        // Already installed with Whisky: use that copy rather than downloading and installing a second one.
+        if steamPrefix == nil, whiskySteamBottle != nil {
+            await startSteam()
+            return
+        }
         guard let runtime else { steamSetup = .failed(Self.describe(EngineError.runtimeMissing)); return }
         let engine = EmbeddedWineEngine(runtime: runtime)
         do {
@@ -524,8 +540,13 @@ final class LibraryStore {
             }
             guard let prefix else { return }
             if SteamLibrary.steamRoot(inPrefix: prefix.url) == nil {
-                steamSetup = .working(.downloadingInstaller)
-                let installer = try await SteamSetup.downloadInstaller()
+                let installer: URL
+                if let cached = SteamSetup.cachedInstaller() {
+                    installer = cached
+                } else {
+                    steamSetup = .working(.downloadingInstaller)
+                    installer = try await SteamSetup.downloadInstaller()
+                }
                 steamSetup = .working(.installing)
                 try await SteamSetup.install(engine: engine, prefix: prefix, installer: installer)
             }
@@ -576,6 +597,7 @@ final class LibraryStore {
 
     /// Starts Steam for Windows in the Steam prefix and brings its window forward.
     func startSteam() async {
+        if steamPrefix == nil, let bottle = whiskySteamBottle { await startWhiskySteam(bottle); return }
         guard let runtime, let prefix = steamPrefix else { return }
         let engine = EmbeddedWineEngine(runtime: runtime)
         steamSetup = .working(.starting)
@@ -608,6 +630,27 @@ final class LibraryStore {
         watchLibraryCache()
         // Steam's window appears only after its self-update (a minute or more on first start).
         _ = await SteamSetup.revealSteamWindow(runtime: runtime)
+    }
+
+    /// Starts the Steam for Windows installed in a Whisky bottle, through Whisky itself.
+    private func startWhiskySteam(_ bottle: BottleInfo) async {
+        guard let install = whiskyInstall, let name = bottle.name else {
+            steamSetup = .failed(String(localized: "Whisky isn't ready, so the Steam installed in its bottle can't start."))
+            return
+        }
+        steamSetup = .working(.starting)
+        if ProcessWatch.matches(in: await ProcessWatch.snapshot(), target: .executable(LaunchPlan.steamExecutable)).isEmpty {
+            let cli = WhiskyCLI(install: install)
+            Task.detached {
+                // Becomes the Steam client: returns only when Steam quits.
+                _ = try? await cli.run(SteamSetup.steamExe, bottle: name, arguments: [], timeout: 7 * 24 * 3600)
+            }
+            guard await ProcessWatch.waitForProgram(named: LaunchPlan.steamExecutable, timeout: .seconds(120)) != nil else {
+                steamSetup = .failed(String(localized: "Steam for Windows didn't start within 2 minutes"))
+                return
+            }
+        }
+        steamSetup = .waitingForSignIn
     }
 
     /// Asks Steam to quit cleanly (it syncs cloud saves on the way out), then ends what's left in the prefix.

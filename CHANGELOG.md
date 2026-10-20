@@ -2,6 +2,21 @@
 
 All notable changes to MacHub. Versions follow [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+- **Assetto Corsa mods**: browse and install from Nexus Mods inside MacHub, like BeamNG.drive and Cyberpunk 2077. Cars and tracks go to `content/cars` and `content/tracks` (archives laid out like the game folder are merged as they are); every mod can be disabled, enabled again or removed, and a game file it replaced is put back.
+- **Mods from other sites** (Overtake, AssettoCorsa.club, BeamNG's repository): MacHub opens the site, watches the Downloads folder for 15 minutes for the archive downloaded there and installs it in one click. Any archive or unpacked folder can also be added by hand.
+- `.7z` and `.rar` mod archives, unpacked with macOS's own bsdtar.
+- **Settings › Sound**: a volume and a mute button per app (a game, Discord, the browser playing YouTube…), with Core Audio process taps. macOS asks once for permission; volumes apply while MacHub is open, and a browser is one app (macOS doesn't separate tabs).
+- Steam for Windows already installed in a Whisky bottle is used as it is: no download and no "Install Steam" step. Valve's installer already on the Mac is reused instead of downloaded again.
+
+### Fixed
+- Mods merged into a game folder (Cyberpunk 2077 layout) could be written under a wrong sub-folder: the temporary folder is reached through `/var` → `/private/var`, which shifted every relative path.
+- Nexus mods could only be installed for games in a MacHub environment; games in a Whisky bottle work too.
+- MacHub didn't compile with Xcode 26.6 in Debug (RootView's body was too long for the type checker).
+- When the Windows engine crashes at start on macOS 26 (engine 1.0.5 was built with the macOS 27 SDK and calls `pipe2`), the error now says so. `scripts/build-wine.sh` sets `ac_cv_func_pipe2=no`: the next engine build runs on macOS 26 and earlier.
+
 ## [0.4.1] - 2026-10-20
 
 ### Fixed

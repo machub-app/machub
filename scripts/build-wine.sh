@@ -57,6 +57,9 @@ cd "$BUILD"
 # also looks in the working directory.
 ln -sf "$MACOS_LIBS"/libfreetype*.dylib "$BUILD/"
 if [[ ! -f Makefile ]]; then
+  # ac_cv_func_pipe2=no: the macOS 27 SDK declares pipe2, so configure finds it and ntdll calls it unguarded. On
+  # macOS 26 and earlier the symbol is missing and every wine process crashes at start (signal 11 in
+  # init_thread_pipe; engine 1.0.5 on macOS 26.5.2, 2026-10-20). Wine falls back to pipe() + fcntl() without it.
   # Options of the official macOS packages (MacPorts wine-stable), minus what isn't installed here
   # (gettext, inotify, cups, pcsclite libraries for x86_64).
   "$SRC/configure" --prefix="$PREFIX" --host=x86_64-apple-darwin \
@@ -68,6 +71,7 @@ if [[ ! -f Makefile ]]; then
     --without-udev --with-unwind --without-usb --without-v4l2 --with-vulkan --without-wayland --without-x \
     --disable-winemenubuilder --disable-tests \
     ac_cv_lib_soname_freetype=libfreetype.6.dylib ac_cv_lib_soname_gnutls=libgnutls.30.dylib \
+    ac_cv_func_pipe2=no \
     2>&1 | tee configure.log
 fi
 make -j"$JOBS" 2>&1 | tee make.log | grep -E 'error:|Error [0-9]' || true

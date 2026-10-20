@@ -10,7 +10,14 @@ struct NexusModInstaller: Sendable {
         case mergeIntoGame(URL, roots: [String])
         /// Dead Island 2: .pak/.utoc/.ucas files go to Content/Paks/~mods.
         case paksInto(URL)
+        /// Assetto Corsa: content/cars, content/tracks, apps… merged into the game folder; a bare car or track
+        /// folder (recognised by its ui_car.json / ui_track.json) goes to content/cars or content/tracks.
+        case assettoCorsa(URL)
     }
+
+    /// Archive formats MacHub unpacks: zip with ditto, 7z and rar with macOS's own bsdtar (libarchive).
+    static let archiveExtensions = ["zip", "7z", "rar"]
+    static let assettoCorsaRoots = ["content", "apps", "extension", "system"]
 
     struct Installed: Codable, Hashable, Identifiable, Sendable {
         var id: String { "\(modID)-\(fileID)" }
@@ -24,6 +31,8 @@ struct NexusModInstaller: Sendable {
         let backups: [String: String]
         var enabled: Bool
         let installedAt: Date
+        /// nil for a Nexus download; "file" for an archive or folder the user brought from another site.
+        var source: String? = nil
     }
 
     enum Failure: Error, Equatable {
@@ -40,7 +49,7 @@ struct NexusModInstaller: Sendable {
 
     var root: URL {
         switch layout {
-        case .zipIntoFolder(let url), .mergeIntoGame(let url, _), .paksInto(let url): url
+        case .zipIntoFolder(let url), .mergeIntoGame(let url, _), .paksInto(let url), .assettoCorsa(let url): url
         }
     }
 
@@ -55,6 +64,8 @@ struct NexusModInstaller: Sendable {
             return .mergeIntoGame(URL(filePath: installPath), roots: ["archive", "bin", "r6", "red4ext", "engine", "mods", "tools"])
         case 934700:
             return .paksInto(URL(filePath: installPath).appending(path: "DeadIsland/Content/Paks/~mods"))
+        case 244210:
+            return .assettoCorsa(URL(filePath: installPath))
         default:
             return nil
         }
@@ -72,39 +83,50 @@ struct NexusModInstaller: Sendable {
     // MARK: Install
 
     /// Installs a downloaded archive. `fileName` is the name Nexus gave it (the download URL may not carry one).
-    func install(archive: URL, fileName: String, modID: Int, fileID: Int, name: String, version: String) async throws -> Installed {
+    /// `archive` may also be a folder the user unpacked themselves.
+    func install(archive: URL, fileName: String, modID: Int, fileID: Int, name: String, version: String,
+                 source: String? = nil) async throws -> Installed {
         let fm = FileManager.default
+        var isFolder: ObjCBool = false
+        _ = fm.fileExists(atPath: archive.path, isDirectory: &isFolder)
         let ext = (fileName as NSString).pathExtension.lowercased()
-        guard ext == "zip" else { throw Failure.unsupportedFormat(ext) }
-        let entries = try await zipEntries(archive)
+        guard isFolder.boolValue || Self.archiveExtensions.contains(ext) else { throw Failure.unsupportedFormat(ext) }
+        let entries = isFolder.boolValue ? [] : try await archiveEntries(archive, ext: ext)
         try Self.check(entries)
+        if isFolder.boolValue { try? ArchiveModImporter.rejectSymlinks(in: archive) }
+        var staging: URL?
+        defer { if let staging { try? fm.removeItem(at: staging) } }
+        /// The unpacked tree: the folder itself, or a staging copy of the archive.
+        func unpack() async throws -> URL {
+            if isFolder.boolValue { return archive }
+            let unpacked = try await extract(archive, ext: ext)
+            staging = unpacked
+            return unpacked
+        }
 
         // Placement plan: source file → path relative to root.
         var plan: [(source: URL, relative: String)] = []
-        var staging: URL?
-        defer { if let staging { try? fm.removeItem(at: staging) } }
 
         switch layout {
         case .zipIntoFolder:
             let beamRoots = ["vehicles", "levels", "lua", "art", "ui", "scripts", "settings", "gameplay", "campaigns", "flowEditor"]
             let roots = Set(entries.compactMap { $0.split(separator: "/").first.map(String.init) })
-            if !roots.isDisjoint(with: beamRoots) {
+            if ext == "zip", !isFolder.boolValue, !roots.isDisjoint(with: beamRoots) {
                 plan = [(archive, Self.safeName(fileName))]
             } else {
-                let unpacked = try await extract(archive)
-                staging = unpacked
+                let unpacked = try await unpack()
                 plan = Self.files(in: unpacked).filter { $0.pathExtension.lowercased() == "zip" }.map { ($0, Self.safeName($0.lastPathComponent)) }
             }
         case .mergeIntoGame(_, let roots):
-            let unpacked = try await extract(archive)
-            staging = unpacked
+            let unpacked = try await unpack()
             guard let base = Self.base(of: unpacked, containingOneOf: roots) else { throw Failure.nothingRecognised }
-            plan = Self.files(in: base).map { ($0, String($0.path.dropFirst(base.path.count + 1))) }
+            plan = Self.files(in: base).map { ($0, Self.relative($0, to: base)) }
         case .paksInto:
-            let unpacked = try await extract(archive)
-            staging = unpacked
+            let unpacked = try await unpack()
             plan = Self.files(in: unpacked).filter { ["pak", "utoc", "ucas"].contains($0.pathExtension.lowercased()) }
                 .map { ($0, $0.lastPathComponent) }
+        case .assettoCorsa:
+            plan = Self.assettoCorsaPlan(in: try await unpack())
         }
         guard !plan.isEmpty else { throw Failure.nothingRecognised }
 
@@ -127,7 +149,7 @@ struct NexusModInstaller: Sendable {
             try fm.copyItem(at: source, to: target)
         }
         let record = Installed(modID: modID, fileID: fileID, name: name, version: version, files: plan.map(\.relative),
-                               backups: backups, enabled: true, installedAt: .now)
+                               backups: backups, enabled: true, installedAt: .now, source: source)
         mods.removeAll { $0.modID == modID }
         mods.append(record)
         save(mods)
@@ -170,16 +192,33 @@ struct NexusModInstaller: Sendable {
 
     // MARK: Helpers
 
-    private func zipEntries(_ archive: URL) async throws -> [String] {
-        let listing = try await runner(URL(filePath: "/usr/bin/zipinfo"), ["-1", archive.path], 60)
+    /// Assetto Corsa placement: an archive laid out like the game folder is merged as it is; otherwise each car or
+    /// track folder found in it goes under content/cars or content/tracks.
+    static func assettoCorsaPlan(in unpacked: URL) -> [(source: URL, relative: String)] {
+        if let base = base(of: unpacked, containingOneOf: assettoCorsaRoots) {
+            return files(in: base).map { ($0, relative($0, to: base)) }
+        }
+        return ArchiveModImporter.items(in: unpacked).flatMap { item in
+            let folder = item.kind == .car ? "content/cars" : "content/tracks"
+            return files(in: item.source).map { ($0, "\(folder)/\(safeName(item.name))/" + relative($0, to: item.source)) }
+        }
+    }
+
+    private func archiveEntries(_ archive: URL, ext: String) async throws -> [String] {
+        let listing = ext == "zip"
+            ? try await runner(URL(filePath: "/usr/bin/zipinfo"), ["-1", archive.path], 60)
+            : try await runner(URL(filePath: "/usr/bin/tar"), ["-tf", archive.path], 120)
         guard listing.status == 0 else { throw Failure.extraction(listing.stderr) }
         return listing.stdout.split(separator: "\n").map(String.init)
     }
 
-    private func extract(_ archive: URL) async throws -> URL {
+    private func extract(_ archive: URL, ext: String = "zip") async throws -> URL {
         let staging = FileManager.default.temporaryDirectory.appending(path: "machub-nexus-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
-        let result = try await runner(URL(filePath: "/usr/bin/ditto"), ["-x", "-k", archive.path, staging.path], 900)
+        // bsdtar refuses absolute paths and ".." by default; entries were also checked before.
+        let result = ext == "zip"
+            ? try await runner(URL(filePath: "/usr/bin/ditto"), ["-x", "-k", archive.path, staging.path], 900)
+            : try await runner(URL(filePath: "/usr/bin/tar"), ["-xf", archive.path, "-C", staging.path], 900)
         guard result.status == 0 else { throw Failure.extraction(result.stderr) }
         do { try ArchiveModImporter.rejectSymlinks(in: staging) } catch { throw Failure.unsafeEntry("symbolic link") }
         return staging
@@ -212,6 +251,14 @@ struct NexusModInstaller: Sendable {
             if case .unsafeEntry(let entry) = error { throw .unsafeEntry(entry) }
             throw .unsafeEntry("archive")
         }
+    }
+
+    /// A file's path inside `base`. Both are resolved first: the temporary folder is reached through a link
+    /// (/var → /private/var), and the enumerator may report either form, which shifted every path (2026-10-20).
+    static func relative(_ file: URL, to base: URL) -> String {
+        let root = base.resolvingSymlinksInPath().path
+        let path = file.resolvingSymlinksInPath().path
+        return path.hasPrefix(root + "/") ? String(path.dropFirst(root.count + 1)) : file.lastPathComponent
     }
 
     static func safeName(_ name: String) -> String {

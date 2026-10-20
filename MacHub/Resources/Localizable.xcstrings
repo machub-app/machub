@@ -525,6 +525,16 @@
         }
       }
     },
+    "Add a file or folder…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un fichier ou un dossier…"
+          }
+        }
+      }
+    },
     "Add a key in Settings": {
       "localizations": {
         "fr": {
@@ -3035,6 +3045,16 @@
         }
       }
     },
+    "Downloaded a mod elsewhere? Add the archive (.zip, .7z, .rar) or the unpacked folder: MacHub puts it in the right place and can disable or remove it.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu as téléchargé un mod ailleurs ? Ajoute l'archive (.zip, .7z, .rar) ou le dossier décompressé : MacHub le met au bon endroit et peut le désactiver ou le retirer."
+          }
+        }
+      }
+    },
     "Downloaded from the internet. Only run installers from publishers you trust: a Windows program in a bottle can read your files.": {
       "localizations": {
         "fr": {
@@ -3475,6 +3495,16 @@
         }
       }
     },
+    "Found in the Whisky bottle “%@”": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouvé dans la bouteille Whisky « %@ »"
+          }
+        }
+      }
+    },
     "Frame rate": {
       "localizations": {
         "fr": {
@@ -3555,6 +3585,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Depuis Téléchargements"
+          }
+        }
+      }
+    },
+    "From a file · %lld files · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis un fichier · %lld fichiers · %@"
           }
         }
       }
@@ -4455,6 +4495,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装到“%@”"
+          }
+        }
+      }
+    },
+    "Install it in %@?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'installer dans %@ ?"
           }
         }
       }
@@ -5425,6 +5475,16 @@
         }
       }
     },
+    "MacHub can't find this game's folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub ne trouve pas le dossier de ce jeu."
+          }
+        }
+      }
+    },
     "MacHub can't replace itself from this folder. Move it to Applications, or download the new version from its page.": {
       "localizations": {
         "fr": {
@@ -5613,6 +5673,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "MacHub utilise Legendary, un lanceur Epic open source (GPLv3), téléchargé une fois depuis ses versions GitHub et vérifié par SHA-256. Ton mot de passe Epic reste sur le site d'Epic ; Legendary garde un jeton de connexion dans le dossier de MacHub. Les jeux Epic s'installent dans leur propre environnement Windows et démarrent avec le moteur de MacHub. Les jeux avec l'anti-triche d'Epic ou Epic Online Services risquent de ne pas tourner."
+          }
+        }
+      }
+    },
+    "MacHub uses this copy as it is: no download, and the bottle isn't changed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub utilise cette copie telle quelle : aucun téléchargement, et la bouteille n'est pas modifiée."
           }
         }
       }
@@ -6050,6 +6120,26 @@
         }
       }
     },
+    "Mute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couper le son"
+          }
+        }
+      }
+    },
+    "Mute %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couper le son de %@"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "fr": {
@@ -6172,6 +6262,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nouvelle bouteille « %@ »"
+          }
+        }
+      }
+    },
+    "New download: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveau téléchargement : %@"
           }
         }
       }
@@ -6404,6 +6504,16 @@
         }
       }
     },
+    "No app is using sound right now. Start a game, a call or a video: it appears here.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune app n'utilise le son pour l'instant. Lance un jeu, un appel ou une vidéo : elle apparaît ici."
+          }
+        }
+      }
+    },
     "No bottle yet": {
       "localizations": {
         "fr": {
@@ -6624,6 +6734,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucun mod installé par MacHub dans ce profil pour l'instant."
+          }
+        }
+      }
+    },
+    "No mod installed by MacHub yet.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun mod installé par MacHub pour l'instant."
           }
         }
       }
@@ -7018,6 +7138,16 @@
         }
       }
     },
+    "Not this one": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas celui-ci"
+          }
+        }
+      }
+    },
     "Not verified": {
       "localizations": {
         "fr": {
@@ -7310,6 +7440,16 @@
         }
       }
     },
+    "Open Privacy & Security": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Confidentialité et sécurité"
+          }
+        }
+      }
+    },
     "Open Settings": {
       "localizations": {
         "fr": {
@@ -7558,6 +7698,16 @@
         }
       }
     },
+    "Other sites": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres sites"
+          }
+        }
+      }
+    },
     "Overlays": {
       "localizations": {
         "fr": {
@@ -7774,6 +7924,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Les joueurs signalent qu'il tourne avec Wine, avec des problèmes (ProtonDB). Attends-toi à des bugs ou à des réglages en plus."
+          }
+        }
+      }
+    },
+    "Playing sound": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joue du son"
           }
         }
       }
@@ -9070,6 +9230,16 @@
         }
       }
     },
+    "Safari and web pages (WebKit)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari et pages web (WebKit)"
+          }
+        }
+      }
+    },
     "Sample content, not connected to Steam or Whisky.": {
       "localizations": {
         "fr": {
@@ -9368,6 +9538,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Session"
+          }
+        }
+      }
+    },
+    "Set every app back to 100 %": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remettre toutes les apps à 100 %"
           }
         }
       }
@@ -9884,6 +10064,16 @@
         }
       }
     },
+    "Silent": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silencieuse"
+          }
+        }
+      }
+    },
     "Simulation": {
       "localizations": {
         "fr": {
@@ -9986,6 +10176,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "排序方式"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son"
           }
         }
       }
@@ -11029,6 +11229,16 @@
         }
       }
     },
+    "Stop watching": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêter de surveiller"
+          }
+        }
+      }
+    },
     "Stopped": {
       "localizations": {
         "fr": {
@@ -11771,6 +11981,16 @@
         }
       }
     },
+    "These sites have no download service MacHub may use. Download the mod there: MacHub notices the file in your Downloads folder and installs it in one click.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces sites n'ont pas de service de téléchargement que MacHub peut utiliser. Télécharge le mod sur le site : MacHub repère le fichier dans ton dossier Téléchargements et l'installe en un clic."
+          }
+        }
+      }
+    },
     "This Whisky is too old for MacHub": {
       "localizations": {
         "fr": {
@@ -11789,6 +12009,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "此 Whisky 版本过旧，无法用于 MacHub"
+          }
+        }
+      }
+    },
+    "This Windows engine was built for a newer macOS: it uses a system function (pipe2) that this version of macOS doesn't have, so Wine crashes as it starts. A rebuilt engine is needed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce moteur Windows a été compilé pour un macOS plus récent : il utilise une fonction système (pipe2) que cette version de macOS n'a pas, donc Wine plante au démarrage. Il faut un moteur recompilé."
           }
         }
       }
@@ -11829,6 +12059,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ce fichier est une archive .%@. MacHub installe les fichiers .zip ; pour les autres, décompresse-la et copie-la toi-même."
+          }
+        }
+      }
+    },
+    "This file is a .%@ file. MacHub installs .zip, .7z and .rar archives, or a folder you unpacked yourself.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier est un .%@. MacHub installe les archives .zip, .7z et .rar, ou un dossier que tu as décompressé toi-même."
           }
         }
       }
@@ -12175,6 +12415,26 @@
         }
       }
     },
+    "Unmute": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétablir le son"
+          }
+        }
+      }
+    },
+    "Unmute %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétablir le son de %@"
+          }
+        }
+      }
+    },
     "Untested": {
       "localizations": {
         "fr": {
@@ -12423,6 +12683,26 @@
         }
       }
     },
+    "Volume of %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume de %@"
+          }
+        }
+      }
+    },
+    "Volume per app": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume par application"
+          }
+        }
+      }
+    },
     "Waiting for Steam": {
       "localizations": {
         "fr": {
@@ -12461,6 +12741,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "En attente du jeu"
+          }
+        }
+      }
+    },
+    "Watching your Downloads folder for the next archive (15 minutes at most).": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Surveillance du dossier Téléchargements jusqu'à la prochaine archive (15 minutes au plus)."
           }
         }
       }
@@ -12650,6 +12940,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Whisky n'est pas prêt"
+          }
+        }
+      }
+    },
+    "Whisky isn't ready, so the Steam installed in its bottle can't start.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whisky n'est pas prêt : le Steam installé dans sa bouteille ne peut pas démarrer."
           }
         }
       }
@@ -12977,6 +13277,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fichiers Windows dans Téléchargements"
+          }
+        }
+      }
+    },
+    "Windows games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeux Windows"
           }
         }
       }
@@ -13535,6 +13845,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS n'a pas laissé MacHub l'ouvrir. Vérifie qu'il est entièrement téléchargé."
+          }
+        }
+      }
+    },
+    "macOS has no volume per app of its own. MacHub captures the sound of an app you turn down and plays it at the level you choose; macOS asks once for permission to record other apps' audio. Nothing is recorded or saved. A browser counts as one app: a YouTube video follows the browser's volume, since macOS doesn't separate tabs. Volumes apply while MacHub is open.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS n'a pas de volume par application. MacHub capte le son d'une app que tu baisses et le rejoue au niveau choisi ; macOS demande une fois l'autorisation d'enregistrer l'audio des autres apps. Rien n'est enregistré ni conservé. Un navigateur compte comme une seule app : une vidéo YouTube suit le volume du navigateur, car macOS ne sépare pas les onglets. Les volumes s'appliquent tant que MacHub est ouvert."
+          }
+        }
+      }
+    },
+    "macOS refused to adjust this app's sound. Check that MacHub may record audio in System Settings › Privacy & Security.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS a refusé de régler le son de cette app. Vérifie que MacHub peut enregistrer l'audio dans Réglages Système › Confidentialité et sécurité."
           }
         }
       }

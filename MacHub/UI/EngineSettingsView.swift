@@ -502,12 +502,19 @@ struct SteamEngineSection: View {
             case nil:
                 if let prefix = store.steamPrefix {
                     LabeledContent("Steam for Windows") { Text(verbatim: "Installed · \(prefix.name)") }
+                } else if let bottle = store.whiskySteamBottle {
+                    LabeledContent("Steam for Windows") { Text("Found in the Whisky bottle “\(bottle.name ?? "")”") }
+                    Text("MacHub uses this copy as it is: no download, and the bottle isn't changed.")
+                        .font(.callout).foregroundStyle(.secondary)
                 } else {
                     Text("Not installed").foregroundStyle(.secondary)
                 }
             }
             HStack {
-                if store.steamPrefix == nil {
+                if store.steamPrefix == nil, store.whiskySteamBottle != nil {
+                    Button("Start Steam") { Task { await store.startSteam() } }
+                        .disabled(isWorking || store.whiskyInstall == nil)
+                } else if store.steamPrefix == nil {
                     Button("Install Steam for Windows") { Task { await store.setUpSteam() } }
                         .disabled(!isReady || isWorking)
                 } else {

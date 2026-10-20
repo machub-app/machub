@@ -27,6 +27,22 @@ enum SteamSetup {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appending(path: "app.machub.MacHub")
     }
 
+    /// Where a Windows environment (MacHub prefix or Whisky bottle) keeps steam.exe, if Steam for Windows is installed.
+    static func hasSteam(inPrefix root: URL, fileManager: FileManager = .default) -> Bool {
+        ["drive_c/Program Files (x86)/Steam/steam.exe", "drive_c/Program Files/Steam/steam.exe"]
+            .contains { fileManager.fileExists(atPath: root.appending(path: $0).path) }
+    }
+
+    /// Valve's installer already on this Mac (MacHub's cache, or the copy an earlier MacHub kept in `installers/`),
+    /// if it is still a Windows executable. Steam updates itself after installing, so an older copy is fine.
+    static func cachedInstaller(in folder: URL = cache, fileManager: FileManager = .default) -> URL? {
+        [folder.appending(path: "SteamSetup.exe"), folder.appending(path: "installers/SteamSetup.exe")].first { url in
+            guard fileManager.fileExists(atPath: url.path), case .executable? = try? WindowsFile.inspect(url, fileManager: fileManager).kind
+            else { return false }
+            return true
+        }
+    }
+
     /// Downloads SteamSetup.exe into MacHub's cache, replacing an older copy.
     static func downloadInstaller() async throws -> URL {
         let (temp, response) = try await URLSession.shared.download(from: installerURL)
