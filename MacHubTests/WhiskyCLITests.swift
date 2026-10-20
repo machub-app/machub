@@ -156,6 +156,12 @@ private func cli(expecting arguments: [String]? = nil, reply: ProcessResult) -> 
         defer { try? FileManager.default.removeItem(at: root) }
         let binary = root.appending(path: "sleep")
         try FileManager.default.copyItem(at: URL(filePath: "/bin/sleep"), to: binary)
+        // macOS kills a copied system binary that keeps Apple's platform signature: sign the copy ad hoc.
+        let sign = Process()
+        sign.executableURL = URL(filePath: "/usr/bin/codesign")
+        sign.arguments = ["-s", "-", "-f", binary.path]
+        try sign.run()
+        sign.waitUntilExit()
         let child = Process()
         child.executableURL = binary
         child.arguments = ["30"]
