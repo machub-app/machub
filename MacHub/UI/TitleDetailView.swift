@@ -316,10 +316,13 @@ private struct TrailerRow: View {
             .scrollIndicators(.never)
         }
         .sheet(item: $playing) { TrailerPlayer(trailer: $0) }
+        // `-playFirstTrailer YES` (a launch argument, never saved) opens the first trailer: used to check playback.
+        .task { if UserDefaults.standard.bool(forKey: "playFirstTrailer") { playing = trailers.first } }
     }
 }
 
-private struct TrailerPlayer: View {
+/// Not internal for tests: rendering it is what used to crash (SwiftUI's VideoPlayer, see TrailerPlayerView).
+struct TrailerPlayer: View {
     let trailer: StoreDetails.Trailer
     @Environment(\.dismiss) private var dismiss
     @State private var player: AVPlayer?
@@ -332,7 +335,7 @@ private struct TrailerPlayer: View {
                 Button("Done") { dismiss() }.keyboardShortcut(.cancelAction)
             }
             .padding(12)
-            VideoPlayer(player: player)
+            TrailerPlayerView(player: player)
                 .aspectRatio(16 / 9, contentMode: .fit)
                 .background(.black)
         }
@@ -343,6 +346,30 @@ private struct TrailerPlayer: View {
             player.play()
         }
         .onDisappear { player?.pause() }
+    }
+}
+
+/// AppKit's AVPlayerView. SwiftUI's VideoPlayer (the _AVKit_SwiftUI overlay) aborted MacHub 0.3.1 on macOS 27 the
+/// moment it was created ("getSuperclassMetadata" fatal error), so the player is hosted directly instead.
+struct TrailerPlayerView: NSViewRepresentable {
+    let player: AVPlayer?
+
+    func makeNSView(context: Context) -> AVPlayerView {
+        let view = AVPlayerView()
+        view.controlsStyle = .floating
+        view.showsFullScreenToggleButton = true
+        view.videoGravity = .resizeAspect
+        view.player = player
+        return view
+    }
+
+    func updateNSView(_ view: AVPlayerView, context: Context) {
+        if view.player !== player { view.player = player }
+    }
+
+    static func dismantleNSView(_ view: AVPlayerView, coordinator: ()) {
+        view.player?.pause()
+        view.player = nil
     }
 }
 
