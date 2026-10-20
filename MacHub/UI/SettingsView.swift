@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Settings, grouped by topic: a category column on the left, the category's options on the right.
 enum SettingsCategory: String, CaseIterable, Identifiable {
-    case general, steamAccount, epic, steamWindows, engine, graphics, performance, input, environments, mods, controllers, whisky, diagnostics
+    case general, steamAccount, epic, steamWindows, engine, graphics, performance, input, environments, storage, mods, controllers, whisky, diagnostics
 
     var id: Self { self }
 
@@ -17,6 +17,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .performance: "Performance"
         case .input: "Keyboard & Mouse"
         case .environments: "Windows Environments"
+        case .storage: "Storage"
         case .mods: "Mods"
         case .controllers: "Controllers"
         case .whisky: "Whisky (Fallback)"
@@ -35,6 +36,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .performance: "gauge.with.dots.needle.67percent"
         case .input: "keyboard"
         case .environments: "square.stack.3d.up"
+        case .storage: "internaldrive"
         case .mods: "puzzlepiece.extension"
         case .controllers: "gamecontroller"
         case .whisky: "wineglass"
@@ -45,7 +47,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     /// Groups in the category column.
     @MainActor static let groups: [(LocalizedStringKey, [SettingsCategory])] = [
         ("MacHub", [.general, .steamAccount, .epic, .mods, .controllers]),
-        ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments]),
+        ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments, .storage]),
         ("Advanced", [.whisky, .diagnostics]),
     ]
 }
@@ -98,6 +100,7 @@ struct SettingsView: View {
         case .performance: PerformanceSettingsSection()
         case .input: InputSettingsSection()
         case .environments: EnvironmentsSettingsSection()
+        case .storage: StorageSettingsSection()
         case .mods: ModsSettingsSection()
         case .epic: EpicSettingsSection()
         case .controllers: ControllerSettingsSection()
