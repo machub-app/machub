@@ -34,6 +34,8 @@ final class LibraryStore {
         case cancelled
         case failed(String, log: String?)
 
+        var isRunningState: Bool { if case .running = self { true } else { false } }
+
         var isInProgress: Bool {
             switch self {
             case .preparing, .checkingBottle, .startingSteam, .startingProcess, .waitingForGame: true
@@ -661,6 +663,28 @@ final class LibraryStore {
         steamSetup = .waitingForSignIn
     }
 
+    static let quitSteamAfterGameKey = "steam.quitAfterGame"
+
+    /// Steam for Windows started for a game keeps eating memory and CPU once the game is gone. When MacHub started
+    /// it for this launch (it wasn't running before) and no other Steam game is running, quit it cleanly. A launch
+    /// that never started (Steam may be showing an update or a sign-in) or that the user stopped watching keeps Steam.
+    func quitSteamAfterGameIfUnneeded(_ id: Title.ID) async {
+        guard UserDefaults.standard.object(forKey: Self.quitSteamAfterGameKey) as? Bool ?? true,
+              launchSessions[id]?.steamAlreadyRunning == false, steamPrefix != nil else { return }
+        switch launchStates[id] {
+        case .closed?, .crashedAtStart?: break
+        default: return
+        }
+        let otherSteamGame = launchStates.contains { key, state in
+            key != id && (state.isInProgress || state.isRunningState) && launchSessions[key]?.route.isSteam == true
+        }
+        // Never in the middle of a download, update or verification.
+        refreshSteamGames()
+        let steamBusy = !steamDownloads.isEmpty || steamUpdates.values.contains { $0.isUpdating || $0.isValidating || $0.isUninstalling }
+        guard !otherSteamGame, !steamBusy else { return }
+        await stopSteam()
+    }
+
     /// Asks Steam to quit cleanly (it syncs cloud saves on the way out), then ends what's left in the prefix.
     func stopSteam() async {
         guard let runtime, let prefix = steamPrefix else { return }
@@ -970,6 +994,7 @@ final class LibraryStore {
             }
         }
         if announced { await DiscordPresence.shared.stopped() }
+        if route.isSteam { await quitSteamAfterGameIfUnneeded(id) }
         var summary: PerformanceSummary?
         if engineSettings.metalHUD, let read = await PerformanceLog.read(since: sessionStart) {
             summary = read

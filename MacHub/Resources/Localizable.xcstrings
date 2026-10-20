@@ -8596,6 +8596,16 @@
         }
       }
     },
+    "Quit Steam when the game closes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter Steam à la fermeture du jeu"
+          }
+        }
+      }
+    },
     "Quit Them Too": {
       "localizations": {
         "fr": {
@@ -13203,6 +13213,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quand MacHub se ferme"
+          }
+        }
+      }
+    },
+    "When MacHub started Steam for a game, it quits Steam once the game closes so it stops using memory and battery. Steam syncs your cloud saves on the way out, and it stays open during downloads.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand MacHub a démarré Steam pour un jeu, il quitte Steam une fois le jeu fermé, pour qu'il n'utilise plus de mémoire ni de batterie. Steam synchronise tes sauvegardes cloud en partant, et il reste ouvert pendant les téléchargements."
           }
         }
       }
