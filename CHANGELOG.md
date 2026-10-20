@@ -5,6 +5,9 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 ## [Unreleased]
 
 ### Added
+- **Mac games through Steam for Mac**: games installed with Steam for Mac show as "Installed (Mac)" and Play starts them through Steam for Mac, without Wine. A game with a native Mac build that isn't installed offers "Install for Mac" (Steam for Mac downloads it and MacHub follows the progress) or its Steam page when the account doesn't own it; the Windows version stays in the … menu. Steam for Mac's library cache also fills the library when no Web API key is set.
+- **Nintendo Switch games through Astris** (a Switch emulator installed separately): the games Astris knows and the game files in its folders appear in the Library with their artwork and details from nlib, and Play opens them in Astris. Settings › Emulators shows Astris and its game folders. MacHub never provides games, firmware or keys.
+- Update checks at launch and then every hour while MacHub is open, so the sidebar card appears without going to Settings.
 - **Assetto Corsa mods**: browse and install from Nexus Mods inside MacHub, like BeamNG.drive and Cyberpunk 2077. Cars and tracks go to `content/cars` and `content/tracks` (archives laid out like the game folder are merged as they are); every mod can be disabled, enabled again or removed, and a game file it replaced is put back.
 - **Mods from other sites** (Overtake, AssettoCorsa.club, BeamNG's repository): MacHub opens the site, watches the Downloads folder for 15 minutes for the archive downloaded there and installs it in one click. Any archive or unpacked folder can also be added by hand.
 - `.7z` and `.rar` mod archives, unpacked with macOS's own bsdtar.
@@ -12,6 +15,7 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 - Steam for Windows already installed in a Whisky bottle is used as it is: no download and no "Install Steam" step. Valve's installer already on the Mac is reused instead of downloaded again.
 
 ### Fixed
+- "Wine didn't start" with an empty message at launch: the cleanup of programs left by an earlier session could also end the engine check MacHub had just started.
 - Mods merged into a game folder (Cyberpunk 2077 layout) could be written under a wrong sub-folder: the temporary folder is reached through `/var` → `/private/var`, which shifted every relative path.
 - Nexus mods could only be installed for games in a MacHub environment; games in a Whisky bottle work too.
 - MacHub didn't compile with Xcode 26.6 in Debug (RootView's body was too long for the type checker).

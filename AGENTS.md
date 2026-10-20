@@ -21,6 +21,8 @@ Read first: `README.md` (what users get), `docs/ENGINE.md` (engine architecture,
 | `MacHub/Library/HighballDB.swift`, `CompatibilityEstimate.swift` | highball-db (gethighball.com/data/steam/<id>.json) and the verdict order |
 | `MacHub/Engine/Recipes.swift`, `LibraryStore+Recipes.swift` | highball-db recipes: one-click fixes, Windows components, per-title variables |
 | `MacHub/Epic/Legendary.swift`, `LibraryStore+Epic.swift` | Epic library through Legendary (pinned binary, `legendary launch --wine`) |
+| `MacHub/Steam/MacSteam.swift`, `LibraryStore+MacSteam.swift` | Steam for Mac: its manifests (Unix paths), native games played/installed through `steam://` links |
+| `MacHub/Emulation/Astris.swift`, `LibraryStore+Switch.swift` | Switch games via the Astris emulator (its `games/<id>/gui/metadata.json`, `LibraryBookmarks` folders) and nlib artwork |
 | `MacHub/Library/GameReport.swift`, `MacShortcut.swift`, `Storage.swift` | Reports to highball-db/MacHub, per-game Mac shortcuts, Settings › Storage |
 | `MacHub/App/DiscordPresence.swift` | Discord Rich Presence over its local socket; off while `clientID` is empty |
 | `MacHub/Input`, `MacHub/Install` | Controllers; importing a Windows installer into a prefix |
@@ -43,7 +45,7 @@ xcodebuild test -project MacHub.xcodeproj -scheme MacHub \
 
 Opt-in integration tests use `TEST_RUNNER_MACHUB_*` variables (listed in `docs/ENGINE.md` › Tests). Useful launch
 arguments for screenshots and checks: `-startPage home|discover|library|software|settings`,
-`-settings.category engine|graphics|…`, `--open title:<steam app id>` (a game's page, e.g. `title:284160`),
+`-settings.category engine|graphics|…`, `--open title:<steam app id>` (a game's page, e.g. `title:284160`; library ids work too, e.g. `title:switch:0100F2C0115B6000`),
 `-AppleLanguages "(fr)"`, `-installUpdateNow YES` (test the updater), `-playFirstTrailer YES` (open a game page's
 first trailer). `--open` also works in Release builds; `--play` and `--import` are debug-only. Check what ships with
 the Release build (`scripts/make-dmg.sh` leaves it in `build/dmg/dd`): 0.3.1 crashed only there (AVKit not linked).
@@ -103,4 +105,6 @@ Logs: `~/Library/Logs/app.machub.MacHub/Wine/` (per launch, and `wineboot-*.log`
   D3DMetal loads with upstream Wine 11, then route DX12 games and test one for real.
 - Not yet tried on a real game: installing a Nexus mod, uninstall/verify from the game menu.
 - Johan's "Wine couldn't set up the Windows environment" (empty message) wasn't reproduced; 0.2.0+ logs it.
+- Not yet tried for real: Play through Steam for Mac (Cyberpunk 2077, Dead Island 2 are installed on the dev Mac), "Install for Mac", and opening a Switch game in Astris.
+- Screenshots of MacHub: capture its window only (`screencapture -l <window id>`), never the whole screen.
 - CI workflows (`runtime.yml`, `release.yml`) were never run. Japanese and Chinese translations are behind.
