@@ -88,6 +88,8 @@ final class LibraryStore {
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
     private(set) var details: [Int: StoreDetails] = [:]
+    /// A report waiting for the player's rating after a session (see GameReport).
+    var pendingReport: GameReport?
     /// Progress and result of applying recipes, per title and per Windows component (see LibraryStore+Recipes).
     var recipeStates: [String: RecipeState] = [:]
     /// Compatibility estimates per Steam app, filled as cards and pages appear (see CompatibilityEstimate).
@@ -886,9 +888,43 @@ final class LibraryStore {
             guard let self, self.launchStates[id] != .cancelled || !state.isInProgress else { return }
             self.launchStates[id] = state
         }
-        if engineSettings.metalHUD, let summary = await PerformanceLog.read(since: sessionStart) {
-            performance = PerformanceLog.record(summary, for: id)
+        var summary: PerformanceSummary?
+        if engineSettings.metalHUD, let read = await PerformanceLog.read(since: sessionStart) {
+            summary = read
+            performance = PerformanceLog.record(read, for: id)
         }
+        offerReport(for: title, started: sessionStart, summary: summary)
+    }
+
+    static let askForReportsKey = "reports.ask"
+
+    /// After a session (or a crash at start), asks once how it went, with everything MacHub knows pre-filled.
+    private func offerReport(for title: Title, started: Date, summary: PerformanceSummary?) {
+        guard UserDefaults.standard.object(forKey: Self.askForReportsKey) as? Bool ?? true, title.kind == .game else { return }
+        let minutes = Int(Date.now.timeIntervalSince(started) / 60)
+        switch launchStates[title.id] {
+        case .closed?, .running?:
+            guard minutes >= 2 else { return }   // a quick look isn't a session worth reporting
+            pendingReport = makeReport(for: title, minutes: minutes, summary: summary)
+        case .crashedAtStart?:
+            var report = makeReport(for: title, minutes: nil, summary: nil)
+            report.rating = 1
+            report.crashedAtStart = true
+            pendingReport = report
+        default:
+            return
+        }
+    }
+
+    func makeReport(for title: Title, minutes: Int? = nil, summary: PerformanceSummary? = nil) -> GameReport {
+        var report = GameReport(titleID: title.id, titleName: title.name, steamAppID: title.steamAppID)
+        report.minutes = minutes
+        report.averageFPS = (summary ?? performance[title.id]?.first).map { Int($0.averageFPS.rounded()) }
+        report.renderer = lastGraphics[title.id]?.values.first?.rawValue
+        report.launchOptions = launchOptions(for: title).joined(separator: " ")
+        report.environment = titleEnvironment(for: title)
+        report.engine = runtime.map { "machub-\($0.version)" }
+        return report
     }
 
     /// The on-disk checks before a launch: bottle registered and set up, program present, Steam present.

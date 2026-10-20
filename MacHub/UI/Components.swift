@@ -361,6 +361,7 @@ struct TitleActionsMenu: View {
                 Button("Verify Game Files", systemImage: "checkmark.shield") { Task { await store.perform(.verify, on: title) } }
                 Button("Show Game Folder", systemImage: "folder") { store.revealInstallFolder(title) }
                 Button("Steam Properties…", systemImage: "slider.horizontal.3") { Task { await store.perform(.properties, on: title) } }
+                Button("Report How It Runs…", systemImage: "text.bubble") { store.pendingReport = store.makeReport(for: title) }
                 if case .running? = store.launchStates[title.id] {
                     Button("Stop", systemImage: "stop.fill") { Task { await store.stop(title) } }
                 }

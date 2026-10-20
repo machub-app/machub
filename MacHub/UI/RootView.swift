@@ -159,6 +159,7 @@ struct RootView: View {
         .onChange(of: store.steam.hasAPIKey) { Task { await store.refreshOwned() } }
         .onChange(of: navigation.searchFocusRequest) { searchFocused = true }
         .onAppear(perform: openFromLaunchArgument)
+        .sheet(item: Binding(get: { store.pendingReport }, set: { store.pendingReport = $0 })) { ReportSheet(report: $0) }
         .onChange(of: navigation.selection) {
             path = NavigationPath()
             query = ""
