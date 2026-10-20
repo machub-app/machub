@@ -150,7 +150,7 @@ Honesty is visual. Demo content is always outlined and marked with a flask; it i
 A theatre palette: one dark ground, white at low alpha for every surface and line, one red for the action, and a semantic set reserved for compatibility. Everything else is borrowed from the artwork. Tokens live in `MacHub/UI/Theme.swift`; the accent lives in `Assets.xcassets/AccentColor`.
 
 ### Primary
-- **Projector Red** (`Color(red: 0.898, green: 0.035, blue: 0.078)`, #E50914): the fill of the Play button and nothing else. White label, capsule shape. When Play cannot launch (demo title, no Whisky, software not yet supported) the fill drops to 35% and the whole control to 55% opacity, so it reads as a dim maroon rather than a live action.
+- **Projector Red** (`Color(red: 0.898, green: 0.035, blue: 0.078)`, #E50914): the fill of the Play button and nothing else. White label, capsule shape. When Play cannot launch (demo title, engine not ready, software not yet supported) the fill drops to 35% and the whole control to 55% opacity, so it reads as a dim maroon rather than a live action.
 
 ### Secondary
 - **Graphite** (`AccentColor` asset, sRGB 0.420 / 0.408 / 0.400, #6B6866): the app accent colour, so it is what native controls pick up: sidebar selection, segmented picker selection, toggles, focus in system controls. It is deliberately colourless so system chrome never competes with Projector Red or the artwork.
@@ -163,11 +163,11 @@ Each state is defined in `Compatibility` (Theme.swift) as a tint, an SF Symbol a
 - **Won't run** (`Color(red: 1.0, green: 0.27, blue: 0.23)`, #FF453B), symbol `xmark.octagon.fill`.
 - **Untested** (Aisle Grey, #A8A8A8), symbol `questionmark.circle`.
 
-The Whisky status dot at the foot of the sidebar reuses these tints: great for ready with bottles, issues for ready without bottles, unsupported for missing or outdated Whisky, Aisle Grey while checking.
+The setup card and the Steam connection dot at the foot of the sidebar reuse these tints: great when connected or ready, unsupported for a problem, Aisle Grey while checking or signed out.
 
 ### Neutral
 - **Theatre Ground** (`Color(red: 0.043, green: 0.043, blue: 0.051)`, #0B0B0D): the window ground under the ambient backdrop, and the colour the backdrop's top-to-bottom gradient fades back into.
-- **House Surface** (`Color.white.opacity(0.06)`): panels on the ground: the installed-empty-state panel, the compatibility panel, the detail info panel, the sidebar Whisky status chip.
+- **House Surface** (`Color.white.opacity(0.06)`): panels on the ground: the installed-empty-state panel, the compatibility panel, the detail info panel, the sidebar cards (update, setup, controller, profile bar).
 - **House Surface Raised** (`Color.white.opacity(0.10)`): the secondary button fill, the row pager discs, the search suggestion chips.
 - **House Stroke** (`Color.white.opacity(0.10)`): the 1 pt dividers between info-panel rows and the outline of the Demo data tag.
 - **Screen White** (`Color(white: 0.96)`, #F5F5F5): primary text: headings, card names, values. Hero summary runs it at 88% and the About text at 85%.
@@ -207,7 +207,7 @@ The Whisky status dot at the foot of the sidebar reuses these tints: great for r
 
 ## Layout
 
-The window is a `NavigationSplitView`: the native floating sidebar (190 to 260 pt wide, 210 ideal) with Home, Library, Search, then Settings in its own section, and the Whisky status chip pinned to its foot with 12 pt padding. The window opens at 1440 × 900 and has a minimum of 1100 × 720. The toolbar title is removed and the toolbar background hidden on every custom page, so the artwork runs up under the traffic lights.
+The window is a `NavigationSplitView`: the native floating sidebar (190 to 260 pt wide, 210 ideal) with Home, Discover, Library and Software, and its foot (12 pt padding) holding, only when relevant, the update card, the setup card (engine, then Steam for Windows) and the controller card, above the profile bar (Steam avatar with a connection dot, name, Settings gear). The window opens at 1440 × 900 and has a minimum of 1100 × 720. The toolbar title is removed and the toolbar background hidden on every custom page, so the artwork runs up under the traffic lights.
 
 Every content edge aligns to a single **44 pt gutter** (`Theme.gutter`): hero text, row headings, the first card of each row, page headings, panels.
 
@@ -289,7 +289,7 @@ Heading (`.title2` bold), count (`.title3` Aisle Grey), Demo data tag when relev
 House Surface fill, no stroke, no shadow: the installed-empty-state panel (20 pt padding, 14 pt corners, 26 pt `shippingbox` symbol, heading plus the real reason in Aisle Grey), the compatibility panel (16 pt padding, 12 pt corners, 26 pt state symbol), and the info panel (18 × 6 pt padding, 14 pt corners, rows of 12 pt vertical padding divided by 1 pt House Stroke lines, labels Aisle Grey, values Screen White and selectable).
 
 ### Navigation
-The native macOS sidebar, untouched: SF Symbol labels (`house`, `square.grid.2x2`, `magnifyingglass`, `gearshape`), graphite selection, Settings separated into its own section. At its foot, the **Whisky status chip**: 8 pt state dot, `.caption` semibold headline and `.caption2` Aisle Grey detail, House Surface, 10 pt padding and corners; clicking it opens Settings. ⌘1 to ⌘3, ⌘F and ⌘, drive the selection. Search uses the native toolbar search field; suggestion chips are House Surface Raised capsules (14 × 8 pt padding).
+The native macOS sidebar, untouched: SF Symbol labels (`house`, `square.grid.2x2`, `macwindow`…), graphite selection. At its foot, cards that appear only when relevant (update, setup, controller: SF Symbol, `.caption` semibold headline, `.caption2` Aisle Grey detail, House Surface, 10 pt padding and corners) and the **profile bar**: Steam avatar with an 9 pt connection dot, the account name, and a gear that opens Settings. ⌘1 to ⌘4, ⌘F and ⌘, drive the selection. Search uses the native toolbar search field; suggestion chips are House Surface Raised capsules (14 × 8 pt padding).
 
 ### Ambient Backdrop (signature)
 The spotlighted title's hero art fills the whole detail column behind the content: blurred at radius 80 (opaque), saturation 1.25, brightness −0.15, at 22% opacity over Theatre Ground, under a vertical gradient (ground at 70%, clear, ground at 85%, solid ground). Focus changes cross-fade over 0.8 s ease-in-out. The spotlight follows the hero's current slide, any hovered card, and the open detail page. Settings clears it to bare ground. Titles without a Steam App ID leave the ground plain. It is decorative and hidden from accessibility.

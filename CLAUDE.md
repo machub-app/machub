@@ -1,0 +1,3 @@
+# MacHub
+
+@AGENTS.md
