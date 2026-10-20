@@ -3025,6 +3025,16 @@
         }
       }
     },
+    "Download": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Télécharger"
+          }
+        }
+      }
+    },
     "Download Engine %@": {
       "localizations": {
         "fr": {
@@ -3213,6 +3223,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moteur"
+          }
+        }
+      }
+    },
+    "Engine %@ fixes problems of the one installed. About 240 MB.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le moteur %@ corrige des problèmes de celui installé. Environ 240 Mo."
           }
         }
       }
@@ -13205,6 +13225,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moteur Windows prêt"
+          }
+        }
+      }
+    },
+    "Windows engine update": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour du moteur Windows"
           }
         }
       }
