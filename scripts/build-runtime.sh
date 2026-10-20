@@ -96,6 +96,17 @@ EOF
 # Downloaded files carry no quarantine for the app, but strip any left by the build machine.
 xattr -cr "$ROOT"
 
+# Every binary must load on the oldest macOS MacHub supports: engine 1.0.5 called pipe2 (macOS 27 only) and crashed
+# at start on macOS 26. Refuse to package an engine that imports a function the oldest SDK at hand doesn't export.
+CHECK_SDK="${CHECK_SDK:-$(ls -d /Library/Developer/CommandLineTools/SDKs/MacOSX26*.sdk 2>/dev/null | sort -V | head -1)}"
+if [[ -n "$CHECK_SDK" && -d "$CHECK_SDK" ]]; then
+  echo "Checking imports against $(basename "$CHECK_SDK")…"
+  python3 "$(dirname "$0")/../tools/check-runtime-symbols.py" "$CHECK_SDK" "$ROOT" \
+    || { echo "The engine imports functions missing from $(basename "$CHECK_SDK"): not packaged." >&2; exit 1; }
+else
+  echo "warning: no macOS 26 SDK found (set CHECK_SDK): imports not checked against older macOS" >&2
+fi
+
 ARCHIVE="MacHubRuntime-$VERSION.tar.xz"
 echo "Compressing $ARCHIVE…"
 tar -C "$STAGE" -cJf "$OUT/$ARCHIVE" "MacHubRuntime-$VERSION"
