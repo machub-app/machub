@@ -97,6 +97,15 @@ enum Astris {
         return games(metadata: metadata(), files: gameFiles(in: libraryFolders()))
     }
 
+    /// The play time Astris has recorded for a game (`timespan_played`), nil when it has none yet.
+    static func playtime(titleID: String, dataDirectory: URL = dataDirectory) -> TimeInterval? {
+        metadata(dataDirectory: dataDirectory).first { $0.titleID == titleID.uppercased() }?.playtime
+    }
+
+    @MainActor static func quit() {
+        NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).forEach { $0.terminate() }
+    }
+
     /// Opens the game's file with Astris, which starts it.
     @MainActor
     static func play(_ file: URL) async -> Bool {

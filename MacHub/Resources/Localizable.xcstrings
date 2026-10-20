@@ -805,6 +805,16 @@
         }
       }
     },
+    "An update is available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une mise à jour est disponible"
+          }
+        }
+      }
+    },
     "An update is available. Steam applies it at the next launch, or choose Update Now in the … menu.": {
       "localizations": {
         "fr": {
@@ -1579,6 +1589,16 @@
         }
       }
     },
+    "Checking for updates…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche de mises à jour…"
+          }
+        }
+      }
+    },
     "Checking the archive…": {
       "localizations": {
         "fr": {
@@ -2257,6 +2277,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法检查。"
+          }
+        }
+      }
+    },
+    "Couldn't check for updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de vérifier les mises à jour"
           }
         }
       }
@@ -3669,6 +3699,16 @@
         }
       }
     },
+    "From the announcement of %@, the latest before this build was installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D'après l'annonce du %@, la plus récente avant l'installation de cette build."
+          }
+        }
+      }
+    },
     "Full gamepad: two sticks and triggers": {
       "localizations": {
         "fr": {
@@ -4743,6 +4783,16 @@
         }
       }
     },
+    "Installed build": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build installée"
+          }
+        }
+      }
+    },
     "Installed by MacHub": {
       "localizations": {
         "fr": {
@@ -5177,6 +5227,26 @@
         }
       }
     },
+    "Latest announcement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière annonce"
+          }
+        }
+      }
+    },
+    "Latest build on Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière build sur Steam"
+          }
+        }
+      }
+    },
     "Launch & Graphics": {
       "localizations": {
         "fr": {
@@ -5561,6 +5631,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac"
+          }
+        }
+      }
+    },
+    "Mac and Switch games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeux Mac et Switch"
           }
         }
       }
@@ -7650,6 +7730,16 @@
         }
       }
     },
+    "Only when MacHub opened them for the game: if Steam for Mac or Astris was already open, it stays open. Steam for Mac syncs your cloud saves before quitting.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seulement quand MacHub les a ouverts pour le jeu : si Steam pour Mac ou Astris était déjà ouvert, il le reste. Steam pour Mac synchronise tes sauvegardes cloud avant de quitter."
+          }
+        }
+      }
+    },
     "Open .exe and .msi files with": {
       "localizations": {
         "fr": {
@@ -8504,6 +8594,16 @@
         }
       }
     },
+    "Published %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Publiée le %@"
+          }
+        }
+      }
+    },
     "Publisher": {
       "localizations": {
         "fr": {
@@ -8582,6 +8682,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quitter Steam et ajouter le dossier"
+          }
+        }
+      }
+    },
+    "Quit Steam for Mac or Astris when the game closes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter Steam pour Mac ou Astris à la fermeture du jeu"
           }
         }
       }
@@ -10775,6 +10885,16 @@
         }
       }
     },
+    "Steam applies it at the next launch, or right away with Update Now.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam l'applique au prochain lancement, ou tout de suite avec « Mettre à jour maintenant »."
+          }
+        }
+      }
+    },
     "Steam can't be reached and nothing is installed yet.": {
       "localizations": {
         "fr": {
@@ -10935,6 +11055,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 未确认此次登录，请重试。"
+          }
+        }
+      }
+    },
+    "Steam for Mac downloads it. Update Now starts it right away.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Mac la télécharge. « Mettre à jour maintenant » la lance tout de suite."
           }
         }
       }
@@ -11165,6 +11295,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam désinstalle ce jeu…"
+          }
+        }
+      }
+    },
+    "Steam is updating this game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam met ce jeu à jour"
           }
         }
       }
@@ -12827,6 +12967,16 @@
         }
       }
     },
+    "Up to date": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À jour"
+          }
+        }
+      }
+    },
     "Update": {
       "localizations": {
         "fr": {
@@ -12857,6 +13007,16 @@
         }
       }
     },
+    "Update available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour disponible"
+          }
+        }
+      }
+    },
     "Update to %@": {
       "localizations": {
         "fr": {
@@ -12873,6 +13033,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mis à jour"
+          }
+        }
+      }
+    },
+    "Updated %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour le %@"
           }
         }
       }
@@ -13019,6 +13189,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "La version %@ prend en charge Minecraft %@ avec Fabric (%@)."
+          }
+        }
+      }
+    },
+    "Version named in the developer's announcements": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version citée dans les annonces du développeur"
           }
         }
       }

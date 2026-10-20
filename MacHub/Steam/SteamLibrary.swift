@@ -148,6 +148,11 @@ struct SteamApp: Equatable, Sendable {
     let downloadingPath: String
     /// What Steam counts for the game on disk (`SizeOnDisk`), 0 when it hasn't said.
     var sizeOnDisk: Int64 = 0
+    /// The installed build (`buildid`) and the one Steam is moving to (`TargetBuildID`), 0 when unknown.
+    var buildID = 0
+    var targetBuildID = 0
+    /// When Steam last installed or updated the files (`LastUpdated`).
+    var lastUpdated: Date?
 
     /// StateFlags bit 4 = fully installed. Steam keeps it while a later update is pending.
     var isInstalled: Bool { stateFlags & 4 != 0 }
@@ -348,7 +353,10 @@ enum SteamLibrary {
             bytesToDownload: state["BytesToDownload"].flatMap(Int64.init) ?? 0,
             bytesDownloaded: state["BytesDownloaded"].flatMap(Int64.init) ?? 0,
             downloadingPath: steamapps.appending(path: "downloading/\(id)").path,
-            sizeOnDisk: state["SizeOnDisk"].flatMap(Int64.init) ?? 0
+            sizeOnDisk: state["SizeOnDisk"].flatMap(Int64.init) ?? 0,
+            buildID: state["buildid"].flatMap(Int.init) ?? 0,
+            targetBuildID: state["TargetBuildID"].flatMap(Int.init) ?? 0,
+            lastUpdated: state["LastUpdated"].flatMap(TimeInterval.init).flatMap { $0 > 0 ? Date(timeIntervalSince1970: $0) : nil }
         )
     }
 

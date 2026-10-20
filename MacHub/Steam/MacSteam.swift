@@ -57,6 +57,37 @@ enum MacSteam {
         return nil
     }
 
+    /// Waits for the game's own process (anything running from its install folder) for up to 3 minutes, then for it
+    /// to be gone for 10 s. Reports `true` when it appears and `false` when it closes.
+    static func waitForGameSession(installFolder: URL, report: @escaping @Sendable (Bool) -> Void) async {
+        var seen = false
+        var goneSince: Date?
+        let deadline = Date.now.addingTimeInterval(180)
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(2))
+            let running = !ProcessWatch.runtimeProcesses(under: installFolder).isEmpty
+            if running {
+                if !seen { seen = true; report(true) }
+                goneSince = nil
+            } else if seen {
+                goneSince = goneSince ?? .now
+                if Date.now.timeIntervalSince(goneSince!) >= 10 { report(false); return }
+            } else if Date.now > deadline {
+                return   // never started (Steam showed an update, a sign-in or an error): leave everything as it is
+            }
+        }
+    }
+
+    /// Any Steam for Mac game still running (its process lives in its install folder).
+    static func isAnyGameRunning(in apps: some Sequence<SteamApp>) -> Bool {
+        apps.contains { $0.isInstalled && !ProcessWatch.runtimeProcesses(under: URL(filePath: $0.installPath)).isEmpty }
+    }
+
+    /// Quits Steam for Mac the normal way (like ⌘Q): it syncs cloud saves before closing.
+    @MainActor static func quit() {
+        NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).forEach { $0.terminate() }
+    }
+
     enum Request {
         case play, install, store, properties, uninstall
 

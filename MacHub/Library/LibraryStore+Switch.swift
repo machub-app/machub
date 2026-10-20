@@ -20,7 +20,23 @@ extension LibraryStore {
 
     /// Opens the game's file with Astris. Astris shows its own window; MacHub notes the launch for Recent.
     func playSwitch(_ title: Title) async {
-        guard let file = title.switchFile else { return }
-        if await Astris.play(file) { recordLaunch(title) }
+        guard let file = title.switchFile, let titleID = title.switchTitleID else { return }
+        let astrisWasRunning = Astris.isRunning
+        let before = Astris.playtime(titleID: titleID)
+        guard await Astris.play(file) else { return }
+        recordLaunch(title)
+        let id = title.id
+        setLaunchState(.running(nil), for: id)
+        Task { [weak self] in
+            // Astris writes the game's play time when emulation stops; Astris closing ends the session too.
+            try? await Task.sleep(for: .seconds(5))
+            while !Task.isCancelled, Astris.isRunning, Astris.playtime(titleID: titleID) == before {
+                try? await Task.sleep(for: .seconds(3))
+            }
+            guard let self else { return }
+            setLaunchState(.closed, for: id)
+            refreshSwitch()
+            if !astrisWasRunning, LaunchersAfterGame.quitWhenGameCloses, Astris.isRunning { Astris.quit() }
+        }
     }
 }

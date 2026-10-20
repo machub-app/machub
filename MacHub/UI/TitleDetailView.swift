@@ -21,6 +21,7 @@ struct TitleDetailView: View {
                 HStack(alignment: .top, spacing: 48) {
                     VStack(alignment: .leading, spacing: 28) {
                         about
+                        GameVersionPanel(title: title)
                         RequirementsPanel(title: title, details: details, detailsLoaded: detailsLoaded)
                         ModsEntry(title: title)
                         if title.install != nil, !title.isDemo {

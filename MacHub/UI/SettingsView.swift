@@ -147,6 +147,14 @@ private struct GeneralSettingsSections: View {
         } footer: {
             Text("Steam for Windows and games keep running if MacHub quits without them. Quitting them closes Steam properly first (cloud saves sync), then ends anything left.")
         }
+        Section {
+            Toggle("Quit Steam for Mac or Astris when the game closes", isOn: Binding(
+                get: { LaunchersAfterGame.quitWhenGameCloses }, set: { LaunchersAfterGame.quitWhenGameCloses = $0 }))
+        } header: {
+            Text("Mac and Switch games")
+        } footer: {
+            Text("Only when MacHub opened them for the game: if Steam for Mac or Astris was already open, it stays open. Steam for Mac syncs your cloud saves before quitting.")
+        }
         UpdatesSection()
         if !DiscordPresence.clientID.isEmpty {
             Section {

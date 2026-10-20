@@ -234,10 +234,25 @@ struct DemoTag: View {
 
 struct MetaLine: View {
     let title: Title
+    @Environment(LibraryStore.self) private var store
 
     var body: some View {
         HStack(spacing: 10) {
             if !title.isDemo { AvailabilityBadge(title: title) }
+            if let appID = title.steamAppID, let installed = store.manifest(for: title) {
+                let info = store.gameUpdates[appID]
+                if let version = GameUpdates.likelyVersion(installedOn: installed.lastUpdated, announcements: info?.announcements ?? [])?.version {
+                    Text(verbatim: "v\(version)").font(.callout.weight(.semibold).monospacedDigit())
+                        .help("Version named in the developer's announcements")
+                }
+                switch GameUpdates.status(installed: installed, latestBuild: info?.latestBuild ?? 0) {
+                case .updateAvailable, .pendingInSteam:
+                    Label("Update available", systemImage: "arrow.down.circle.fill")
+                        .font(.callout.weight(.semibold)).foregroundStyle(Compatibility.playable.tint)
+                default: EmptyView()
+                }
+                Color.clear.frame(width: 0, height: 0).task(id: appID) { await store.loadGameUpdates(appID: appID) }
+            }
             if !title.isDemo, let appID = title.steamAppID {
                 EstimateBadge(appID: appID)
             } else if title.switchTitleID == nil {   // Switch games: Astris' own compatibility, not Wine's
@@ -425,21 +440,9 @@ struct PlayButton: View {
             }
             .buttonStyle(PrimaryActionStyle())
         case .playSwitch:
-            Button {
-                Task { await store.playSwitch(title) }
-            } label: {
-                Label("Play", systemImage: "play.fill")
-            }
-            .buttonStyle(PrimaryActionStyle())
-            .help("Opens the game in Astris.")
+            launcherPlay(help: "Opens the game in Astris.") { await store.playSwitch(title) }
         case .playOnMac:
-            Button {
-                Task { await store.playOnMac(title) }
-            } label: {
-                Label("Play", systemImage: "play.fill")
-            }
-            .buttonStyle(PrimaryActionStyle())
-            .help("Native Mac version: Steam for Mac starts it, without Wine.")
+            launcherPlay(help: "Native Mac version: Steam for Mac starts it, without Wine.") { await store.playOnMac(title) }
         case .installOnMac(let owned):
             Button {
                 Task { await store.installOnMac(title) }
@@ -503,6 +506,29 @@ struct PlayButton: View {
                 .help("Closes every process of this title, and forces those that don't close within 8 seconds.")
             }
         }
+    }
+}
+
+extension PlayButton {
+    /// Play for games another app starts (Steam for Mac, Astris): "Starting…" then "Running" while MacHub sees the game.
+    @ViewBuilder
+    func launcherPlay(help: LocalizedStringKey, _ play: @escaping () async -> Void) -> some View {
+        let state = store.launchStates[title.id]
+        Button {
+            Task { await play() }
+        } label: {
+            switch state {
+            case .waitingForGame?:
+                HStack(spacing: 8) { ProgressView().controlSize(.small).tint(.white); Text("Starting…") }
+            case .running?:
+                Label("Running", systemImage: "play.circle.fill")
+            default:
+                Label("Play", systemImage: "play.fill")
+            }
+        }
+        .buttonStyle(PrimaryActionStyle())
+        .disabled(state.isBusy)
+        .help(help)
     }
 }
 

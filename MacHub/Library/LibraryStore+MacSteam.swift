@@ -37,7 +37,23 @@ extension LibraryStore {
     /// Plays the game through Steam for Mac, which handles its DRM, cloud saves and updates.
     func playOnMac(_ title: Title) async {
         guard let appID = title.steamAppID else { return }
-        if await MacSteam.open(.play, appID: appID) { recordLaunch(title) }
+        let steamWasRunning = MacSteam.isRunning
+        guard await MacSteam.open(.play, appID: appID) else { return }
+        recordLaunch(title)
+        guard let installPath = title.macInstall else { return }
+        let id = title.id
+        setLaunchState(.waitingForGame, for: id)
+        Task { [weak self] in
+            await MacSteam.waitForGameSession(installFolder: URL(filePath: installPath)) { running in
+                Task { @MainActor in self?.setLaunchState(running ? .running(nil) : .closed, for: id) }
+            }
+            guard let self else { return }
+            if launchStates[id] == .waitingForGame { setLaunchState(nil, for: id) }
+            // Steam for Mac was started for this game: quit it once the game is closed, like Steam for Windows.
+            if !steamWasRunning, LaunchersAfterGame.quitWhenGameCloses, !MacSteam.isAnyGameRunning(in: macSteamApps.values) {
+                MacSteam.quit()
+            }
+        }
     }
 
     /// Asks Steam for Mac to install the game (Steam shows its own confirmation), or opens its store page when the
@@ -77,6 +93,30 @@ extension LibraryStore {
                 }
             }
             self?.macSteamWatch = nil
+        }
+    }
+
+    /// The Steam manifest of an installed game: MacHub's Windows environment first, else Steam for Mac.
+    func manifest(for title: Title) -> SteamApp? {
+        guard let appID = title.steamAppID else { return nil }
+        if title.install != nil, let app = steamManifests[appID] { return app }
+        if title.macInstall != nil { return macSteamApps[appID] }
+        return nil
+    }
+
+    /// Loaded once per game and session (answers are cached on disk for an hour).
+    func loadGameUpdates(appID: Int) async {
+        guard gameUpdates[appID] == nil else { return }
+        gameUpdates[appID] = await GameUpdates.load(appID: appID)
+    }
+
+    /// Asks the right Steam to update the game now (Steam for Windows in MacHub's environment, or Steam for Mac).
+    func updateNow(_ title: Title) async {
+        guard let appID = title.steamAppID else { return }
+        if title.install != nil {
+            await perform(.update, on: title)
+        } else if title.macInstall != nil, await MacSteam.open(.install, appID: appID) {
+            watchMacSteam()
         }
     }
 }

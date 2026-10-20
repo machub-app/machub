@@ -76,6 +76,10 @@ final class LibraryStore {
     private(set) var steamDownloads: [Int: SteamApp] = [:]
     /// Installed games with an update pending or running, or being verified, by App ID.
     private(set) var steamUpdates: [Int: SteamApp] = [:]
+    /// Manifests of the games installed in MacHub's environments (build, last update), by App ID.
+    private(set) var steamManifests: [Int: SteamApp] = [:]
+    /// Steam's public build and the developer's announcements, per App ID, once a game page asked for them.
+    var gameUpdates: [Int: GameUpdates.Info] = [:]
     private(set) var steamSetup: SteamSetupState?
     private var downloadWatch: Task<Void, Never>?
     private var libraryCacheWatch: Task<Void, Never>?
@@ -463,10 +467,12 @@ final class LibraryStore {
         var installed: [Title] = []
         var downloads: [Int: SteamApp] = [:]
         var updates: [Int: SteamApp] = [:]
+        var manifests: [Int: SteamApp] = [:]
         for prefix in prefixes {
             guard let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else { continue }
             for app in SteamLibrary.apps(steamRoot: root, prefix: prefix.url) {
                 if app.isInstalled {
+                    manifests[app.appID] = app
                     installed.append(Title(game: app.game, bottle: prefix.name,
                                            executables: ExecutableScanner.executables(in: URL(filePath: app.installPath))))
                     if app.needsUpdate || app.isUpdating || app.isValidating || app.isUninstalling { updates[app.appID] = app }
@@ -476,6 +482,7 @@ final class LibraryStore {
             }
         }
         embeddedInstalled = installed
+        steamManifests = manifests
         steamDownloads = downloads
         steamUpdates = updates
         pendingSteamActions = pendingSteamActions.filter { id in installed.contains { $0.steamAppID == id } }
