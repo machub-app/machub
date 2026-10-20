@@ -531,6 +531,9 @@ final class LibraryStore {
 
     /// One click: Steam prefix → Valve's installer (silent) → Steam started for the user to sign in.
     func setUpSteam() async {
+        // One setup at a time: a second click (sidebar and Settings both offer it) used to start a parallel one,
+        // which created "Steam 2", "Steam 3"… environments side by side.
+        if case .working? = steamSetup { return }
         // Already installed with Whisky: use that copy rather than downloading and installing a second one.
         if steamPrefix == nil, whiskySteamBottle != nil {
             await startSteam()

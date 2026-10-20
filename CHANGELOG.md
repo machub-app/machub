@@ -18,6 +18,7 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 - Nexus mods could only be installed for games in a MacHub environment; games in a Whisky bottle work too.
 - MacHub didn't compile with Xcode 26.6 in Debug (RootView's body was too long for the type checker).
 - **Windows engine 1.0.6**: MacHub 0.4.1 and earlier installed engine 1.0.5, which crashed at start on macOS 26 ("Wine stopped with code 11"), so Steam for Windows couldn't be installed. 1.0.6 is rebuilt for macOS 26. After updating MacHub, a sidebar card offers it in one click; once downloaded it becomes the engine in use, and existing environments switch to it.
+- Clicking "Install" again while Steam for Windows was being set up started a second setup in parallel, in an environment named "Steam 2" (then "Steam 3"…).
 - With Steam for Windows reused from a Whisky bottle, the library (without a Web API key) now comes from that Steam's cache too, and refreshes while it runs: it stayed empty because only MacHub's own environment was read.
 - "Wine didn't start" with an empty message at launch: the cleanup of programs left by an earlier session could also end the engine check MacHub had just started.
 - When the Windows engine crashes at start on macOS 26 (engine 1.0.5 was built with the macOS 27 SDK and calls `pipe2`), the error now says so. `scripts/build-wine.sh` sets `ac_cv_func_pipe2=no`: the next engine build runs on macOS 26 and earlier.
