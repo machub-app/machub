@@ -44,6 +44,17 @@
 				<string>nxm</string>
 			</array>
 		</dict>
+		<!-- Game shortcuts made by MacHub (machub://play/<steam app id>): open MacHub and start the game. -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>MacHub game shortcut</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>machub</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>
