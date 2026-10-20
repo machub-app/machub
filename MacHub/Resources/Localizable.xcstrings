@@ -899,6 +899,16 @@
         }
       }
     },
+    "Ask": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demander"
+          }
+        }
+      }
+    },
     "Ask after each session": {
       "localizations": {
         "fr": {
@@ -2985,6 +2995,16 @@
         }
       }
     },
+    "Don't ask again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ne plus demander"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "fr": {
@@ -5037,6 +5057,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "启动 Windows 软件的功能将在后续版本提供。"
+          }
+        }
+      }
+    },
+    "Leave Them Running": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les laisser ouverts"
+          }
+        }
+      }
+    },
+    "Leave them running": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les laisser ouverts"
           }
         }
       }
@@ -8126,6 +8166,36 @@
         }
       }
     },
+    "Quit Them Too": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les quitter aussi"
+          }
+        }
+      }
+    },
+    "Quit Windows programs too": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter aussi les programmes Windows"
+          }
+        }
+      }
+    },
+    "Quit the Windows programs too?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter aussi les programmes Windows ?"
+          }
+        }
+      }
+    },
     "RPG": {
       "localizations": {
         "fr": {
@@ -10399,6 +10469,16 @@
         }
       }
     },
+    "Steam for Windows and games keep running if MacHub quits without them. Quitting them closes Steam properly first (cloud saves sync), then ends anything left.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows et les jeux continuent de tourner si MacHub se ferme sans eux. Les quitter ferme d'abord Steam proprement (les sauvegardes cloud se synchronisent), puis termine ce qui reste."
+          }
+        }
+      }
+    },
     "Steam for Windows and its games": {
       "localizations": {
         "fr": {
@@ -10467,6 +10547,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam pour Windows n'est pas installé dans la bouteille « %@ »."
+          }
+        }
+      }
+    },
+    "Steam for Windows or a game is still running. Left open, they keep using memory and can end up frozen in a black window once MacHub is gone. Steam is closed properly first, so your cloud saves sync.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Windows ou un jeu tourne encore. Laissés ouverts, ils continuent d'utiliser de la mémoire et peuvent finir figés dans une fenêtre noire une fois MacHub fermé. Steam est d'abord fermé proprement, pour que tes sauvegardes cloud se synchronisent."
           }
         }
       }
@@ -12447,6 +12537,16 @@
         }
       }
     },
+    "When MacHub quits": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand MacHub se ferme"
+          }
+        }
+      }
+    },
     "Which program should MacHub open?": {
       "localizations": {
         "fr": {
@@ -12907,6 +13007,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Programme Windows 64 bits"
+          }
+        }
+      }
+    },
+    "Windows programs": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programmes Windows"
           }
         }
       }

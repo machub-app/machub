@@ -2,6 +2,11 @@
 
 All notable changes to MacHub. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.4.1] - 2026-10-20
+
+### Fixed
+- Wine programs could outlive MacHub and freeze in a black window that wouldn't close (Steam's window, left without its wineserver). Quitting MacHub now asks whether to quit Windows programs too (Steam is closed properly first, so cloud saves sync), with a setting in Settings › General. At launch, MacHub ends programs an earlier session left without their wineserver.
+
 ## [0.4.0] - 2026-10-20
 
 ### Added
