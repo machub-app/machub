@@ -361,6 +361,8 @@ struct TitleActionsMenu: View {
                 Button("Verify Game Files", systemImage: "checkmark.shield") { Task { await store.perform(.verify, on: title) } }
                 Button("Show Game Folder", systemImage: "folder") { store.revealInstallFolder(title) }
                 Button("Steam Properties…", systemImage: "slider.horizontal.3") { Task { await store.perform(.properties, on: title) } }
+                Button("Create Mac Shortcut", systemImage: "app.badge") { Task { await store.createMacShortcut(for: title) } }
+                    .help("Adds an app for this game to Applications › MacHub Games: open it to play without going through MacHub's window.")
                 if case .running? = store.launchStates[title.id] {
                     Button("Stop", systemImage: "stop.fill") { Task { await store.stop(title) } }
                 }

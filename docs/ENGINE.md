@@ -76,6 +76,7 @@ xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-te
 - `TEST_RUNNER_MACHUB_ENGINE_STEAM=1 … -only-testing:MacHubTests/RealSteamEngineTests` installe et démarre Steam.
 - `TEST_RUNNER_MACHUB_FRESH_INSTALL=1 … -only-testing:MacHubTests/FreshInstallTests` télécharge le moteur publié dans un dossier vide et crée un environnement (premier lancement).
 - `TEST_RUNNER_MACHUB_UPDATE_CHECK=1 … -only-testing:MacHubTests/RealUpdateTests` trouve la dernière release sur GitHub et la prépare comme une mise à jour.
+- `TEST_RUNNER_MACHUB_SHORTCUT_APP_ID=284160 … -only-testing:MacHubTests/RealShortcutTests` crée le raccourci Mac d'un jeu installé dans `~/Applications/MacHub Games` (comme le menu « … » du jeu).
 
 ## Historique des essais du 18/10/2026 (pour mémoire)
 

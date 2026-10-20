@@ -14,11 +14,29 @@ enum Main {
     }
 }
 
-/// Receives Windows files opened from Finder ("Open With > MacHub", or by default if the user chose it).
+/// Receives Windows files opened from Finder ("Open With > MacHub", or by default if the user chose it), Nexus
+/// download links and `machub://` links from game shortcuts.
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        // Links arrive as Apple Events handled here: left to SwiftUI, each one would open another window.
+        NSAppleEventManager.shared().setEventHandler(
+            self, andSelector: #selector(handleURLEvent(_:withReply:)),
+            forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
+    }
+
+    @objc private func handleURLEvent(_ event: NSAppleEventDescriptor, withReply reply: NSAppleEventDescriptor) {
+        guard let text = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue, let url = URL(string: text) else { return }
+        receive([url])
+    }
+
     func application(_ application: NSApplication, open urls: [URL]) {
+        receive(urls)
+    }
+
+    private func receive(_ urls: [URL]) {
         MainActor.assumeIsolated {
             NexusLinkInbox.shared.receive(urls.filter { $0.scheme?.lowercased() == "nxm" })
+            MacHubLinkInbox.shared.receive(urls)
             ImportInbox.shared.receive(urls.filter { $0.isFileURL })
         }
     }
