@@ -121,10 +121,19 @@ enum ProcessWatch {
 
     /// Ends Windows programs left behind once their wineserver is gone (they no longer answer to Wine). Does nothing
     /// while any wineserver of MacHub still runs, so another environment's programs are never touched.
-    static func terminateOrphans(under root: URL) async {
+    /// Processes this MacHub just started (the engine check's `wine --version`, a wineboot) are never orphans, even
+    /// before their wineserver is up: killing them made the launch-time engine check fail with an empty message.
+    static func terminateOrphans(under root: URL, ownPID: Int32 = getpid()) async {
         let processes = runtimeProcesses(under: root)
         guard !processes.isEmpty, !processes.contains(where: \.isServer) else { return }
-        await terminate(processes.map(\.pid), grace: .seconds(2))
+        await terminate(processes.map(\.pid).filter { parentPID(of: $0) != ownPID }, grace: .seconds(2))
+    }
+
+    static func parentPID(of pid: Int32) -> Int32? {
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size else { return nil }
+        return Int32(info.pbi_ppid)
     }
 
     /// Whisky writes one Wine log per launch; the newest is the one to show on failure.
