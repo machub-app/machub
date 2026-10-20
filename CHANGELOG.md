@@ -19,6 +19,7 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 - Steam for Windows already installed in a Whisky bottle is used as it is: no download and no "Install Steam" step. Valve's installer already on the Mac is reused instead of downloaded again.
 
 ### Fixed
+- With Steam for Windows reused from a Whisky bottle, the library (without a Web API key) now comes from that Steam's cache too, and refreshes while it runs: it stayed empty because only MacHub's own environment was read.
 - "Wine didn't start" with an empty message at launch: the cleanup of programs left by an earlier session could also end the engine check MacHub had just started.
 - Mods merged into a game folder (Cyberpunk 2077 layout) could be written under a wrong sub-folder: the temporary folder is reached through `/var` → `/private/var`, which shifted every relative path.
 - Nexus mods could only be installed for games in a MacHub environment; games in a Whisky bottle work too.

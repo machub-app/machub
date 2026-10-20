@@ -494,12 +494,19 @@ final class LibraryStore {
     /// Without a key the library comes from Steam for Windows' cache, which fills in once Steam is signed in and its
     /// library has been shown: reload the games whenever the number of cached apps changes.
     private func refreshOwnedIfSteamLibraryChanged() {
-        guard steam.account != nil, !steam.hasAPIKey, let prefix = steamPrefix,
-              let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else { return }
-        let count = SteamLibrary.libraryCacheAppIDs(steamRoot: root).count
+        guard steam.account != nil, !steam.hasAPIKey, !steamClientRoots.isEmpty else { return }
+        let count = Set(steamClientRoots.flatMap { SteamLibrary.libraryCacheAppIDs(steamRoot: $0) }).count
         guard count != libraryCacheCount else { return }
         libraryCacheCount = count
         Task { await refreshOwned() }
+    }
+
+    /// Every Steam client on this Mac whose library cache lists the account's games: Steam for Windows in MacHub's
+    /// environment, the one in a Whisky bottle MacHub reuses, and Steam for Mac.
+    var steamClientRoots: [URL] {
+        [steamPrefix.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) },
+         whiskySteamBottle.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) },
+         MacSteam.app.map { _ in MacSteam.root }].compactMap { $0 }
     }
 
     /// While Steam for Windows waits for its first sign-in, look at its library cache every 15 s for 10 minutes.
@@ -669,6 +676,7 @@ final class LibraryStore {
             }
         }
         steamSetup = .waitingForSignIn
+        watchLibraryCache()
     }
 
     static let quitSteamAfterGameKey = "steam.quitAfterGame"
@@ -801,9 +809,7 @@ final class LibraryStore {
     /// app. The store tells which of them are games (DLC, demos, SDKs and redistributables are left out); answers
     /// are kept on disk so each app is asked about once.
     private func refreshOwnedFromSteamClient() async {
-        // Steam for Windows (in MacHub's prefix) and Steam for Mac each keep a cache for the same account.
-        let roots = [steamPrefix.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) }, MacSteam.app.map { _ in MacSteam.root }].compactMap { $0 }
-        let ids = Array(Set(roots.flatMap { SteamLibrary.libraryCacheAppIDs(steamRoot: $0) })).sorted()
+        let ids = Array(Set(steamClientRoots.flatMap { SteamLibrary.libraryCacheAppIDs(steamRoot: $0) })).sorted()
         guard !ids.isEmpty else { ownedState = .needsKey; ownedTitles = []; return }
         if ownedTitles.isEmpty { ownedState = .loading }
         var known = LocalData.load([String: AppKind].self, from: Self.appKindsFile) ?? [:]
