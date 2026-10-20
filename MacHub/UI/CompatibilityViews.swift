@@ -4,6 +4,8 @@ extension CompatibilityEstimate {
     var shortLabel: LocalizedStringKey {
         switch verdict {
         case .tested: "Tested: plays"
+        case .verified: "Verified on Mac"
+        case .community: "Players report it runs"
         case .native: "Mac version"
         case .likely: "Likely to run"
         case .issues: antiCheat != nil ? "Anti-cheat: uncertain" : "May have issues"
@@ -17,6 +19,8 @@ extension CompatibilityEstimate {
     var explanation: LocalizedStringKey {
         switch verdict {
         case .tested: "MacHub has played this game on a real Mac."
+        case .verified: "Verified running on a Mac by the Highball project (highball-db)."
+        case .community: "Players report it runs on Apple silicon with Wine (highball-db). See their notes and known issues below."
         case .native: "Steam has a native macOS version: play it with Steam for Mac, without Wine."
         case .likely: "Players report it runs well with Wine (ProtonDB). Linux has more graphics paths than macOS, so this is a good sign, not a guarantee."
         case .issues:
@@ -98,6 +102,10 @@ struct CompatibilityPanel: View {
                             Text(estimate.explanation).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                    if let entry = estimate.highball {
+                        Divider()
+                        highballSection(entry)
+                    }
                     Divider()
                     signals(estimate, appID: appID)
                     Text("An estimate from public reports, not a promise. Tried it? Report how it ran on MacHub's GitHub page.")
@@ -113,6 +121,51 @@ struct CompatibilityPanel: View {
             .background(Theme.surface, in: .rect(cornerRadius: 12))
         }
         .task(id: title.steamAppID) { if let id = title.steamAppID { await store.loadEstimate(appID: id) } }
+    }
+
+    @ViewBuilder
+    private func highballSection(_ entry: HighballDB.Entry) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            switch entry {
+            case .curated(let game):
+                if let renderer = game.renderer {
+                    row("Renderer players used", value: renderer == "d3dmetal" ? "D3DMetal" : renderer.uppercased())
+                }
+                if !game.launchArgs.isEmpty {
+                    row("Launch options", value: game.launchArgs.joined(separator: " "))
+                }
+                if game.reports > 0 { row("Player reports", value: "\(game.reports)") }
+                if let notes = game.notes, !notes.isEmpty {
+                    Text(verbatim: notes).font(.callout).foregroundStyle(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true).lineLimit(8)
+                }
+                if !game.knownIssues.isEmpty {
+                    Text("Known issues").font(.callout.weight(.semibold)).foregroundStyle(Theme.textPrimary)
+                    ForEach(game.knownIssues, id: \.self) { issue in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Label { Text(verbatim: issue.symptom) } icon: { Image(systemName: "exclamationmark.triangle") }
+                                .foregroundStyle(Theme.textPrimary)
+                            if let fix = issue.fix { Text(verbatim: "→ " + fix).foregroundStyle(Theme.textSecondary).padding(.leading, 26) }
+                        }
+                        .font(.callout)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                attribution(page: game.page, text: "Compatibility data from highball-db (CC0), the open database of the Highball project.")
+            case .prediction(let odds):
+                row("Prediction", value: odds.label)
+                attribution(page: odds.page, text: "Prediction from highball-db: ProtonDB reports (ODbL) crossed with anti-cheat data. Odds for macOS, not a verdict.")
+            }
+        }
+    }
+
+    private func attribution(page: URL?, text: LocalizedStringKey) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(text).font(.caption).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+            if let page {
+                Link(destination: page) { Image(systemName: "arrow.up.right.square") }.help("Open the game's Highball page")
+            }
+        }
     }
 
     @ViewBuilder

@@ -3,15 +3,15 @@ import Foundation
 /// How likely a Windows game is to run in MacHub, from public signals. An estimate, never a promise: only MacHub's
 /// own tests say "tested". Signals, strongest first:
 /// 1. MacHub's tests on a real Mac;
-/// 2. a native macOS version on Steam (then Wine isn't needed);
-/// 3. anti-cheat, from AreWeAntiCheatYet: kernel anti-cheat that refuses Wine stops a game outright;
-/// 4. the DirectX version from the store's system requirements: DirectX 12 needs D3DMetal, which MacHub doesn't
-///    route games to yet;
-/// 5. ProtonDB, where players report how games run on Wine/Proton (Linux, with the same Wine and DXVK MacHub
-///    builds on). Linux has more graphics paths than macOS, so a good tier is a hint, not proof.
+/// 2. highball-db's curated verdict when it blocks the game (kernel anti-cheat);
+/// 3. a native macOS version on Steam (then Wine isn't needed);
+/// 4. highball-db's curated verdict (verified on a Mac, or reported by players), unless it needs D3DMetal for a
+///    DirectX 12-only game, which MacHub doesn't route games to yet;
+/// 5. the DirectX version from the store's system requirements (DirectX 12 needs D3DMetal);
+/// 6. highball-db's prediction (ProtonDB × anti-cheat, macOS odds), else AreWeAntiCheatYet and ProtonDB directly.
 struct CompatibilityEstimate: Equatable, Sendable {
     enum Verdict: String, Sendable {
-        case tested, native, likely, issues, unlikely, antiCheat, directX12, unknown
+        case tested, verified, community, native, likely, issues, unlikely, antiCheat, directX12, unknown
     }
 
     let verdict: Verdict
@@ -19,6 +19,7 @@ struct CompatibilityEstimate: Equatable, Sendable {
     var protonReports = 0
     var antiCheat: AntiCheat?
     var directX: Int?
+    var highball: HighballDB.Entry?
 
     struct AntiCheat: Equatable, Sendable {
         let names: [String]
@@ -29,7 +30,8 @@ struct CompatibilityEstimate: Equatable, Sendable {
 
     var compatibility: Compatibility {
         switch verdict {
-        case .tested, .native: .great
+        case .tested, .verified, .native: .great
+        case .community: .playable
         case .likely: protonTier == "platinum" ? .great : .playable
         case .issues: .issues
         case .unlikely, .antiCheat, .directX12: .unsupported
@@ -41,18 +43,34 @@ struct CompatibilityEstimate: Equatable, Sendable {
     static let testedPlayable: Set<Int> = [284160]   // BeamNG.drive, Direct3D 11 through DXMT
 
     static func make(appID: Int, nativeMac: Bool?, directX: Int?, antiCheat: AntiCheat?,
-                     protonTier: String?, protonReports: Int) -> CompatibilityEstimate {
-        var estimate = CompatibilityEstimate(verdict: .unknown, protonTier: protonTier, protonReports: protonReports,
-                                             antiCheat: antiCheat, directX: directX)
+                     protonTier: String?, protonReports: Int, highball: HighballDB.Entry? = nil) -> CompatibilityEstimate {
+        var curated: HighballDB.Game?
+        var prediction: HighballDB.Prediction?
+        switch highball {
+        case .curated(let game)?: curated = game
+        case .prediction(let odds)?: prediction = odds
+        case nil: break
+        }
+        let needsD3DMetal = curated?.renderer == "d3dmetal" && (directX ?? 0) >= 12
         let verdict: Verdict
         if testedPlayable.contains(appID) {
             verdict = .tested
-        } else if nativeMac == true {
+        } else if curated?.status == "blocked-anticheat" {
+            verdict = .antiCheat
+        } else if nativeMac == true || curated?.nativeMac != nil {
             verdict = .native
+        } else if let curated, !needsD3DMetal {
+            verdict = curated.status == "verified-local" ? .verified : .community
+        } else if needsD3DMetal || (directX ?? 0) >= 12 {
+            verdict = .directX12   // Highball runs DirectX 12 through D3DMetal; MacHub doesn't yet
         } else if antiCheat?.blocksWine == true {
             verdict = .antiCheat
-        } else if let directX, directX >= 12 {
-            verdict = .directX12
+        } else if let prediction {
+            switch prediction.macPrediction {
+            case "likely": verdict = .likely
+            case "maybe", "possible": verdict = .issues
+            default: verdict = .unlikely
+            }
         } else if antiCheat != nil {
             verdict = .issues   // works on Linux, untested with macOS's Wine
         } else {
@@ -63,9 +81,9 @@ struct CompatibilityEstimate: Equatable, Sendable {
             default: verdict = .unknown
             }
         }
-        estimate = CompatibilityEstimate(verdict: verdict, protonTier: protonTier, protonReports: protonReports,
-                                         antiCheat: antiCheat, directX: directX)
-        return estimate
+        return CompatibilityEstimate(verdict: verdict, protonTier: prediction?.protonTier ?? protonTier,
+                                     protonReports: prediction?.recentReports ?? protonReports,
+                                     antiCheat: antiCheat, directX: directX, highball: highball)
     }
 }
 

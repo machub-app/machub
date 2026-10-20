@@ -524,7 +524,9 @@ struct PlayStatus: View {
         if title.macAvailable == true, title.install == nil { return "A native macOS version exists on Steam: use Steam for Mac rather than Wine." }
         if !store.canRunWindows { return "MacHub's Windows engine isn't ready. See Settings › Windows Engine." }
         if let install = title.install, install.executables.isEmpty { return "Installed, but no Windows executable was found in its folder." }
-        if title.install != nil { return "Compatibility not verified: it may or may not run on Mac." }
+        if title.install != nil, title.steamAppID.flatMap({ store.estimates[$0] })?.verdict ?? .unknown == .unknown {
+            return "Compatibility not verified: it may or may not run on Mac."
+        }
         if title.kind == .game, store.steamBottle == nil { return "To play, set up Steam for Windows in Settings › Windows Engine." }
         if title.owned == nil { return "Not in your Steam library. Buy or add it on Steam first." }
         return nil

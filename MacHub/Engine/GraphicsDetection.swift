@@ -92,6 +92,22 @@ struct TitleSettings: Codable, Equatable, Sendable {
     var graphics: GraphicsChoice = .automatic
     /// Extra command-line arguments for programs MacHub starts directly.
     var arguments = ""
+    /// Follow highball-db's renderer and launch options while the title's own are left on Automatic / empty.
+    var useRecommended = true
+
+    init(graphics: GraphicsChoice = .automatic, arguments: String = "", useRecommended: Bool = true) {
+        self.graphics = graphics
+        self.arguments = arguments
+        self.useRecommended = useRecommended
+    }
+
+    /// Settings saved by older versions lack the newer keys: each falls back to its default.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        graphics = try c.decodeIfPresent(GraphicsChoice.self, forKey: .graphics) ?? .automatic
+        arguments = try c.decodeIfPresent(String.self, forKey: .arguments) ?? ""
+        useRecommended = try c.decodeIfPresent(Bool.self, forKey: .useRecommended) ?? true
+    }
 
     static let fileName = "title-settings.json"
 

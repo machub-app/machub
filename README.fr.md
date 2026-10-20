@@ -49,7 +49,7 @@ Tu te connectes à Steam, tu choisis un jeu, tu cliques sur **Installer**, puis 
 ### 🎮 Une seule bibliothèque pour tous tes jeux
 - Tes jeux Steam, ce qui est installé sur ce Mac et tes derniers jeux, au même endroit.
 - **Découvrir :** la boutique Steam depuis MacHub, avec une fiche par jeu.
-- **La compatibilité Mac en un coup d'œil :** chaque jeu affiche une estimation (testé par MacHub, version Mac native, bloqué par l'anti-triche, exige DirectX 12, ou devrait tourner d'après les rapports Wine de ProtonDB), avec ses sources sur la fiche du jeu.
+- **La compatibilité Mac en un coup d'œil :** chaque jeu affiche une estimation (testé par MacHub, vérifié ou signalé par des joueurs dans [highball-db](https://github.com/gauthierpiarrette/highball-db), version Mac native, bloqué par l'anti-triche, exige DirectX 12, ou une prédiction), avec ses sources sur la fiche du jeu. MacHub applique aussi les options de lancement et le rendu recommandés par les joueurs (désactivable jeu par jeu).
 - **Sans clé :** dès que Steam pour Windows est connecté, MacHub y lit ta bibliothèque, jeux partagés via les Familles Steam compris.
 - Les jeux Mac natifs sont reconnus et ouverts via Steam pour Mac, sans Wine.
 
@@ -235,6 +235,7 @@ MacHub repose sur le travail de ces projets open source :
 [MoltenVK](https://github.com/KhronosGroup/MoltenVK) ·
 [llvm-mingw](https://github.com/mstorsjo/llvm-mingw) ·
 [Whisky](https://github.com/Whisky-App/Whisky).
+Les données de compatibilité viennent de [highball-db](https://github.com/gauthierpiarrette/highball-db), la base ouverte du projet [Highball](https://github.com/gauthierpiarrette/highball) (données curées CC0 ; prédictions tirées de [ProtonDB](https://www.protondb.com) sous ODbL), et d'[AreWeAntiCheatYet](https://areweanticheatyet.com).
 Liste complète et licences : [docs/LICENSES.md](docs/LICENSES.md).
 
 ## Licence

@@ -217,10 +217,28 @@ final class LibraryStore {
         TitleSettings.save(titleSettings)
     }
 
-    /// The choice a launch uses: the title's own, else the engine default.
+    /// The choice a launch uses: the title's own, else the renderer highball-db reports working (when the title follows
+    /// recommendations), else the engine default.
     func graphicsChoice(for title: Title) -> GraphicsChoice {
-        let own = settings(for: title).graphics
-        return own == .automatic ? engineSettings.defaultGraphics : own
+        let own = settings(for: title)
+        if own.graphics != .automatic { return own.graphics }
+        if own.useRecommended, let recommended = recommendation(for: title)?.graphicsChoice, recommended != .d3dmetal {
+            return recommended
+        }
+        return engineSettings.defaultGraphics
+    }
+
+    /// highball-db's curated entry for a Steam title, once its estimate has loaded.
+    func recommendation(for title: Title) -> HighballDB.Game? {
+        guard let appID = title.steamAppID, case .curated(let game)? = estimates[appID]?.highball else { return nil }
+        return game
+    }
+
+    /// The launch options a launch uses: the title's own, else highball-db's (e.g. BeamNG's `-gfx dx11`).
+    func launchOptions(for title: Title) -> [String] {
+        let own = settings(for: title)
+        if !own.argumentList.isEmpty || !own.useRecommended { return own.argumentList }
+        return recommendation(for: title)?.launchArgs ?? []
     }
     private(set) var engineState: EngineState = .checking
     private(set) var prefixes: [InstalledPrefix] = []
@@ -753,10 +771,13 @@ final class LibraryStore {
         defer { estimating.remove(appID) }
         async let detailsTask = loadDetails(appID: appID)
         async let antiCheatsTask = CompatibilitySources.antiCheats()
-        async let protonTask = CompatibilitySources.protonDB(appID: appID)
-        let (details, antiCheats, proton) = await (detailsTask, antiCheatsTask, protonTask)
+        async let highballTask = HighballDB.entry(appID: appID)
+        let (details, antiCheats, highball) = await (detailsTask, antiCheatsTask, highballTask)
+        // highball-db already folds ProtonDB into its predictions; ask ProtonDB only for games it doesn't cover.
+        let proton = highball == nil ? await CompatibilitySources.protonDB(appID: appID) : nil
         estimates[appID] = .make(appID: appID, nativeMac: details?.mac, directX: details?.directX,
-                                 antiCheat: antiCheats[appID], protonTier: proton?.tier, protonReports: proton?.reports ?? 0)
+                                 antiCheat: antiCheats[appID], protonTier: proton?.tier, protonReports: proton?.reports ?? 0,
+                                 highball: highball)
     }
 
     // MARK: Actions
@@ -816,7 +837,8 @@ final class LibraryStore {
         case .steam: .installFolder(URL(filePath: title.installPath ?? "").lastPathComponent)
         case .program(let path): .executable(URL(filePath: path).lastPathComponent)
         }
-        let options = settings(for: title).argumentList
+        if let appID = title.steamAppID { await loadEstimate(appID: appID) }   // recommendations, if not loaded yet
+        let options = launchOptions(for: title)
         var runner = LaunchRunner { plan in
             switch plan.route {
             case .steam(let appID):
