@@ -130,6 +130,17 @@ private struct GeneralSettingsSections: View {
             Text("Demo titles let you explore MacHub before your own games are installed. They are labelled and can't be launched.")
         }
         WindowsFilesSection()
+        Section {
+            Picker("When MacHub quits", selection: Binding(get: { WineShutdown.policy }, set: { WineShutdown.policy = $0 })) {
+                Text("Ask").tag(WineShutdown.Policy.ask)
+                Text("Quit Windows programs too").tag(WineShutdown.Policy.quit)
+                Text("Leave them running").tag(WineShutdown.Policy.leave)
+            }
+        } header: {
+            Text("Windows programs")
+        } footer: {
+            Text("Steam for Windows and games keep running if MacHub quits without them. Quitting them closes Steam properly first (cloud saves sync), then ends anything left.")
+        }
         UpdatesSection()
         if !DiscordPresence.clientID.isEmpty {
             Section {

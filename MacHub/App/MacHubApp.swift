@@ -24,6 +24,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
     }
 
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Task.detached { await WineShutdown.cleanUpOrphans() }
+    }
+
+    /// Quitting MacHub with Windows programs still open: close them too (asked, or as the user chose in Settings).
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard WineShutdown.hasRunningPrograms else { return .terminateNow }
+        guard let quit = WineShutdown.decideOnQuit() else { return .terminateCancel }
+        guard quit else { return .terminateNow }
+        Task.detached {
+            await WineShutdown.quitAll()
+            await MainActor.run { NSApp.reply(toApplicationShouldTerminate: true) }
+        }
+        return .terminateLater
+    }
+
     @objc private func handleURLEvent(_ event: NSAppleEventDescriptor, withReply reply: NSAppleEventDescriptor) {
         guard let text = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue, let url = URL(string: text) else { return }
         receive([url])
