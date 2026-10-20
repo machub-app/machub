@@ -7,6 +7,8 @@
 #
 # <work-dir> must hold an extracted llvm-mingw (macOS universal). MACOS_LIBS: x86_64 dylibs Wine links against and
 # ships with (wine/lib of the WineHQ macOS package). Homebrew: bison pkgconf freetype gnutls sdl2.
+# Build against the oldest SDK at hand (SDKROOT=…/MacOSX26.5.sdk, read by xcrun): with a newer SDK, configure finds
+# functions older macOS lack and Wine imports them weakly (engine 1.0.6 was built with the macOS 26.5 SDK).
 set -euo pipefail
 
 TARBALL="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"

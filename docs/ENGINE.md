@@ -1,6 +1,6 @@
 # Moteur Windows intégré
 
-MacHub exécute les programmes Windows avec **son propre Wine**, compilé à partir des sources officielles de WineHQ (Wine 11.0) avec quelques correctifs maison (`tools/wine-patches/`), plus DXMT et DXVK. Moteur par défaut : **1.0.5**. Whisky n'est plus nécessaire ; il reste utilisable comme moteur de secours pour les bouteilles qui existent déjà.
+MacHub exécute les programmes Windows avec **son propre Wine**, compilé à partir des sources officielles de WineHQ (Wine 11.0) avec quelques correctifs maison (`tools/wine-patches/`), plus DXMT et DXVK. Moteur par défaut : **1.0.6**. Whisky n'est plus nécessaire ; il reste utilisable comme moteur de secours pour les bouteilles qui existent déjà.
 
 ## Architecture (`MacHub/Engine/`)
 
@@ -34,6 +34,7 @@ Autour du moteur :
 ## Construire le moteur
 
 ```bash
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk MACOSX_DEPLOYMENT_TARGET=11.0 \
 MACOS_LIBS=<dossier wine/lib du paquet WineHQ 11.0> scripts/build-wine.sh <wine-11.0.tar.xz> <dossier de travail> <dossier d'installation>
 WINE_BUILD=<dossier d'installation> WINE_SOURCES=<wine-11.0.tar.xz> VERSION=1.0.6 LLVM_MINGW=<dossier llvm-mingw> scripts/build-runtime.sh <cache> <sortie>
 ```
@@ -43,7 +44,10 @@ WINE_BUILD=<dossier d'installation> WINE_SOURCES=<wine-11.0.tar.xz> VERSION=1.0.
 Prérequis :
 - Xcode ;
 - Homebrew, avec `bison pkgconf freetype gnutls sdl2` ;
-- llvm-mingw (version macOS universelle), extrait dans le dossier de travail.
+- llvm-mingw (version macOS universelle), extrait dans le dossier de travail ;
+- le SDK de macOS 26 (outils en ligne de commande), pas celui de macOS 27.
+
+**Compiler pour macOS 26 et antérieurs.** Le moteur 1.0.5 avait été compilé avec le SDK de macOS 27 : `configure` y trouvait `pipe2`, que `ntdll.so` importait sans garde (import faible). Sur macOS 26.5.2, chez Johan, tout processus Wine plantait au démarrage (signal 11 dans `init_thread_pipe`). Le moteur 1.0.6 est compilé avec le SDK de macOS 26.5 (`SDKROOT`, lu par `xcrun`), une cible minimale macOS 11.0 (celle des bibliothèques du paquet WineHQ, entre 10.11 et 11.0) et `ac_cv_func_pipe2=no`. Avant de publier, vérifier qu'aucun fichier n'importe un symbole absent du SDK de macOS 26 (`tools/check-runtime-symbols.py <SDK macOS 26> <moteur décompressé>` : `nm -m -u` sur chaque binaire, comparé aux `.tbd` du SDK) et lire `minos` avec `otool -l`.
 
 La compilation prend environ 15 minutes sur un Mac à puce M. Copiez ensuite `runtime-manifest.json` dans `MacHub/Engine/`.
 
@@ -88,11 +92,12 @@ xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-te
 2. **WineCX 24, build Gcenx (1.1.0).** Les fenêtres de Steam s'affichent, mais Steam boucle sur « Unexpected Transport Error (0x3008) » : `WebUITransport: Connection rejected`. C'est un défaut connu des versions antérieures à CrossOver 25.
 3. **WineCX 26.2 compilé par MacHub (1.2.0).** Le Bloc-notes fonctionne, Steam s'installe, et **l'erreur 0x3008 a disparu** (la connexion locale est acceptée). Sur mes captures, la fenêtre de connexion paraît encore noire, mais ces captures ne sont pas fiables pour les surfaces dessinées par la carte graphique. **À vérifier à l'œil.**
 
-## État (moteur 1.0.5, MacHub 0.3.1, 20/10/2026)
+## État (moteur 1.0.6, 20/10/2026)
 
 | Fonction | État |
 |---|---|
 | Moteur intégré : installation vérifiée (SHA-256), versions côte à côte, environnements, sans Whisky | ✅ vérifié, y compris un premier téléchargement depuis GitHub dans un dossier vide (`FreshInstallTests`) |
+| Moteur 1.0.6 sur macOS 26 | ✅ aucun symbole absent du SDK de macOS 26.5 (`tools/check-runtime-symbols.py`), `minos` 11.0 (15.0 pour `winemetal.so` de DXMT) ; environnement, Bloc-notes et connexion de Steam vérifiés sur macOS 27 ; ⏳ pas encore lancé sur un Mac en macOS 26 |
 | Steam pour Windows : installation silencieuse, connexion du compte, téléchargements, mises à jour | ✅ vérifié (fenêtre de Steam affichée grâce au relais `tools/steam-cef-shim`, une seule icône dans le Dock grâce au correctif `0001`) |
 | **BeamNG.drive** en Direct3D 11 via DXMT | ✅ joué plusieurs minutes (correctif `0002` pour DXMT) ; `-gfx dx11` saute le lanceur |
 | Graphismes par jeu (DXMT, DXVK, wined3d), options de lancement, résumé de performances | ✅ code et tests ; seul BeamNG a été lancé |
