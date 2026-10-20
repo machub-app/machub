@@ -419,6 +419,11 @@ private struct SetupChip: View {
         case .needsRosetta:
             return Step(title: "Rosetta 2 needed", detail: "Open Settings to see the one command to run.",
                         symbol: "exclamationmark.triangle.fill", tint: Compatibility.unsupported.tint)
+        case .failed where store.runtimeUpdateAvailable != nil, .ready where store.runtimeUpdateAvailable != nil:
+            // A newer engine ships with this MacHub (1.0.6 fixed the crash on macOS 26): offer it before anything else.
+            return Step(title: "Windows engine update", detail: "Engine \(store.runtimeUpdateAvailable?.version ?? "") fixes problems of the one installed. About 240 MB.",
+                        symbol: "arrow.down.circle", tint: Theme.textPrimary, buttonLabel: "Download",
+                        run: { await $0.downloadRuntime() })
         case .failed:
             return Step(title: "Windows engine problem", detail: "Open Settings for details.",
                         symbol: "exclamationmark.triangle.fill", tint: Compatibility.unsupported.tint, buttonLabel: "Try Again",

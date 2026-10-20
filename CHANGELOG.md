@@ -12,6 +12,10 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 - Steam for Mac and Astris quit by themselves once the game MacHub opened them for is closed (unless they were already open; a setting in Settings › General keeps them open).
 - **Game renderer** for games that choose it by launch option: BeamNG.drive can start with Vulkan through MoltenVK instead of DirectX 11 (not tested yet; Automatic switches back).
 - Update checks at launch and then every hour while MacHub is open, so the sidebar card appears without going to Settings.
+
+## [0.4.2] - 2026-10-20
+
+### Added
 - **Assetto Corsa mods**: browse and install from Nexus Mods inside MacHub, like BeamNG.drive and Cyberpunk 2077. Cars and tracks go to `content/cars` and `content/tracks` (archives laid out like the game folder are merged as they are); every mod can be disabled, enabled again or removed, and a game file it replaced is put back.
 - **Mods from other sites** (Overtake, AssettoCorsa.club, BeamNG's repository): MacHub opens the site, watches the Downloads folder for 15 minutes for the archive downloaded there and installs it in one click. Any archive or unpacked folder can also be added by hand.
 - `.7z` and `.rar` mod archives, unpacked with macOS's own bsdtar.
@@ -19,11 +23,13 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 - Steam for Windows already installed in a Whisky bottle is used as it is: no download and no "Install Steam" step. Valve's installer already on the Mac is reused instead of downloaded again.
 
 ### Fixed
-- With Steam for Windows reused from a Whisky bottle, the library (without a Web API key) now comes from that Steam's cache too, and refreshes while it runs: it stayed empty because only MacHub's own environment was read.
-- "Wine didn't start" with an empty message at launch: the cleanup of programs left by an earlier session could also end the engine check MacHub had just started.
 - Mods merged into a game folder (Cyberpunk 2077 layout) could be written under a wrong sub-folder: the temporary folder is reached through `/var` → `/private/var`, which shifted every relative path.
 - Nexus mods could only be installed for games in a MacHub environment; games in a Whisky bottle work too.
 - MacHub didn't compile with Xcode 26.6 in Debug (RootView's body was too long for the type checker).
+- **Windows engine 1.0.6**: MacHub 0.4.1 and earlier installed engine 1.0.5, which crashed at start on macOS 26 ("Wine stopped with code 11"), so Steam for Windows couldn't be installed. 1.0.6 is rebuilt for macOS 26. After updating MacHub, a sidebar card offers it in one click; once downloaded it becomes the engine in use, and existing environments switch to it.
+- Clicking "Install" again while Steam for Windows was being set up started a second setup in parallel, in an environment named "Steam 2" (then "Steam 3"…).
+- With Steam for Windows reused from a Whisky bottle, the library (without a Web API key) now comes from that Steam's cache too, and refreshes while it runs: it stayed empty because only MacHub's own environment was read.
+- "Wine didn't start" with an empty message at launch: the cleanup of programs left by an earlier session could also end the engine check MacHub had just started.
 - When the Windows engine crashes at start on macOS 26 (engine 1.0.5 was built with the macOS 27 SDK and calls `pipe2`), the error now says so. `scripts/build-wine.sh` sets `ac_cv_func_pipe2=no`: the next engine build runs on macOS 26 and earlier.
 
 ## [0.4.1] - 2026-10-20

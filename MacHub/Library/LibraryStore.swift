@@ -397,6 +397,8 @@ final class LibraryStore {
             engineState = .failed(Self.describe(error))
             return
         }
+        // A downloaded engine is the one MacHub ships for this version: use it, even if an older one was picked.
+        UserDefaults.standard.set(manifest.version, forKey: RuntimeManager.selectedVersionKey)
         await refreshEngine()
     }
 
