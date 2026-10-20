@@ -97,7 +97,7 @@ xcodebuild test -scheme MacHub -skip-testing:MacHubTests/RealSteamTests -skip-te
 | Fonction | État |
 |---|---|
 | Moteur intégré : installation vérifiée (SHA-256), versions côte à côte, environnements, sans Whisky | ✅ vérifié, y compris un premier téléchargement depuis GitHub dans un dossier vide (`FreshInstallTests`) |
-| Moteur 1.0.6 sur macOS 26 | ✅ aucun symbole absent du SDK de macOS 26.5 (`tools/check-runtime-symbols.py`), `minos` 11.0 (15.0 pour `winemetal.so` de DXMT) ; environnement, Bloc-notes et connexion de Steam vérifiés sur macOS 27 ; ⏳ pas encore lancé sur un Mac en macOS 26 |
+| Moteur 1.0.6 sur macOS 26 | ✅ aucun symbole absent du SDK de macOS 26.5 (`tools/check-runtime-symbols.py`), `minos` 11.0 (15.0 pour `winemetal.so` de DXMT) ; environnement, Bloc-notes, Steam et menu de BeamNG.drive (Direct3D 11 via DXMT) vérifiés sur macOS 27 ; ⏳ pas encore lancé sur un Mac en macOS 26 |
 | Steam pour Windows : installation silencieuse, connexion du compte, téléchargements, mises à jour | ✅ vérifié (fenêtre de Steam affichée grâce au relais `tools/steam-cef-shim`, une seule icône dans le Dock grâce au correctif `0001`) |
 | **BeamNG.drive** en Direct3D 11 via DXMT | ✅ joué plusieurs minutes (correctif `0002` pour DXMT) ; `-gfx dx11` saute le lanceur |
 | Graphismes par jeu (DXMT, DXVK, wined3d), options de lancement, résumé de performances | ✅ code et tests ; seul BeamNG a été lancé |
