@@ -35,3 +35,18 @@ struct GameReportTests {
         #expect(GameReport.macOSVersion().split(separator: ".").count >= 2)
     }
 }
+
+struct DiscordPresenceTests {
+    @Test func framesRoundTrip() throws {
+        let frame = DiscordPresence.frame(.handshake, ["v": 1, "client_id": "123"])
+        #expect(Array(frame.prefix(4)) == [0, 0, 0, 0])
+        let length = Int(frame[4]) | Int(frame[5]) << 8
+        #expect(length == frame.count - 8)
+        let parsed = try #require(DiscordPresence.parseFrame(frame))
+        #expect(parsed.opcode == 0 && parsed.payload["client_id"] as? String == "123")
+    }
+
+    @Test func rejectsShortFrames() {
+        #expect(DiscordPresence.parseFrame(Data([1, 0, 0])) == nil)
+    }
+}

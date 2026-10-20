@@ -125,6 +125,17 @@ private struct GeneralSettingsSections: View {
         }
         WindowsFilesSection()
         UpdatesSection()
+        if !DiscordPresence.clientID.isEmpty {
+            Section {
+                Toggle("Show what I'm playing in Discord", isOn: Binding(
+                    get: { UserDefaults.standard.object(forKey: DiscordPresence.enabledKey) as? Bool ?? true },
+                    set: { UserDefaults.standard.set($0, forKey: DiscordPresence.enabledKey) }))
+            } header: {
+                Text("Discord")
+            } footer: {
+                Text("While a game runs, your Discord friends see “Playing <game> · via MacHub” and for how long. It goes through the Discord app on this Mac; nothing is shown when Discord isn't open.")
+            }
+        }
     }
 }
 

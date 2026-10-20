@@ -884,10 +884,17 @@ final class LibraryStore {
             }
         }
         let sessionStart = Date.now
+        var announced = false
         await runner.run(LaunchPlan(route: route, bottle: bottle, target: target)) { [weak self] state in
             guard let self, self.launchStates[id] != .cancelled || !state.isInProgress else { return }
             self.launchStates[id] = state
+            if case .running = state, !announced, title.kind == .game {
+                announced = true
+                let (name, appID) = (title.name, title.steamAppID)
+                Task { await DiscordPresence.shared.playing(name, appID: appID, since: .now) }
+            }
         }
+        if announced { await DiscordPresence.shared.stopped() }
         var summary: PerformanceSummary?
         if engineSettings.metalHUD, let read = await PerformanceLog.read(since: sessionStart) {
             summary = read
