@@ -7,6 +7,8 @@ struct LaunchPlan: Equatable, Sendable {
         case steam(appID: Int)
         /// `whisky run <bottle> <path>` for a program the user added.
         case program(path: String)
+        /// `legendary launch <app>` with MacHub's Wine: an Epic Games Store game.
+        case epic(appName: String)
     }
 
     let route: Route
@@ -19,6 +21,8 @@ struct LaunchPlan: Equatable, Sendable {
 
 extension LaunchPlan.Route {
     var isSteam: Bool { if case .steam = self { true } else { false } }
+    /// Games are watched through their install folder; added programs through their own executable.
+    var watchesInstallFolder: Bool { if case .program = self { false } else { true } }
 }
 
 /// Why a launch couldn't even start. Each case is a fact checked on disk, with its own fix.
@@ -60,7 +64,7 @@ struct LaunchRunner: Sendable {
             steamWasRunning = false
         }
 
-        if case .program = plan.route { await update(.startingProcess) }
+        if !plan.route.isSteam { await update(.startingProcess) }
         Task.detached {
             do { try await handoff(plan) } catch { await outcome.fail(error) }
         }
@@ -163,6 +167,7 @@ enum LaunchTimeline {
         switch route {
         case .steam: [.prepare, .checkBottle] + (steamAlreadyRunning ? [] : [.startSteam]) + [.waitForGame, .running]
         case .program: [.prepare, .checkBottle, .handOff, .running]
+        case .epic: [.prepare, .checkBottle, .handOff, .waitForGame, .running]
         }
     }
 
@@ -172,7 +177,7 @@ enum LaunchTimeline {
         case .preparing: .prepare
         case .checkingBottle, .blocked: .checkBottle
         case .startingSteam: .startSteam
-        case .startingProcess: if case .program = route { .handOff } else { .waitForGame }
+        case .startingProcess: route.isSteam ? .waitForGame : .handOff
         case .waitingForGame, .notStarted, .cancelled, .failed: if case .program = route { .handOff } else { .waitForGame }
         case .running, .closed, .crashedAtStart, .exited: .running
         case .installRequested: .prepare

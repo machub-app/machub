@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Settings, grouped by topic: a category column on the left, the category's options on the right.
 enum SettingsCategory: String, CaseIterable, Identifiable {
-    case general, steamAccount, steamWindows, engine, graphics, performance, input, environments, mods, controllers, whisky, diagnostics
+    case general, steamAccount, epic, steamWindows, engine, graphics, performance, input, environments, mods, controllers, whisky, diagnostics
 
     var id: Self { self }
 
@@ -10,6 +10,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general: "General"
         case .steamAccount: "Steam Account"
+        case .epic: "Epic Games"
         case .steamWindows: "Steam for Windows"
         case .engine: "Windows Engine"
         case .graphics: "Graphics"
@@ -27,6 +28,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .steamAccount: "person.crop.circle"
+        case .epic: "bag"
         case .steamWindows: "arrow.down.app"
         case .engine: "cpu"
         case .graphics: "display"
@@ -42,7 +44,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
 
     /// Groups in the category column.
     @MainActor static let groups: [(LocalizedStringKey, [SettingsCategory])] = [
-        ("MacHub", [.general, .steamAccount, .mods, .controllers]),
+        ("MacHub", [.general, .steamAccount, .epic, .mods, .controllers]),
         ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments]),
         ("Advanced", [.whisky, .diagnostics]),
     ]
@@ -97,6 +99,7 @@ struct SettingsView: View {
         case .input: InputSettingsSection()
         case .environments: EnvironmentsSettingsSection()
         case .mods: ModsSettingsSection()
+        case .epic: EpicSettingsSection()
         case .controllers: ControllerSettingsSection()
         case .whisky: WhiskySettingsSections()
         case .diagnostics: DiagnosticsSettingsSection()

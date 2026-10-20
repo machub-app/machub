@@ -88,6 +88,12 @@ final class LibraryStore {
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
     private(set) var details: [Int: StoreDetails] = [:]
+    /// The Epic library (LibraryStore+Epic): titles, account state and installs in progress (fraction by app name).
+    var epicTitles: [Title] = []
+    var epicState: EpicState = .signedOut
+    var epicInstalls: [String: Double] = [:]
+    /// The last install or uninstall error per Epic app name, shown on the game's page.
+    var epicErrors: [String: String] = [:]
     /// A report waiting for the player's rating after a session (see GameReport).
     var pendingReport: GameReport?
     /// Progress and result of applying recipes, per title and per Windows component (see LibraryStore+Recipes).
@@ -115,7 +121,7 @@ final class LibraryStore {
     /// Steam games the user has: installed ∪ owned, merged per App ID.
     var library: [Title] {
         var byID: [String: Title] = [:]
-        for t in installedTitles + ownedTitles + nativeTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
+        for t in installedTitles + ownedTitles + nativeTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
         return byID.values.map(enriched).sorted { lastPlayed($0) > lastPlayed($1) }
     }
 
@@ -644,9 +650,10 @@ final class LibraryStore {
         async let store: Void = refreshFeatured()
         async let owned: Void = refreshOwned()
         async let profile: Void = steam.refreshProfile()
+        async let epic: Void = refreshEpic()
         await refreshEngine()
         await refreshWhisky(customPath: customPath)
-        _ = await (store, owned, profile)
+        _ = await (store, owned, profile, epic)
     }
 
     func refreshNative() {
@@ -792,7 +799,9 @@ final class LibraryStore {
     /// Starts a title and shows the launch screen. Every step is checked; nothing is assumed.
     func launch(_ title: Title) async {
         guard title.canLaunch, !(launchStates[title.id]?.isInProgress ?? false) else { return }
-        let route: LaunchPlan.Route = if title.kind == .game, let appID = title.steamAppID {
+        let route: LaunchPlan.Route = if let appName = title.epicAppName {
+            .epic(appName: appName)
+        } else if title.kind == .game, let appID = title.steamAppID {
             .steam(appID: appID)
         } else {
             .program(path: title.installPath ?? "")
@@ -850,6 +859,7 @@ final class LibraryStore {
         let target: ProcessWatch.Target = switch route {
         case .steam: .installFolder(URL(filePath: title.installPath ?? "").lastPathComponent)
         case .program(let path): .executable(URL(filePath: path).lastPathComponent)
+        case .epic: .installFolder(URL(filePath: title.installPath ?? "").lastPathComponent)
         }
         if let appID = title.steamAppID { await loadEstimate(appID: appID) }   // recommendations, if not loaded yet
         let options = launchOptions(for: title)
@@ -863,6 +873,16 @@ final class LibraryStore {
                                          arguments: ["-applaunch", String(appID)] + options, timeout: 24 * 3600)
             case .program(let path):
                 _ = try await engine.run(path, bottle: plan.bottle, arguments: options, timeout: 24 * 3600)
+            case .epic(let appName):
+                guard let embedded = engine as? EmbeddedWineEngine, let prefix = PrefixStore.live.prefix(named: plan.bottle) else {
+                    throw EngineError.prefixMissing(plan.bottle)
+                }
+                var env = WineEnvironment(runtime: embedded.runtime, prefix: prefix).variables
+                WineEnvironment.merge(embedded.extraEnvironment, into: &env)
+                let result = try await Legendary.run(Legendary.launchArguments(appName, wine: embedded.runtime.wine, prefix: prefix.url,
+                                                                               options: options),
+                                                     timeout: 24 * 3600, environment: env)
+                guard result.status == 0 else { throw Legendary.Failure.command(String(result.stderr.suffix(400))) }
             }
         }
         runner.latestLog = { engine.latestLog()?.path }
@@ -872,8 +892,8 @@ final class LibraryStore {
                 await restartSteamIfSettingsChanged(prefix: prefix, runtime: embedded.runtime, launching: id,
                                                     extra: titleEnvironment(for: title))
             }
-            let folder = route.isSteam ? URL(filePath: install.path) : URL(filePath: install.path).deletingLastPathComponent()
-            let executables = route.isSteam ? install.executables : [URL(filePath: install.path).lastPathComponent]
+            let folder = route.watchesInstallFolder ? URL(filePath: install.path) : URL(filePath: install.path).deletingLastPathComponent()
+            let executables = route.watchesInstallFolder ? install.executables : [URL(filePath: install.path).lastPathComponent]
             do {
                 lastGraphics[id] = try await GraphicsDeployment.prepare(
                     installFolder: folder, executables: executables, choice: graphicsChoice(for: title),
@@ -951,6 +971,10 @@ final class LibraryStore {
             }
         case .program(let path):
             guard fileManager.fileExists(atPath: path) else { return .executableMissing(path) }
+        case .epic:
+            guard let path = title.installPath, fileManager.fileExists(atPath: path), title.hasExecutable else {
+                return .executableMissing(title.installPath ?? "")
+            }
         }
         return nil
     }
@@ -967,6 +991,7 @@ final class LibraryStore {
 
     /// Asks Steam for Windows inside the bottle to install the game (`steam://install/<id>`).
     func requestInstall(_ title: Title) async {
+        if title.epicAppName != nil { return await installEpic(title) }
         guard let appID = title.steamAppID, let bottle = steamBottle?.name, let engine = engine(forBottle: bottle) else { return }
         launchStates[title.id] = .installRequested
         do {

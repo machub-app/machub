@@ -15,6 +15,8 @@ struct ArtworkImage: View {
                     default: Theme.surface
                     }
                 }
+            } else if title.capsuleURL != nil || title.backgroundURL != nil {
+                fallback   // Epic games: the store's own artwork
             } else {
                 MonogramPlate(title: title)
             }
@@ -315,6 +317,10 @@ extension LibraryStore {
     func action(for title: Title) -> TitleAction {
         if let app = title.nativeApp { return .openNative(app) }
         if title.canLaunch, let bottle = title.bottle, engine(forBottle: bottle) != nil { return .play }
+        if let appName = title.epicAppName {
+            if let fraction = epicInstalls[appName] { return .downloading(fraction) }
+            if title.install == nil, case .ready = epicState { return .install(bottle: Legendary.prefixName) }
+        }
         if let appID = title.steamAppID, title.install == nil, steamDownloads[appID] != nil { return .downloading(downloadProgress(appID: appID)) }
         if let appID = title.steamAppID, let update = steamUpdates[appID], update.isUpdating {
             return .downloading(SteamLibrary.progress(of: update))
@@ -354,6 +360,12 @@ struct TitleActionsMenu: View {
         @Environment(LibraryStore.self) private var store
 
         var body: some View {
+            if title.install != nil, title.epicAppName != nil {
+                Button("Show Game Folder", systemImage: "folder") { store.revealInstallFolder(title) }
+                Button("Report How It Runs…", systemImage: "text.bubble") { store.pendingReport = store.makeReport(for: title) }
+                Divider()
+                Button("Uninstall…", systemImage: "trash", role: .destructive) { Task { await store.uninstallEpic(title) } }
+            }
             if title.install != nil, let appID = title.steamAppID {
                 if store.steamUpdates[appID]?.needsUpdate == true {
                     Button("Update Now", systemImage: "arrow.down.circle") { Task { await store.perform(.update, on: title) } }
