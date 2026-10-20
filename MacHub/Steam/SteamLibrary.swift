@@ -7,9 +7,49 @@ struct VDF: Equatable, Sendable {
     var children: [String: VDF] = [:]
     /// Child keys in file order (library folders are "0", "1", …).
     var order: [String] = []
+    /// Value keys in file order, so a file written back keeps Steam's layout.
+    var valueOrder: [String] = []
+    /// Each key as the file spelled it (`StateFlags`), by its lowercased form.
+    var spelling: [String: String] = [:]
 
-    subscript(key: String) -> String? { values[key.lowercased()] }
+    subscript(key: String) -> String? {
+        get { values[key.lowercased()] }
+        set {
+            let lower = key.lowercased()
+            if values[lower] == nil, newValue != nil { valueOrder.append(lower) }
+            if newValue == nil { valueOrder.removeAll { $0 == lower } }
+            if spelling[lower] == nil { spelling[lower] = key }
+            values[lower] = newValue
+        }
+    }
+
     func child(_ key: String) -> VDF? { children[key.lowercased()] }
+
+    mutating func setChild(_ key: String, _ child: VDF) {
+        let lower = key.lowercased()
+        if children[lower] == nil { order.append(lower) }
+        if spelling[lower] == nil { spelling[lower] = key }
+        children[lower] = child
+    }
+
+    /// Steam's own layout: tab indents, `"key"\t\t"value"`, values before child objects.
+    func text(indent: Int = 0) -> String {
+        let pad = String(repeating: "\t", count: indent)
+        var out = ""
+        for key in valueOrder {
+            guard let value = values[key] else { continue }
+            out += "\(pad)\"\(Self.escape(spelling[key] ?? key))\"\t\t\"\(Self.escape(value))\"\n"
+        }
+        for key in order {
+            guard let child = children[key] else { continue }
+            out += "\(pad)\"\(Self.escape(spelling[key] ?? key))\"\n\(pad){\n\(child.text(indent: indent + 1))\(pad)}\n"
+        }
+        return out
+    }
+
+    private static func escape(_ string: String) -> String {
+        string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+    }
 
     struct ParseError: Error, Equatable {}
 
@@ -31,11 +71,9 @@ struct VDF: Equatable, Sendable {
             case .string(let key):
                 switch tokens.next() {
                 case .string(let value)?:
-                    object.values[key.lowercased()] = value
+                    object[key] = value
                 case .open?:
-                    let child = try parseObject(&tokens, nested: true)
-                    if object.children[key.lowercased()] == nil { object.order.append(key.lowercased()) }
-                    object.children[key.lowercased()] = child
+                    object.setChild(key, try parseObject(&tokens, nested: true))
                 default:
                     throw ParseError()
                 }
@@ -108,6 +146,8 @@ struct SteamApp: Equatable, Sendable {
     let bytesDownloaded: Int64
     /// macOS path of `steamapps/downloading/<id>` (where Steam writes while downloading).
     let downloadingPath: String
+    /// What Steam counts for the game on disk (`SizeOnDisk`), 0 when it hasn't said.
+    var sizeOnDisk: Int64 = 0
 
     /// StateFlags bit 4 = fully installed. Steam keeps it while a later update is pending.
     var isInstalled: Bool { stateFlags & 4 != 0 }
@@ -142,27 +182,140 @@ enum SteamLibrary {
         return ((try? fileManager.contentsOfDirectory(atPath: cache.path)) ?? []).compactMap(Int.init).sorted()
     }
 
-    /// Every library folder Steam knows (its own folder first), as macOS URLs inside the prefix.
-    static func libraryFolders(steamRoot: URL, prefix: URL) -> [URL] {
-        var folders = [steamRoot]
-        if let text = try? String(contentsOf: steamRoot.appending(path: "steamapps/libraryfolders.vdf"), encoding: .utf8),
+    /// Every library folder Steam knows that is reachable now (its own folder first), as macOS URLs inside the
+    /// prefix. A folder on an unplugged drive is left out rather than read as an empty library.
+    static func libraryFolders(steamRoot: URL, prefix: URL, fileManager: FileManager = .default) -> [URL] {
+        libraryFolderEntries(steamRoot: steamRoot, prefix: prefix, fileManager: fileManager).filter(\.isAvailable).map(\.url)
+    }
+
+    /// One `libraryfolders.vdf` entry, reachable or not.
+    struct LibraryFolder: Equatable, Sendable {
+        /// As Steam wrote it (`E:\`, `C:\Program Files (x86)\Steam`).
+        let windowsPath: String
+        /// Where it lives on the Mac (for an unplugged drive, where it would be).
+        let url: URL
+        let isAvailable: Bool
+    }
+
+    /// Every library folder in `libraryfolders.vdf`, Steam's own first, including ones on a drive that is unplugged.
+    static func libraryFolderEntries(steamRoot: URL, prefix: URL, fileManager: FileManager = .default) -> [LibraryFolder] {
+        var folders = [LibraryFolder(windowsPath: #"C:\Program Files (x86)\Steam"#, url: steamRoot, isAvailable: true)]
+        if let text = try? String(contentsOf: libraryFoldersFile(steamRoot: steamRoot), encoding: .utf8),
            let vdf = try? VDF.parse(text), let list = vdf.child("libraryfolders") {
             for key in list.order {
-                guard let path = list.child(key)?["path"], let url = macURL(forWindowsPath: path, prefix: prefix) else { continue }
-                if !folders.contains(where: { $0.standardizedFileURL.path == url.standardizedFileURL.path }) { folders.append(url) }
+                guard let path = list.child(key)?["path"], let url = macURL(forWindowsPath: path, prefix: prefix, fileManager: fileManager)
+                else { continue }
+                if folders.contains(where: { $0.url.standardizedFileURL.path == url.standardizedFileURL.path }) { continue }
+                var isDirectory: ObjCBool = false
+                let available = fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) && isDirectory.boolValue
+                folders.append(LibraryFolder(windowsPath: path, url: url, isAvailable: available))
             }
         }
         return folders
     }
 
+    static func libraryFoldersFile(steamRoot: URL) -> URL { steamRoot.appending(path: "steamapps/libraryfolders.vdf") }
+
     /// `C:\Program Files (x86)\Steam` → `<prefix>/drive_c/Program Files (x86)/Steam`; other drives go through
-    /// Wine's `dosdevices/<letter>:` links.
-    static func macURL(forWindowsPath path: String, prefix: URL) -> URL? {
+    /// Wine's `dosdevices/<letter>:` links. A link whose target is gone (unplugged drive) still maps to that target.
+    static func macURL(forWindowsPath path: String, prefix: URL, fileManager: FileManager = .default) -> URL? {
         guard let match = path.firstMatch(of: /^([A-Za-z]):[\\\/]*(.*)$/) else { return nil }
         let letter = match.1.lowercased()
         let rest = match.2.split(whereSeparator: { $0 == "\\" || $0 == "/" }).joined(separator: "/")
-        let base = letter == "c" ? prefix.appending(path: "drive_c") : prefix.appending(path: "dosdevices/\(letter):").resolvingSymlinksInPath()
+        let base = letter == "c" ? prefix.appending(path: "drive_c") : driveTarget(letter: letter, prefix: prefix, fileManager: fileManager)
         return rest.isEmpty ? base : base.appending(path: rest)
+    }
+
+    /// Where `dosdevices/<letter>:` points, read from the link itself so a missing target doesn't matter.
+    static func driveTarget(letter: String, prefix: URL, fileManager: FileManager = .default) -> URL {
+        let dosdevices = prefix.appending(path: "dosdevices")
+        let link = dosdevices.appending(path: "\(letter):")
+        guard let destination = try? fileManager.destinationOfSymbolicLink(atPath: link.path) else {
+            return link.resolvingSymlinksInPath()
+        }
+        let target = destination.hasPrefix("/") ? URL(filePath: destination) : dosdevices.appending(path: destination)
+        return target.standardizedFileURL
+    }
+
+    // MARK: Games folders on other drives
+
+    enum AddFolderError: Error, Equatable {
+        case noFreeDriveLetter
+        case unreadableLibraryFile
+    }
+
+    /// The drive letter already pointing at `folder`, else the first letter from E: that Wine doesn't use.
+    /// Wine's mount manager adds `x::` links for raw devices and `x:` links for volumes it sees: both count as taken.
+    static func driveLetter(for folder: URL, prefix: URL, fileManager: FileManager = .default) -> String? {
+        let dosdevices = prefix.appending(path: "dosdevices")
+        let entries = Set(((try? fileManager.contentsOfDirectory(atPath: dosdevices.path)) ?? []).map { $0.lowercased() })
+        let letters = "defghijklmnopqrstuvwxy".map(String.init)
+        for letter in letters where entries.contains("\(letter):") {
+            if driveTarget(letter: letter, prefix: prefix, fileManager: fileManager).path == folder.standardizedFileURL.path { return letter }
+        }
+        return letters.dropFirst().first { !entries.contains("\($0):") && !entries.contains("\($0)::") }
+    }
+
+    /// Makes `folder` (usually on an external drive) a Steam library: maps it as a Wine drive letter, prepares it the
+    /// way Steam does (`steamapps/`, `libraryfolder.vdf`) and lists it in `libraryfolders.vdf`, after copying that
+    /// file to `libraryfolders.vdf.machub-backup`. Steam must not be running: it rewrites the file when it quits.
+    /// Returns the Windows path Steam sees (`E:\`).
+    @discardableResult
+    static func addLibraryFolder(_ folder: URL, steamRoot: URL, prefix: URL, fileManager: FileManager = .default) throws -> String {
+        // Steam writes the file on its first start; without it there's no list of its own folder to add to.
+        let file = libraryFoldersFile(steamRoot: steamRoot)
+        guard let text = try? String(contentsOf: file, encoding: .utf8), let parsed = try? VDF.parse(text) else {
+            throw AddFolderError.unreadableLibraryFile
+        }
+        guard let letter = driveLetter(for: folder, prefix: prefix, fileManager: fileManager) else { throw AddFolderError.noFreeDriveLetter }
+        let link = prefix.appending(path: "dosdevices/\(letter):")
+        if (try? fileManager.destinationOfSymbolicLink(atPath: link.path)) == nil {
+            try fileManager.createDirectory(at: link.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try fileManager.createSymbolicLink(atPath: link.path, withDestinationPath: folder.standardizedFileURL.path)
+        }
+        let windowsPath = "\(letter.uppercased()):\\"
+
+        try fileManager.createDirectory(at: folder.appending(path: "steamapps"), withIntermediateDirectories: true)
+        // The folder's own marker and Steam's list share one content ID, as when Steam adds a library itself.
+        let marker = folder.appending(path: "libraryfolder.vdf")
+        var contentID = String(UInt64.random(in: 1...UInt64(Int64.max)))
+        if let text = try? String(contentsOf: marker, encoding: .utf8), let id = (try? VDF.parse(text))?.child("libraryfolder")?["contentid"] {
+            contentID = id
+        } else {
+            var inner = VDF()
+            inner["contentid"] = contentID
+            inner["label"] = ""
+            var root = VDF()
+            root.setChild("libraryfolder", inner)
+            try root.text().write(to: marker, atomically: true, encoding: .utf8)
+        }
+
+        let root = addingLibrary(windowsPath, contentID: contentID, to: parsed)
+        let backup = file.appendingPathExtension("machub-backup")
+        try? fileManager.removeItem(at: backup)
+        try fileManager.copyItem(at: file, to: backup)
+        try root.text().write(to: file, atomically: true, encoding: .utf8)
+        return windowsPath
+    }
+
+    /// `libraryfolders.vdf` with one more library (next free number), unchanged if Steam already lists that path.
+    static func addingLibrary(_ windowsPath: String, contentID: String, to root: VDF) -> VDF {
+        var root = root
+        var list = root.child("libraryfolders") ?? VDF()
+        let normalized = { (path: String) in path.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "\\/")) }
+        if list.children.values.contains(where: { $0["path"].map(normalized) == normalized(windowsPath) }) { return root }
+        let next = (list.order.compactMap(Int.init).max() ?? -1) + 1
+        var entry = VDF()
+        entry["path"] = windowsPath
+        entry["label"] = ""
+        entry["contentid"] = contentID
+        entry["totalsize"] = "0"
+        entry["update_clean_bytes_tally"] = "0"
+        entry["time_last_update_verified"] = "0"
+        entry.setChild("apps", VDF())
+        list.setChild(String(next), entry)
+        root.setChild("libraryfolders", list)
+        return root
     }
 
     static func apps(steamRoot: URL, prefix: URL, fileManager: FileManager = .default) -> [SteamApp] {
@@ -194,7 +347,8 @@ enum SteamLibrary {
             stateFlags: state["StateFlags"].flatMap(Int.init) ?? 0,
             bytesToDownload: state["BytesToDownload"].flatMap(Int64.init) ?? 0,
             bytesDownloaded: state["BytesDownloaded"].flatMap(Int64.init) ?? 0,
-            downloadingPath: steamapps.appending(path: "downloading/\(id)").path
+            downloadingPath: steamapps.appending(path: "downloading/\(id)").path,
+            sizeOnDisk: state["SizeOnDisk"].flatMap(Int64.init) ?? 0
         )
     }
 
