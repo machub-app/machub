@@ -147,3 +147,34 @@ private func cli(expecting arguments: [String]? = nil, reply: ProcessResult) -> 
         #expect(ProcessWatch.matches(in: redist, installFolder: "assettocorsa").isEmpty)
     }
 }
+
+@Suite struct OrphanCleanupTests {
+    /// A process MacHub started itself (like the launch-time `wine --version`) survives the orphan cleanup.
+    @Test func sparesProcessesThisAppStarted() async throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: "machub-orphans-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let binary = root.appending(path: "sleep")
+        try FileManager.default.copyItem(at: URL(filePath: "/bin/sleep"), to: binary)
+        // macOS kills a copied system binary that keeps Apple's platform signature: sign the copy ad hoc.
+        let sign = Process()
+        sign.executableURL = URL(filePath: "/usr/bin/codesign")
+        sign.arguments = ["-s", "-", "-f", binary.path]
+        try sign.run()
+        sign.waitUntilExit()
+        let child = Process()
+        child.executableURL = binary
+        child.arguments = ["30"]
+        try child.run()
+        defer { child.terminate() }
+        try await Task.sleep(for: .milliseconds(200))
+
+        #expect(ProcessWatch.parentPID(of: child.processIdentifier) == getpid())
+        await ProcessWatch.terminateOrphans(under: root)
+        #expect(child.isRunning)
+        // Seen from another app (a later MacHub), the same process is an orphan and is ended.
+        await ProcessWatch.terminateOrphans(under: root, ownPID: 1)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(!child.isRunning)
+    }
+}

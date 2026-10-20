@@ -382,6 +382,8 @@ final class LibraryStore {
             engineState = .failed(Self.describe(error))
             return
         }
+        // A downloaded engine is the one MacHub ships for this version: use it, even if an older one was picked.
+        UserDefaults.standard.set(manifest.version, forKey: RuntimeManager.selectedVersionKey)
         await refreshEngine()
     }
 
@@ -476,12 +478,18 @@ final class LibraryStore {
     /// Without a key the library comes from Steam for Windows' cache, which fills in once Steam is signed in and its
     /// library has been shown: reload the games whenever the number of cached apps changes.
     private func refreshOwnedIfSteamLibraryChanged() {
-        guard steam.account != nil, !steam.hasAPIKey, let prefix = steamPrefix,
-              let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else { return }
-        let count = SteamLibrary.libraryCacheAppIDs(steamRoot: root).count
+        guard steam.account != nil, !steam.hasAPIKey, !steamClientRoots.isEmpty else { return }
+        let count = Set(steamClientRoots.flatMap { SteamLibrary.libraryCacheAppIDs(steamRoot: $0) }).count
         guard count != libraryCacheCount else { return }
         libraryCacheCount = count
         Task { await refreshOwned() }
+    }
+
+    /// Every Steam for Windows whose library cache lists the account's games: the one in MacHub's environment and
+    /// the one in a Whisky bottle MacHub reuses.
+    var steamClientRoots: [URL] {
+        [steamPrefix.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) },
+         whiskySteamBottle.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) }].compactMap { $0 }
     }
 
     /// While Steam for Windows waits for its first sign-in, look at its library cache every 15 s for 10 minutes.
@@ -523,6 +531,9 @@ final class LibraryStore {
 
     /// One click: Steam prefix → Valve's installer (silent) → Steam started for the user to sign in.
     func setUpSteam() async {
+        // One setup at a time: a second click (sidebar and Settings both offer it) used to start a parallel one,
+        // which created "Steam 2", "Steam 3"… environments side by side.
+        if case .working? = steamSetup { return }
         // Already installed with Whisky: use that copy rather than downloading and installing a second one.
         if steamPrefix == nil, whiskySteamBottle != nil {
             await startSteam()
@@ -651,6 +662,7 @@ final class LibraryStore {
             }
         }
         steamSetup = .waitingForSignIn
+        watchLibraryCache()
     }
 
     /// Asks Steam to quit cleanly (it syncs cloud saves on the way out), then ends what's left in the prefix.
@@ -759,10 +771,7 @@ final class LibraryStore {
     /// app. The store tells which of them are games (DLC, demos, SDKs and redistributables are left out); answers
     /// are kept on disk so each app is asked about once.
     private func refreshOwnedFromSteamClient() async {
-        guard let prefix = steamPrefix, let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else {
-            ownedState = .needsKey; ownedTitles = []; return
-        }
-        let ids = SteamLibrary.libraryCacheAppIDs(steamRoot: root)
+        let ids = Array(Set(steamClientRoots.flatMap { SteamLibrary.libraryCacheAppIDs(steamRoot: $0) })).sorted()
         guard !ids.isEmpty else { ownedState = .needsKey; ownedTitles = []; return }
         if ownedTitles.isEmpty { ownedState = .loading }
         var known = LocalData.load([String: AppKind].self, from: Self.appKindsFile) ?? [:]

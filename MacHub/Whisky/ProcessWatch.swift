@@ -103,7 +103,9 @@ enum ProcessWatch {
     /// Every process running a binary from MacHub's runtimes (Wine itself, its wineserver, every Windows program).
     /// Wine programs show their Windows path in `ps`, so their binary path (proc_pidpath) is what identifies them.
     static func runtimeProcesses(under root: URL) -> [(pid: Int32, isServer: Bool)] {
-        let prefix = root.resolvingSymlinksInPath().path
+        // realpath, not resolvingSymlinksInPath(): Foundation turns /private/var into /var, the kernel reports /private/var.
+        let prefix = (realpath(root.path, nil).map { defer { free($0) }; return String(cString: $0) } ?? root.path)
+            .trimmingSuffix("/") + "/"
         var count = proc_listallpids(nil, 0)
         guard count > 0 else { return [] }
         var pids = [Int32](repeating: 0, count: Int(count) * 2)
@@ -121,10 +123,19 @@ enum ProcessWatch {
 
     /// Ends Windows programs left behind once their wineserver is gone (they no longer answer to Wine). Does nothing
     /// while any wineserver of MacHub still runs, so another environment's programs are never touched.
-    static func terminateOrphans(under root: URL) async {
+    /// Processes this MacHub just started (the engine check's `wine --version`, a wineboot) are never orphans, even
+    /// before their wineserver is up: killing them made the launch-time engine check fail with an empty message.
+    static func terminateOrphans(under root: URL, ownPID: Int32 = getpid()) async {
         let processes = runtimeProcesses(under: root)
         guard !processes.isEmpty, !processes.contains(where: \.isServer) else { return }
-        await terminate(processes.map(\.pid), grace: .seconds(2))
+        await terminate(processes.map(\.pid).filter { parentPID(of: $0) != ownPID }, grace: .seconds(2))
+    }
+
+    static func parentPID(of pid: Int32) -> Int32? {
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size else { return nil }
+        return Int32(info.pbi_ppid)
     }
 
     /// Whisky writes one Wine log per launch; the newest is the one to show on failure.
@@ -137,4 +148,8 @@ enum ProcessWatch {
             return a < b
         }
     }
+}
+
+private extension String {
+    func trimmingSuffix(_ suffix: String) -> String { hasSuffix(suffix) ? String(dropLast(suffix.count)) : self }
 }
