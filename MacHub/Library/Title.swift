@@ -57,11 +57,13 @@ struct Title: Identifiable, Hashable, Sendable {
     var macAvailable: Bool?
     /// A game that runs natively on the Mac through its own launcher (Minecraft: Java Edition).
     var nativeApp: URL?
+    /// Installed through Steam for Mac (native build): path of its install folder there.
+    var macInstall: String?
     /// Epic Games Store app name (Legendary's `app_name`): the game comes from the user's Epic library.
     var epicAppName: String?
 
     var availability: Availability {
-        if install != nil { .installed } else if owned != nil { .owned } else { .store }
+        if install != nil || macInstall != nil { .installed } else if owned != nil { .owned } else { .store }
     }
 
     var bottle: String? { install?.bottle }
@@ -133,6 +135,10 @@ struct Title: Identifiable, Hashable, Sendable {
         t.capsuleURL = t.capsuleURL ?? other.capsuleURL
         t.backgroundURL = t.backgroundURL ?? other.backgroundURL
         t.macAvailable = t.macAvailable ?? other.macAvailable
+        t.macInstall = t.macInstall ?? other.macInstall
+        if let mine = t.owned, let theirs = other.owned, (theirs.lastPlayed ?? .distantPast) > (mine.lastPlayed ?? .distantPast) {
+            t.owned?.lastPlayed = theirs.lastPlayed
+        }
         if t.name.hasPrefix("App "), !other.name.hasPrefix("App ") { t.name = other.name }
         return t
     }
@@ -144,7 +150,7 @@ struct Title: Identifiable, Hashable, Sendable {
         genres = details.genres.isEmpty ? genres : details.genres
         developer = details.developers.first ?? developer
         publisher = details.publishers.first ?? publisher
-        macAvailable = details.mac
+        macAvailable = details.mac || macInstall != nil
         capsuleURL = details.headerImage ?? capsuleURL
         backgroundURL = details.background ?? backgroundURL
         if let year = details.releaseDate.flatMap({ $0.firstMatch(of: /\b(19|20)\d{2}\b/) }).map({ Int($0.0)! }) {

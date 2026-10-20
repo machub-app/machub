@@ -84,6 +84,11 @@ final class LibraryStore {
     private(set) var pinnedTitles: [Title] = []
     /// Native Mac games MacHub manages mods for (today: Minecraft: Java Edition, when installed).
     private(set) var nativeTitles: [Title] = []
+    /// Games in Steam for Mac's libraries (installed or downloading), by App ID.
+    var macSteamApps: [Int: SteamApp] = [:]
+    var macSteamWatch: Task<Void, Never>?
+    /// Games Steam for Mac was asked to install: followed until their manifest shows up.
+    var macInstallRequests: Set<Int> = []
     private(set) var featuredStore = SteamStore.Featured()
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
@@ -121,7 +126,7 @@ final class LibraryStore {
     /// Steam games the user has: installed ∪ owned, merged per App ID.
     var library: [Title] {
         var byID: [String: Title] = [:]
-        for t in installedTitles + ownedTitles + nativeTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
+        for t in installedTitles + ownedTitles + nativeTitles + macSteamTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
         return byID.values.map(enriched).sorted { lastPlayed($0) > lastPlayed($1) }
     }
 
@@ -154,7 +159,7 @@ final class LibraryStore {
     /// A title as the user has it: store/search entries pick up owned/installed state and cached details.
     func enriched(_ title: Title) -> Title {
         var t = title
-        for mine in (installedTitles + ownedTitles) where mine.id == title.id {
+        for mine in (installedTitles + ownedTitles + macSteamTitles) where mine.id == title.id {
             t = mine.merged(with: t)
         }
         if let id = t.steamAppID, let d = details[id] { t.apply(d) }
@@ -710,6 +715,7 @@ final class LibraryStore {
 
     func refreshWhisky(customPath: String?) async {
         refreshNative()
+        refreshMacSteam()
         let report = await DiagnosticsReport.make(customPath: customPath)
         self.report = report
         guard let install = whiskyInstall else {
@@ -759,10 +765,9 @@ final class LibraryStore {
     /// app. The store tells which of them are games (DLC, demos, SDKs and redistributables are left out); answers
     /// are kept on disk so each app is asked about once.
     private func refreshOwnedFromSteamClient() async {
-        guard let prefix = steamPrefix, let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else {
-            ownedState = .needsKey; ownedTitles = []; return
-        }
-        let ids = SteamLibrary.libraryCacheAppIDs(steamRoot: root)
+        // Steam for Windows (in MacHub's prefix) and Steam for Mac each keep a cache for the same account.
+        let roots = [steamPrefix.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) }, MacSteam.app.map { _ in MacSteam.root }].compactMap { $0 }
+        let ids = Array(Set(roots.flatMap { SteamLibrary.libraryCacheAppIDs(steamRoot: $0) })).sorted()
         guard !ids.isEmpty else { ownedState = .needsKey; ownedTitles = []; return }
         if ownedTitles.isEmpty { ownedState = .loading }
         var known = LocalData.load([String: AppKind].self, from: Self.appKindsFile) ?? [:]
@@ -1116,7 +1121,9 @@ final class LibraryStore {
         LocalData.save(imported, to: "software.json")
     }
 
-    private func recordLaunch(_ title: Title) {
+    func setLaunchState(_ state: LaunchState?, for id: Title.ID) { launchStates[id] = state }
+
+    func recordLaunch(_ title: Title) {
         history[title.id] = .now
         LocalData.save(history, to: "history.json")
     }

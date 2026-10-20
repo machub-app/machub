@@ -220,6 +220,12 @@ private struct RequirementsPanel: View {
                              details == nil && detailsLoaded ? "No store page returned for your region." : nil)
                         ownedItem
                     }
+                    if let path = title.macInstall {
+                        item(.ok, "Installed with Steam for Mac", path)
+                        item(.ok, "Runs on Mac", "Native macOS version: no Windows engine needed.")
+                    }
+                }
+                if !title.isDemo, title.macInstall == nil {
                     item(title.install != nil ? .ok : .missing, "Installed in a Windows environment",
                          title.bottle.map { "Environment “\($0)”" })
                     if title.install != nil {
@@ -235,7 +241,9 @@ private struct RequirementsPanel: View {
                     }
                     item(.unknown, "Runs on Mac", "Not verified.")
                     if details?.mac == true {
-                        item(.info, "Native macOS version", "Steam sells a Mac build of this game: Steam for Mac runs it without Wine.")
+                        item(.info, "Native macOS version", MacSteam.app == nil
+                             ? "Steam sells a Mac build of this game: install Steam for Mac to run it without Wine."
+                             : "Steam sells a Mac build of this game: Steam for Mac runs it without Wine.")
                     }
                 }
             }

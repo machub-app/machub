@@ -307,6 +307,10 @@ enum TitleAction: Equatable {
     case play
     /// Native Mac game: its own launcher opens it.
     case openNative(URL)
+    /// Installed in Steam for Mac: Steam for Mac starts it.
+    case playOnMac
+    /// A native macOS build exists and isn't installed: Steam for Mac installs it (or shows its store page).
+    case installOnMac(owned: Bool)
     case install(bottle: String)
     /// Steam for Windows is downloading it in a MacHub prefix (fraction when known).
     case downloading(Double?)
@@ -316,6 +320,10 @@ enum TitleAction: Equatable {
 extension LibraryStore {
     func action(for title: Title) -> TitleAction {
         if let app = title.nativeApp { return .openNative(app) }
+        if let appID = title.steamAppID, let mac = macSteamApps[appID] {
+            if mac.isInstalled, !mac.isUpdating { return .playOnMac }
+            return .downloading(macDownloadProgress(appID: appID))
+        }
         if title.canLaunch, let bottle = title.bottle, engine(forBottle: bottle) != nil { return .play }
         if let appName = title.epicAppName {
             if let fraction = epicInstalls[appName] { return .downloading(fraction) }
@@ -324,6 +332,9 @@ extension LibraryStore {
         if let appID = title.steamAppID, title.install == nil, steamDownloads[appID] != nil { return .downloading(downloadProgress(appID: appID)) }
         if let appID = title.steamAppID, let update = steamUpdates[appID], update.isUpdating {
             return .downloading(SteamLibrary.progress(of: update))
+        }
+        if !title.isDemo, title.kind == .game, title.install == nil, title.macAvailable == true, title.steamAppID != nil {
+            return .installOnMac(owned: title.owned != nil)
         }
         if !title.isDemo, title.kind == .game, title.install == nil, title.steamAppID != nil, let bottle = steamBottle?.name {
             return .install(bottle: bottle)
@@ -338,7 +349,7 @@ struct TitleActionsMenu: View {
     @Environment(LibraryStore.self) private var store
 
     var body: some View {
-        if title.install != nil, title.steamAppID != nil {
+        if title.steamAppID != nil, title.install != nil || title.macInstall != nil || store.canInstallWindowsVersion(title) {
             Menu {
                 Items(title: title)
             } label: {
@@ -365,6 +376,16 @@ struct TitleActionsMenu: View {
                 Button("Report How It Runs…", systemImage: "text.bubble") { store.pendingReport = store.makeReport(for: title) }
                 Divider()
                 Button("Uninstall…", systemImage: "trash", role: .destructive) { Task { await store.uninstallEpic(title) } }
+            }
+            if title.install == nil, let appID = title.steamAppID {
+                if title.macInstall != nil {
+                    Button("Steam Properties…", systemImage: "slider.horizontal.3") { Task { _ = await MacSteam.open(.properties, appID: appID) } }
+                    Button("Uninstall in Steam for Mac…", systemImage: "trash") { Task { _ = await MacSteam.open(.uninstall, appID: appID) } }
+                }
+                if store.canInstallWindowsVersion(title), let bottle = store.steamBottle?.name {
+                    if title.macInstall != nil { Divider() }
+                    Button("Install the Windows Version in “\(bottle)”", systemImage: "arrow.down.circle") { Task { await store.requestInstall(title) } }
+                }
             }
             if title.install != nil, let appID = title.steamAppID {
                 if store.steamUpdates[appID]?.needsUpdate == true {
@@ -400,6 +421,27 @@ struct PlayButton: View {
                 Label("Open the launcher", systemImage: "play.fill")
             }
             .buttonStyle(PrimaryActionStyle())
+        case .playOnMac:
+            Button {
+                Task { await store.playOnMac(title) }
+            } label: {
+                Label("Play", systemImage: "play.fill")
+            }
+            .buttonStyle(PrimaryActionStyle())
+            .help("Native Mac version: Steam for Mac starts it, without Wine.")
+        case .installOnMac(let owned):
+            Button {
+                Task { await store.installOnMac(title) }
+            } label: {
+                if owned {
+                    Label("Install for Mac", systemImage: "arrow.down.circle")
+                } else {
+                    Label("View on Steam", systemImage: "cart")
+                }
+            }
+            .buttonStyle(SecondaryActionStyle())
+            .disabled(store.launchStates[title.id] == .installRequested)
+            .help("This game has a native Mac version: Steam for Mac downloads it, without Wine.")
         case .install(let bottle):
             Button {
                 Task { await store.requestInstall(title) }
@@ -536,7 +578,12 @@ struct PlayStatus: View {
         if title.isDemo { return "Demo title. It can't be installed or launched." }
         if title.nativeApp != nil { return "Native Mac game: it runs in its own launcher, without Wine." }
         if title.id == ModSupport.minecraftTitleID { return "The Minecraft Launcher isn't installed in Applications." }
-        if title.macAvailable == true, title.install == nil { return "A native macOS version exists on Steam: use Steam for Mac rather than Wine." }
+        if title.macInstall != nil { return "Native Mac version, installed with Steam for Mac: it runs without Wine." }
+        if title.macAvailable == true, title.install == nil {
+            return MacSteam.app == nil
+                ? "A native macOS version exists on Steam: install Steam for Mac to get it. The Windows version stays in the … menu."
+                : "A native macOS version exists: Steam for Mac installs it. The Windows version stays in the … menu."
+        }
         if !store.canRunWindows { return "MacHub's Windows engine isn't ready. See Settings › Windows Engine." }
         if let install = title.install, install.executables.isEmpty { return "Installed, but no Windows executable was found in its folder." }
         if title.install != nil, title.steamAppID.flatMap({ store.estimates[$0] })?.verdict ?? .unknown == .unknown {
@@ -555,6 +602,7 @@ struct AvailabilityBadge: View {
 
     var body: some View {
         let (label, symbol, fill, ink): (LocalizedStringKey, String, Color, Color) = switch title.availability {
+        case .installed where title.install == nil && title.macInstall != nil: ("Installed (Mac)", "apple.logo", Theme.textPrimary, Theme.ground)
         case .installed: ("Installed", "shippingbox.fill", Theme.textPrimary, Theme.ground)
         case .owned: ("Owned", "checkmark.circle", Theme.surfaceRaised, Theme.textPrimary)
         case .store: ("On Steam", "cart", .clear, Theme.textSecondary)
@@ -566,7 +614,8 @@ struct AvailabilityBadge: View {
             .padding(.vertical, compact ? 3 : 5)
             .background(fill, in: .capsule)
             .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: title.availability == .store ? 1 : 0))
-            .help(title.bottle.map { Text("Installed in bottle “\($0)”") } ?? Text(label))
+            .help(title.bottle.map { Text("Installed in bottle “\($0)”") }
+                  ?? (title.macInstall != nil ? Text("Native Mac version, installed with Steam for Mac") : Text(label)))
     }
 }
 
@@ -598,7 +647,7 @@ struct TitleCard: View {
                 .frame(width: w, height: w * size.height / size.width)
                 .clipShape(.rect(cornerRadius: Theme.cardRadius))
                 .overlay(alignment: .bottomLeading) {
-                    if !title.isDemo, title.nativeApp == nil, let appID = title.steamAppID { EstimatePill(appID: appID) }
+                    if !title.isDemo, title.nativeApp == nil, title.macInstall == nil, let appID = title.steamAppID { EstimatePill(appID: appID) }
                 }
                 .overlay(alignment: .topTrailing) {
                     if title.isDemo {
