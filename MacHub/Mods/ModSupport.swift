@@ -18,10 +18,18 @@ enum ModSupport: Equatable, Sendable {
 
     static func support(for title: Title) -> ModSupport? {
         if title.id == minecraftTitleID { return .modrinth }
-        if title.steamAppID == assettoCorsaAppID, let path = title.installPath { return .archiveImport(gameFolder: URL(filePath: path)) }
         if let appID = title.steamAppID, let domain = NexusMods.domains[appID], title.install != nil { return .nexus(domain: domain) }
         if title.steamAppID == beamNGAppID { return .externalOnly(URL(string: "https://www.beamng.com/resources/")!) }
         return nil
+    }
+
+    /// Sites with no download API MacHub may use: MacHub opens them, then installs what the user downloads there.
+    static func otherSources(appID: Int?) -> [(name: String, url: URL)] {
+        switch appID {
+        case assettoCorsaAppID: assettoCorsaSources
+        case beamNGAppID: [("BeamNG.drive Repository", URL(string: "https://www.beamng.com/resources/")!)]
+        default: []
+        }
     }
 
     /// Community sites for Assetto Corsa content. They have no public download API, so MacHub opens them in the browser.

@@ -4,6 +4,9 @@
 <dict>
 	<!-- Merged with the generated Info.plist. "Alternate" rank: MacHub appears in Finder's Open With menu
 	     for Windows files but never becomes their default app unless the user chooses it in Settings. -->
+	<!-- Settings › Sound: per-app volume uses Core Audio process taps, which macOS gates behind this prompt. -->
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>MacHub adjusts the volume of each app you choose (a game, Discord, your browser). The sound is played back at your level and never recorded or saved.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

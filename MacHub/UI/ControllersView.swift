@@ -553,6 +553,11 @@ enum SystemSettings {
     }
 
     static func open(_ pane: SystemSettings) { NSWorkspace.shared.open(pane.url) }
+
+    /// Privacy & Security, where "Screen & System Audio Recording" lists the apps allowed to capture audio.
+    static func openAudioCapturePrivacy() {
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AudioCapture")!)
+    }
 }
 
 /// A compact summary for the main Settings page, linking to the full Controllers page.

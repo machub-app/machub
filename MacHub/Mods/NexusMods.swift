@@ -10,7 +10,8 @@ enum NexusMods {
     static let rest = URL(string: "https://api.nexusmods.com/v1")!
 
     /// Games MacHub installs Nexus mods for, by Steam App ID → Nexus game domain (checked 2026-10-19).
-    static let domains: [Int: String] = [284160: "beamngdrive", 1091500: "cyberpunk2077", 934700: "deadisland2"]
+    static let domains: [Int: String] = [284160: "beamngdrive", 1091500: "cyberpunk2077", 934700: "deadisland2",
+                                         244210: "assettocorsa"]
 
     struct Mod: Identifiable, Hashable, Sendable {
         let id: Int

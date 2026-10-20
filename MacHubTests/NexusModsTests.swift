@@ -82,8 +82,9 @@ import Testing
 
     @Test func refusesOtherFormatsAndForeignLayouts() async throws {
         let installer = NexusModInstaller(layout: .mergeIntoGame(folder("cp2"), roots: ["archive"]), dataFolder: folder("data"))
-        await #expect(throws: NexusModInstaller.Failure.unsupportedFormat("7z")) {
-            try await installer.install(archive: URL(filePath: "/dev/null"), fileName: "x.7z", modID: 5, fileID: 50, name: "X", version: "1")
+        // .7z and .rar are unpacked with macOS's bsdtar since 2026-10-20; other formats are still refused.
+        await #expect(throws: NexusModInstaller.Failure.unsupportedFormat("exe")) {
+            try await installer.install(archive: URL(filePath: "/dev/null"), fileName: "x.exe", modID: 5, fileID: 50, name: "X", version: "1")
         }
         let archive = try await zip(["random/file.txt": "x"], name: "r.zip")
         await #expect(throws: NexusModInstaller.Failure.nothingRecognised) {

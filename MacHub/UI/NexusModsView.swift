@@ -28,6 +28,7 @@ struct NexusModsSection: View {
                 SourceBanner(text: "Most BeamNG.drive mods live on BeamNG's own repository, which the game has built in (Mods in its main menu). Nexus has a smaller selection.")
             }
             InstalledNexusMods(title: title)
+            OtherModSources(title: title)
             catalog
         }
         .task { if store.nexusAccount == nil { await store.refreshNexusAccount() } }
@@ -185,7 +186,7 @@ private struct InstalledNexusMods: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Installed").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
             if mods.isEmpty {
-                Text("No Nexus mod installed by MacHub yet.").foregroundStyle(Theme.textSecondary)
+                Text("No mod installed by MacHub yet.").foregroundStyle(Theme.textSecondary)
             }
             ForEach(mods) { mod in
                 HStack(spacing: 12) {
@@ -193,8 +194,14 @@ private struct InstalledNexusMods: View {
                         .toggleStyle(.switch).labelsHidden()
                     VStack(alignment: .leading, spacing: 2) {
                         Text(verbatim: mod.name).foregroundStyle(Theme.textPrimary)
-                        Text(verbatim: "\(mod.version) · \(mod.files.count) files · \(mod.installedAt.formatted(date: .abbreviated, time: .omitted))")
-                            .font(.caption).foregroundStyle(Theme.textSecondary)
+                        Group {
+                            if mod.source == "file" {
+                                Text("From a file · \(mod.files.count) files · \(mod.installedAt.formatted(date: .abbreviated, time: .omitted))")
+                            } else {
+                                Text(verbatim: "\(mod.version) · \(mod.files.count) files · \(mod.installedAt.formatted(date: .abbreviated, time: .omitted))")
+                            }
+                        }
+                        .font(.caption).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
                     if let message = store.nexusMessages[mod.modID] { Text(verbatim: message).font(.caption).foregroundStyle(Theme.textSecondary) }
@@ -209,6 +216,78 @@ private struct InstalledNexusMods: View {
         } message: {
             Text("Its files go to the Trash, and any game file it replaced is put back.")
         }
+    }
+}
+
+/// Sites without a download API (Overtake, AssettoCorsa.club, BeamNG's repository): MacHub opens them, then offers
+/// to install what the user downloads there. Also takes any archive or folder the user already has.
+private struct OtherModSources: View {
+    let title: Title
+    @Environment(LibraryStore.self) private var store
+    @State private var watch = DownloadsWatch()
+    @State private var choosing = false
+    @State private var message: String?
+
+    var body: some View {
+        let sources = ModSupport.otherSources(appID: title.steamAppID)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Other sites").font(.title2.weight(.bold)).foregroundStyle(Theme.textPrimary)
+            Text(sources.isEmpty
+                 ? "Downloaded a mod elsewhere? Add the archive (.zip, .7z, .rar) or the unpacked folder: MacHub puts it in the right place and can disable or remove it."
+                 : "These sites have no download service MacHub may use. Download the mod there: MacHub notices the file in your Downloads folder and installs it in one click.")
+                .font(.callout).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 10) {
+                ForEach(sources, id: \.url) { source in
+                    Button {
+                        watch.start()
+                        NSWorkspace.shared.open(source.url)
+                    } label: {
+                        Label(source.name, systemImage: "arrow.up.right.square")
+                    }
+                    .buttonStyle(SecondaryActionStyle())
+                }
+                Button {
+                    choosing = true
+                } label: {
+                    Label("Add a file or folder…", systemImage: "plus")
+                }
+                .buttonStyle(SecondaryActionStyle())
+                .disabled(store.localModWork != nil)
+            }
+            if watch.isWatching {
+                Label("Watching your Downloads folder for the next archive (15 minutes at most).", systemImage: "eye")
+                    .font(.callout).foregroundStyle(Theme.textSecondary)
+                Button("Stop watching") { watch.stop() }.buttonStyle(.link)
+            }
+            if let file = watch.found {
+                HStack(spacing: 12) {
+                    Image(systemName: "shippingbox.fill").font(.title2).foregroundStyle(Theme.textPrimary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("New download: \(file.lastPathComponent)").font(.headline).foregroundStyle(Theme.textPrimary)
+                        Text("Install it in \(title.name)?").font(.callout).foregroundStyle(Theme.textSecondary)
+                    }
+                    Spacer()
+                    Button("Not this one") { watch.dismissFound() }
+                    Button("Install") {
+                        watch.dismissFound()
+                        Task { message = await store.installLocalMod(file, for: title) }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding(14)
+                .background(Theme.surfaceRaised, in: .rect(cornerRadius: 12))
+            }
+            if let work = store.localModWork {
+                HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Installing \(work)…") }
+                    .font(.callout).foregroundStyle(Theme.textSecondary)
+            }
+            if let message { Text(verbatim: message).font(.callout).foregroundStyle(Theme.textSecondary) }
+        }
+        .fileImporter(isPresented: $choosing, allowedContentTypes: [.zip, .folder, .data]) { result in
+            guard case .success(let url) = result else { return }
+            Task { message = await store.installLocalMod(url, for: title) }
+        }
+        .onDisappear { watch.stop() }
     }
 }
 

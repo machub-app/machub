@@ -3,11 +3,12 @@ import AppKit
 /// Nexus Mods downloads and installs. The catalog itself is public; the account (personal API key) is only needed to
 /// list a mod's files and to download.
 extension LibraryStore {
-    /// The installer for a title's mods, when the game is one MacHub knows and it lives in a MacHub prefix.
+    /// The installer for a title's mods, when the game is one MacHub knows, in a MacHub prefix or a Whisky bottle.
     func nexusInstaller(for title: Title) -> NexusModInstaller? {
         guard let appID = title.steamAppID, let domain = NexusMods.domains[appID], let install = title.install,
-              let prefix = prefixes.first(where: { $0.name == install.bottle }),
-              let layout = NexusModInstaller.layout(appID: appID, installPath: install.path, prefix: prefix.url)
+              let environment = prefixes.first(where: { $0.name == install.bottle })?.url
+                ?? registeredBottles.first(where: { $0.name == install.bottle })?.url,
+              let layout = NexusModInstaller.layout(appID: appID, installPath: install.path, prefix: environment)
         else { return nil }
         return NexusModInstaller(layout: layout, dataFolder: LocalData.directory.appending(path: "mods/nexus/\(domain)"))
     }
@@ -96,6 +97,27 @@ extension LibraryStore {
         nexusRevision += 1
     }
 
+    /// Installs a mod the user downloaded from another site (an archive or an unpacked folder), with the same
+    /// checks, backups and enable/disable as a Nexus download. Returns the message shown to the user.
+    @discardableResult
+    func installLocalMod(_ url: URL, for title: Title) async -> String {
+        guard let installer = nexusInstaller(for: title) else {
+            return String(localized: "MacHub can't find this game's folder.")
+        }
+        // Local imports get negative IDs so they never collide with Nexus mod IDs.
+        let id = -Int(Date.now.timeIntervalSince1970 * 1000) % 1_000_000_000_000
+        let name = url.deletingPathExtension().lastPathComponent
+        localModWork = name
+        defer { localModWork = nil; nexusRevision += 1 }
+        do {
+            let record = try await installer.install(archive: url, fileName: url.lastPathComponent, modID: id, fileID: 0,
+                                                     name: name, version: "", source: "file")
+            return String(localized: "Installed \(record.name) (\(record.files.count) files)")
+        } catch {
+            return Self.describeNexus(error)
+        }
+    }
+
     func setNexusMod(_ mod: NexusModInstaller.Installed, enabled: Bool, for title: Title) {
         do { try nexusInstaller(for: title)?.setEnabled(mod, enabled) } catch { nexusMessages[mod.modID] = Self.describeNexus(error) }
         nexusRevision += 1
@@ -112,7 +134,7 @@ extension LibraryStore {
         case NexusMods.Failure.invalidKey: String(localized: "Nexus Mods refused the API key. Check it in Settings › Mods.")
         case NexusMods.Failure.premiumRequired: String(localized: "Nexus Mods only allows direct downloads for Premium members. Use “Mod Manager Download” on the mod's page.")
         case NexusMods.Failure.http(let code): String(localized: "Nexus Mods answered HTTP \(code).")
-        case NexusModInstaller.Failure.unsupportedFormat(let ext): String(localized: "This file is a .\(ext) archive. MacHub installs .zip files; for others, unpack it and copy it yourself.")
+        case NexusModInstaller.Failure.unsupportedFormat(let ext): String(localized: "This file is a .\(ext) file. MacHub installs .zip, .7z and .rar archives, or a folder you unpacked yourself.")
         case NexusModInstaller.Failure.unsafeEntry(let entry): String(localized: "The archive was refused: it tries to write outside the game (\(entry)).")
         case NexusModInstaller.Failure.nothingRecognised: String(localized: "MacHub didn't recognise this mod's layout for this game.")
         case NexusModInstaller.Failure.extraction(let detail): String(localized: "The archive couldn't be unpacked: \(detail)")

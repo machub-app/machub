@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 /// A Windows environment (Wine prefix) owned by MacHub. Its settings live in `prefix.json` inside the prefix.
@@ -35,6 +36,11 @@ struct InstalledPrefix: Identifiable, Equatable, Sendable {
         BottleInfo(url: url, name: settings.name, windowsVersion: settings.windowsVersion,
                    isRegistered: true, hasDriveC: hasDriveC, engine: .embedded)
     }
+}
+
+extension WinePrefix {
+    /// pipe2 exists in libSystem from macOS 27 on. Engines built with the macOS 27 SDK call it without checking.
+    static var systemHasPipe2: Bool { dlsym(UnsafeMutableRawPointer(bitPattern: -2), "pipe2") != nil }
 }
 
 enum PrefixError: Error, Equatable {
@@ -177,12 +183,18 @@ struct PrefixStore: Sendable {
     }
 
     /// Exit code plus the last meaningful lines Wine printed (empty when Wine printed nothing, as on a crash).
-    static func describeExit(_ result: ProcessResult) -> String {
+    static func describeExit(_ result: ProcessResult, systemHasPipe2: Bool = WinePrefix.systemHasPipe2) -> String {
         let lines = (result.stderr + "\n" + result.stdout).split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
         let tail = lines.suffix(4).joined(separator: "\n")
         let code = String(localized: "Wine stopped with code \(Int(result.status)).")
-        return tail.isEmpty ? code + " " + String(localized: "It printed nothing.") : code + "\n" + tail
+        var text = tail.isEmpty ? code + " " + String(localized: "It printed nothing.") : code + "\n" + tail
+        // Signal 11 before any output, on a macOS without pipe2: the engine was built with a newer SDK and Wine's
+        // first call to its server jumps to the missing function (verified 2026-10-20, engine 1.0.5, macOS 26.5.2).
+        if [11, 139].contains(result.status), !systemHasPipe2 {
+            text += "\n" + String(localized: "This Windows engine was built for a newer macOS: it uses a system function (pipe2) that this version of macOS doesn't have, so Wine crashes as it starts. A rebuilt engine is needed.")
+        }
+        return text
     }
 }
 

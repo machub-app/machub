@@ -54,84 +54,14 @@ struct RootView: View {
     @FocusState private var searchFocused: Bool
     @AppStorage("whiskyCmdPath") private var customPath = ""
 
+    // The window is built in stages: one long modifier chain is too much for the type checker.
     var body: some View {
-        NavigationSplitView {
-            List(selection: $navigation.selection) {
-                ForEach([SidebarItem.home, .discover, .library, .software], id: \.self) { item in
-                    Label(item.label, systemImage: item.symbol).tag(item)
-                }
-            }
-            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
-            .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 8) {
-                    UpdateChip()
-                    SetupChip { navigation.selection = .settings }
-                    ControllerChip { navigation.selection = .settings }
-                    ProfileBar(isInSettings: navigation.selection == .settings) { navigation.selection = .settings }
-                }
-                .padding(12)
-                .animation(.snappy, value: controllers.controllers.count)
-                .animation(.snappy, value: store.engineState)
-                .animation(.snappy, value: store.steamPrefix?.url)
-                .animation(.snappy, value: updater.state)
-            }
-        } detail: {
-            NavigationStack(path: $path) {
-                Group {
-                    if query.trimmingCharacters(in: .whitespaces).isEmpty {
-                        page
-                    } else {
-                        GlobalSearchView(query: query) {
-                            discover.term = query
-                            query = ""
-                            navigation.selection = .discover
-                            Task { await discover.reload() }
-                        }
-                    }
-                }
-                .navigationDestination(for: Title.self) { TitleDetailView(title: $0) }
-                .navigationDestination(for: ModsRoute.self) { ModsView(title: $0.title) }
-                .navigationDestination(for: SettingsPage.self) { page in
-                    switch page {
-                    case .controllers: ControllersView()
-                    }
-                }
-            }
-            .background { AmbientBackdrop(title: store.spotlight) }
+        chrome
+        .onAppear {
+            controllers.start()
+            // Volumes the user set stay applied from launch; otherwise nothing touches audio until Settings › Sound.
+            if AppVolumeMixer.shared.hasSavedSettings { AppVolumeMixer.shared.start() }
         }
-        .overlay { LaunchOverlay() }
-        .dropDestination(for: URL.self) { urls, _ in
-            let windows = urls.filter(WindowsFile.isCandidate)
-            inbox.receive(windows)
-            return !windows.isEmpty
-        }
-        .sheet(item: $importSession, onDismiss: {
-            Task { await store.refreshWhisky(customPath: customPath) }
-            openNextImport()
-        }) { session in
-            InstallerImportView(session: session)
-        }
-        .fileImporter(isPresented: $choosingInstaller, allowedContentTypes: WindowsFile.contentTypes) { result in
-            if case .success(let url) = result { inbox.receive([url]) }
-        }
-        .onChange(of: inbox.pending) { openNextImport() }
-        .onChange(of: nexusInbox.pending) {
-            let links = nexusInbox.pending
-            nexusInbox.pending = []
-            for link in links { Task { await store.handle(link) } }
-        }
-        .onChange(of: linkInbox.pending) { openNextLink() }
-        // A shortcut can open MacHub cold: its link waits until the installed games are known.
-        .onChange(of: store.report == nil) { openNextLink() }
-        .onChange(of: navigation.installRequest) { choosingInstaller = true }
-        .toolbar(store.presentedLaunch == nil ? .automatic : .hidden, for: .windowToolbar)
-        .searchable(text: $query, placement: .toolbar, prompt: Text("Search games and software"))
-        .searchFocused($searchFocused)
-        .environment(store)
-        .environment(discover)
-        .environment(navigation)
-        .environment(controllers)
-        .onAppear { controllers.start() }
         .task {
             // `-installUpdateNow YES` (a launch argument, never saved): checks and installs at once. Used to test updates.
             if UserDefaults.standard.bool(forKey: "installUpdateNow") {
@@ -182,6 +112,96 @@ struct RootView: View {
                 navigation.selection = .settings
             }
         }
+    }
+
+    /// Sidebar and page stack.
+    private var window: some View {
+        NavigationSplitView {
+            List(selection: $navigation.selection) {
+                ForEach([SidebarItem.home, .discover, .library, .software], id: \.self) { item in
+                    Label(item.label, systemImage: item.symbol).tag(item)
+                }
+            }
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 8) {
+                    UpdateChip()
+                    SetupChip { navigation.selection = .settings }
+                    ControllerChip { navigation.selection = .settings }
+                    ProfileBar(isInSettings: navigation.selection == .settings) { navigation.selection = .settings }
+                }
+                .padding(12)
+                .animation(.snappy, value: controllers.controllers.count)
+                .animation(.snappy, value: store.engineState)
+                .animation(.snappy, value: store.steamPrefix?.url)
+                .animation(.snappy, value: updater.state)
+            }
+        } detail: {
+            NavigationStack(path: $path) {
+                Group {
+                    if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                        page
+                    } else {
+                        GlobalSearchView(query: query) {
+                            discover.term = query
+                            query = ""
+                            navigation.selection = .discover
+                            Task { await discover.reload() }
+                        }
+                    }
+                }
+                .navigationDestination(for: Title.self) { TitleDetailView(title: $0) }
+                .navigationDestination(for: ModsRoute.self) { ModsView(title: $0.title) }
+                .navigationDestination(for: SettingsPage.self) { page in
+                    switch page {
+                    case .controllers: ControllersView()
+                    }
+                }
+            }
+            .background { AmbientBackdrop(title: store.spotlight) }
+        }
+    }
+
+    /// Imports, Nexus and MacHub links, and the launch screen over the window.
+    private var routedWindow: some View {
+        window
+        .overlay { LaunchOverlay() }
+        .dropDestination(for: URL.self) { urls, _ in
+            let windows = urls.filter(WindowsFile.isCandidate)
+            inbox.receive(windows)
+            return !windows.isEmpty
+        }
+        .sheet(item: $importSession, onDismiss: {
+            Task { await store.refreshWhisky(customPath: customPath) }
+            openNextImport()
+        }) { session in
+            InstallerImportView(session: session)
+        }
+        .fileImporter(isPresented: $choosingInstaller, allowedContentTypes: WindowsFile.contentTypes) { result in
+            if case .success(let url) = result { inbox.receive([url]) }
+        }
+        .onChange(of: inbox.pending) { openNextImport() }
+        .onChange(of: nexusInbox.pending) {
+            let links = nexusInbox.pending
+            nexusInbox.pending = []
+            for link in links { Task { await store.handle(link) } }
+        }
+        .onChange(of: linkInbox.pending) { openNextLink() }
+        // A shortcut can open MacHub cold: its link waits until the installed games are known.
+        .onChange(of: store.report == nil) { openNextLink() }
+        .onChange(of: navigation.installRequest) { choosingInstaller = true }
+    }
+
+    /// Toolbar, search and the shared models every page reads.
+    private var chrome: some View {
+        routedWindow
+        .toolbar(store.presentedLaunch == nil ? .automatic : .hidden, for: .windowToolbar)
+        .searchable(text: $query, placement: .toolbar, prompt: Text("Search games and software"))
+        .searchFocused($searchFocused)
+        .environment(store)
+        .environment(discover)
+        .environment(navigation)
+        .environment(controllers)
     }
 
     private func openNextImport() {
@@ -395,7 +415,8 @@ private struct SetupChip: View {
                         symbol: "exclamationmark.triangle.fill", tint: Compatibility.unsupported.tint, buttonLabel: "Try Again",
                         run: { await $0.refreshEngine() })
         case .ready:
-            guard store.steamPrefix == nil else { return nil }
+            // Steam already installed (MacHub's environment or a Whisky bottle): nothing to set up.
+            guard !store.hasSteamForWindows else { return nil }
             switch store.steamSetup {
             case .working?:
                 return Step(title: "Setting up Steam for Windows…", detail: "This takes a minute or two the first time.",
