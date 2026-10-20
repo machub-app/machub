@@ -103,7 +103,9 @@ enum ProcessWatch {
     /// Every process running a binary from MacHub's runtimes (Wine itself, its wineserver, every Windows program).
     /// Wine programs show their Windows path in `ps`, so their binary path (proc_pidpath) is what identifies them.
     static func runtimeProcesses(under root: URL) -> [(pid: Int32, isServer: Bool)] {
-        let prefix = root.resolvingSymlinksInPath().path
+        // realpath, not resolvingSymlinksInPath(): Foundation turns /private/var into /var, the kernel reports /private/var.
+        let prefix = (realpath(root.path, nil).map { defer { free($0) }; return String(cString: $0) } ?? root.path)
+            .trimmingSuffix("/") + "/"
         var count = proc_listallpids(nil, 0)
         guard count > 0 else { return [] }
         var pids = [Int32](repeating: 0, count: Int(count) * 2)
@@ -146,4 +148,8 @@ enum ProcessWatch {
             return a < b
         }
     }
+}
+
+private extension String {
+    func trimmingSuffix(_ suffix: String) -> String { hasSuffix(suffix) ? String(dropLast(suffix.count)) : self }
 }
