@@ -4,6 +4,15 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [Unreleased]
+
+### Fixed
+- Games installed, updated or removed in a Whisky bottle (from MacHub or from Steam's own window) only showed after restarting MacHub. MacHub now reads every environment's Steam manifests, Whisky's bottles included, and follows them while it runs: the library changes within seconds.
+- A game wouldn't start when Steam for Windows had stopped taking launch requests (after a game closed, Steam stayed open but ignored them). MacHub notices that Steam logged nothing within 25 seconds, restarts it in that environment and launches the game again.
+- With Steam open in a Whisky bottle, MacHub believed its own Steam (engine 1.0.6) was already running and never started it. Each Steam is now matched to the engine that runs it.
+- MacHub 0.4.2 didn't compile with Xcode 26.6 (`ProcessWatch`).
+- Engine builds refuse to package an engine that needs functions missing from macOS 26 (`scripts/build-runtime.sh`, `tools/check-runtime-symbols.py`). Engine 1.0.6 checked on macOS 26.5.2.
+
 ## [0.4.2] - 2026-10-20
 
 ### Added

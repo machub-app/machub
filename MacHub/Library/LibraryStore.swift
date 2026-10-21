@@ -74,6 +74,7 @@ final class LibraryStore {
     private(set) var embeddedInstalled: [Title] = []
     /// Games found through `whisky games` in Whisky bottles (fallback engine).
     private(set) var whiskyInstalled: [Title] = []
+    private var libraryWatch: Task<Void, Never>?
     var installedTitles: [Title] { embeddedInstalled + whiskyInstalled }
     /// Games Steam is downloading in MacHub's prefixes, by App ID.
     private(set) var steamDownloads: [Int: SteamApp] = [:]
@@ -455,17 +456,26 @@ final class LibraryStore {
     /// Steam for Windows is available somewhere MacHub can use it, so the "Install Steam" step isn't needed.
     var hasSteamForWindows: Bool { steamPrefix != nil || whiskySteamBottle != nil }
 
-    /// Reads installed and downloading games from every MacHub prefix that has Steam. No Steam or Whisky call.
+    /// Every Windows environment that may hold Steam games: MacHub's prefixes and Whisky's set-up bottles.
+    var steamEnvironments: [(name: String, url: URL, isWhisky: Bool)] {
+        prefixes.map { ($0.name, $0.url, false) }
+            + whiskyBottles.filter(\.hasDriveC).compactMap { bottle in bottle.name.map { ($0, bottle.url, true) } }
+    }
+
+    /// Reads installed and downloading games from every environment that has Steam (MacHub's and Whisky's), straight
+    /// from Steam's manifests. No Steam or Whisky call, so it can run every few seconds.
     func refreshSteamGames() {
         var installed: [Title] = []
+        var inWhisky: [Title] = []
         var downloads: [Int: SteamApp] = [:]
         var updates: [Int: SteamApp] = [:]
-        for prefix in prefixes {
-            guard let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else { continue }
-            for app in SteamLibrary.apps(steamRoot: root, prefix: prefix.url) {
+        for environment in steamEnvironments {
+            guard let root = SteamLibrary.steamRoot(inPrefix: environment.url) else { continue }
+            for app in SteamLibrary.apps(steamRoot: root, prefix: environment.url) {
                 if app.isInstalled {
-                    installed.append(Title(game: app.game, bottle: prefix.name,
-                                           executables: ExecutableScanner.executables(in: URL(filePath: app.installPath))))
+                    let title = Title(game: app.game, bottle: environment.name,
+                                      executables: ExecutableScanner.executables(in: URL(filePath: app.installPath)))
+                    if environment.isWhisky { inWhisky.append(title) } else { installed.append(title) }
                     if app.needsUpdate || app.isUpdating || app.isValidating || app.isUninstalling { updates[app.appID] = app }
                 } else {
                     downloads[app.appID] = app
@@ -473,9 +483,10 @@ final class LibraryStore {
             }
         }
         embeddedInstalled = installed
+        if whiskyInstall != nil { whiskyInstalled = inWhisky }
         steamDownloads = downloads
         steamUpdates = updates
-        pendingSteamActions = pendingSteamActions.filter { id in installed.contains { $0.steamAppID == id } }
+        pendingSteamActions = pendingSteamActions.filter { id in (installed + inWhisky).contains { $0.steamAppID == id } }
         if !downloads.isEmpty || updates.values.contains(where: { $0.isUpdating || $0.isValidating || $0.isUninstalling }) { watchDownloads() }
         refreshOwnedIfSteamLibraryChanged()
     }
@@ -514,6 +525,28 @@ final class LibraryStore {
         steamDownloads[appID].flatMap { SteamLibrary.progress(of: $0) }
     }
 
+    /// Follows every environment's Steam library for as long as MacHub runs: an install, update or removal (from
+    /// MacHub or from Steam's own window) shows up within seconds, without restarting MacHub (asked 2026-10-21, after
+    /// Assetto Corsa was removed and BeamNG.drive installed and neither showed until a restart).
+    func watchSteamLibraries(interval: Duration = .seconds(4)) {
+        guard libraryWatch == nil else { return }
+        libraryWatch = Task { [weak self] in
+            var last: [String] = []
+            while !Task.isCancelled {
+                guard let self else { return }
+                let current = self.steamEnvironments.flatMap { environment -> [String] in
+                    guard let root = SteamLibrary.steamRoot(inPrefix: environment.url) else { return [] }
+                    return SteamLibrary.signature(steamRoot: root, prefix: environment.url)
+                }
+                if current != last {
+                    if !last.isEmpty { self.refreshSteamGames() }
+                    last = current
+                }
+                try? await Task.sleep(for: interval)
+            }
+        }
+    }
+
     /// Polls Steam's manifests while something is downloading, so progress and "Installed" appear without a refresh.
     private func watchDownloads() {
         guard downloadWatch == nil else { return }
@@ -523,11 +556,11 @@ final class LibraryStore {
                 guard let self else { return }
                 let requested = self.launchStates.values.contains(.installRequested)
                 self.refreshSteamGames()
-                for title in self.embeddedInstalled where self.launchStates[title.id] == .installRequested {
+                for title in self.installedTitles where self.launchStates[title.id] == .installRequested {
                     self.launchStates[title.id] = nil
                 }
                 let busy = self.steamUpdates.values.contains { $0.isUpdating || $0.isValidating || $0.isUninstalling }
-                    || self.pendingSteamActions.contains { id in self.embeddedInstalled.contains { $0.steamAppID == id } }
+                    || self.pendingSteamActions.contains { id in self.installedTitles.contains { $0.steamAppID == id } }
                 if self.steamDownloads.isEmpty && !requested && !busy { break }
             }
             self?.downloadWatch = nil
@@ -773,22 +806,13 @@ final class LibraryStore {
             pinnedTitles = []
             return
         }
-        let cli = WhiskyCLI(install: install)
-        var found: [Title] = []
-        var errors: [String] = []
-        for bottle in whiskyBottles where bottle.hasDriveC {
-            guard let name = bottle.name else { continue }
-            do {
-                found += try await cli.games(bottle: name).map {
-                    Title(game: $0, bottle: name, executables: ExecutableScanner.executables(in: URL(filePath: $0.installPath)))
-                }
-            } catch {
-                errors.append("\(name): \(Self.describe(error))")
-            }
-        }
-        whiskyInstalled = found
+        _ = install
+        // Games in Whisky's bottles come from Steam's own manifests, like MacHub's environments (same source as
+        // `whisky games`, without a process per bottle), and stay current through watchSteamLibraries().
+        refreshSteamGames()
         pinnedTitles = whiskyBottles.flatMap(WhiskyPins.titles(in:))
-        loadErrors = errors
+        loadErrors = []
+        watchSteamLibraries()
     }
 
     func refreshOwned() async {
