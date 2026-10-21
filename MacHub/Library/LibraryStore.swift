@@ -715,6 +715,22 @@ final class LibraryStore {
         return false
     }
 
+    /// Lets a game's executables that import d3d12.dll load it in a Whisky bottle (see D3D12Compat). Only those
+    /// executables get the per-app override.
+    func allowD3D12IfImported(install: Title.Install, bottle: BottleInfo, engine: CompatibilityEngine) async {
+        let folder = URL(filePath: install.path)
+        let needing = install.executables.map { folder.appending(path: $0) }.filter(D3D12Compat.importsD3D12)
+        guard !needing.isEmpty else { return }
+        // Written at every launch: `reg add /f` is idempotent, and user.reg on disk lags behind the live registry,
+        // so reading it could skip a key that was just removed.
+        for exe in needing {
+            for dll in D3D12Compat.dlls {
+                _ = try? await engine.run(#"C:\windows\system32\reg.exe"#, bottle: bottle.name ?? "",
+                                          arguments: D3D12Compat.regArguments(executable: exe.lastPathComponent, dll: dll), timeout: 60)
+            }
+        }
+    }
+
     /// The folder holding the Wine that runs a bottle: MacHub's runtimes, or Whisky's libraries.
     func engineRoot(forBottle name: String) -> URL {
         if registeredBottles.first(where: { $0.name == name })?.engine == .embedded { return RuntimeManager.live.directory }
@@ -974,6 +990,9 @@ final class LibraryStore {
             engine = embedded
         } else {
             engine = bottleEngine
+        }
+        if engine.kind == .whisky, let environment = registeredBottles.first(where: { $0.name == bottle }), let install = title.install {
+            await allowD3D12IfImported(install: install, bottle: environment, engine: engine)
         }
         recordLaunch(title)
         let target: ProcessWatch.Target = switch route {
