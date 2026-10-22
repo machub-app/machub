@@ -46,7 +46,7 @@ arguments for screenshots and checks: `-startPage home|discover|library|software
 `-settings.category engine|graphics|…`, `--open title:<steam app id>` (a game's page, e.g. `title:284160`),
 `-AppleLanguages "(fr)"`, `-installUpdateNow YES` (test the updater), `-playFirstTrailer YES` (open a game page's
 first trailer). `--open` also works in Release builds; `--play` and `--import` are debug-only. Check what ships with
-the Release build (`scripts/make-dmg.sh` leaves it in `build/dmg/dd`): 0.3.1 crashed only there (AVKit not linked).
+the Release build (`scripts/make-dmg.sh` leaves it in `build/dmg.noindex/dd`): 0.3.1 crashed only there (AVKit not linked).
 `xcodebuild … -quiet` sometimes prints "failed with exit code 0" while succeeding: check `** BUILD SUCCEEDED **`.
 
 ## Releasing
