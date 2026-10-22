@@ -55,6 +55,24 @@ struct AppUpdatesTests {
         #expect(!fm.fileExists(atPath: new.path))
         #expect(!fm.fileExists(atPath: old.path + ".previous"))
     }
+
+    @Test func swapScriptRemovesTheUpdateFolder() throws {
+        let fm = FileManager.default
+        let dir = fm.temporaryDirectory.appending(path: "machub-swap-\(UUID().uuidString)")
+        defer { try? fm.removeItem(at: dir) }
+        let old = dir.appending(path: "Apps/MacHub.app"), work = dir.appending(path: "machub-update-test")
+        let new = work.appending(path: "MacHub.app")
+        try fm.createDirectory(at: old, withIntermediateDirectories: true)
+        try fm.createDirectory(at: new, withIntermediateDirectories: true)
+        fm.createFile(atPath: work.appending(path: "MacHub.dmg").path, contents: Data("dmg".utf8))
+        let script = UpdateInstaller.swapScript(old: old, new: new, pid: 999_999).replacingOccurrences(of: "\nopen ", with: "\n: ")
+        let process = Process()
+        process.executableURL = URL(filePath: "/bin/sh")
+        process.arguments = ["-c", script]
+        try process.run(); process.waitUntilExit()
+        #expect(fm.fileExists(atPath: old.path))
+        #expect(!fm.fileExists(atPath: work.path))
+    }
 }
 
 /// Talks to the real GitHub: finds the newest release and stages it exactly as an update would. Opt-in:

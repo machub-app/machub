@@ -15,7 +15,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/build/release}"
-WORK="$ROOT/build/dmg"
+# ".noindex": Spotlight skips the folder, so its build copies never show up as more MacHub apps.
+WORK="$ROOT/build/dmg.noindex"
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
 if [[ "$SIGN_IDENTITY" == "-" ]]; then echo "Ad-hoc signature (no developer account)"; else echo "Signing with: $SIGN_IDENTITY"; fi
 
@@ -79,4 +80,7 @@ else
   echo "Not notarized: macOS will ask users to confirm the first launch"
 fi
 shasum -a 256 "$DMG" | tee "$DMG.sha256"
+# Forget the build copies in Launch Services: "Open With" and machub:// links must only find the installed MacHub.
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+[ -x "$LSREGISTER" ] && "$LSREGISTER" -u "$APP" "$STAGE/MacHub.app" >/dev/null 2>&1 || true
 echo "Done: $DMG"

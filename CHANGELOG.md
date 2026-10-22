@@ -4,6 +4,9 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+### Fixed
+- Every in-app update left a copy of its download (disk image and staging folder) in a temporary folder, and macOS listed each of them as another MacHub app. The folder is now removed after the update, and when an update fails.
+
 ## [0.4.2] - 2026-10-20
 
 ### Added
