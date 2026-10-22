@@ -4,6 +4,8 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-22
+
 ### Added
 - **Mac games through Steam for Mac**: games installed with Steam for Mac show as "Installed (Mac)" and Play starts them through Steam for Mac, without Wine. A game with a native Mac build that isn't installed offers "Install for Mac" (Steam for Mac downloads it and MacHub follows the progress) or its Steam page when the account doesn't own it; the Windows version stays in the … menu. Steam for Mac's library cache also fills the library when no Web API key is set.
 - **Nintendo Switch games through Astris** (a Switch emulator installed separately): the games Astris knows and the game files in its folders appear in the Library with their artwork and details from nlib, and Play opens them in Astris. Settings › Emulators shows Astris and its game folders. MacHub never provides games, firmware or keys.
@@ -12,6 +14,9 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 - Steam for Mac and Astris quit by themselves once the game MacHub opened them for is closed (unless they were already open; a setting in Settings › General keeps them open).
 - **Game renderer** for games that choose it by launch option: BeamNG.drive can start with Vulkan through MoltenVK instead of DirectX 11 (not tested yet; Automatic switches back).
 - Update checks at launch and then every hour while MacHub is open, so the sidebar card appears without going to Settings.
+
+### Fixed
+- Every in-app update left a copy of its download (disk image and staging folder) in a temporary folder, and macOS listed each of them as another MacHub app. The folder is now removed after the update, and when an update fails.
 
 ## [0.4.2] - 2026-10-20
 

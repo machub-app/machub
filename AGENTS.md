@@ -48,7 +48,7 @@ arguments for screenshots and checks: `-startPage home|discover|library|software
 `-settings.category engine|graphics|…`, `--open title:<steam app id>` (a game's page, e.g. `title:284160`; library ids work too, e.g. `title:switch:0100F2C0115B6000`),
 `-AppleLanguages "(fr)"`, `-installUpdateNow YES` (test the updater), `-playFirstTrailer YES` (open a game page's
 first trailer). `--open` also works in Release builds; `--play` and `--import` are debug-only. Check what ships with
-the Release build (`scripts/make-dmg.sh` leaves it in `build/dmg/dd`): 0.3.1 crashed only there (AVKit not linked).
+the Release build (`scripts/make-dmg.sh` leaves it in `build/dmg.noindex/dd`): 0.3.1 crashed only there (AVKit not linked).
 `xcodebuild … -quiet` sometimes prints "failed with exit code 0" while succeeding: check `** BUILD SUCCEEDED **`.
 
 ## Releasing
@@ -104,7 +104,10 @@ Logs: `~/Library/Logs/app.machub.MacHub/Wine/` (per launch, and `wineboot-*.log`
 - **DirectX 12 via D3DMetal**: import exists, routing disabled (`GPTKStore.canRunDirectX12 = false`); first check
   D3DMetal loads with upstream Wine 11, then route DX12 games and test one for real.
 - Not yet tried on a real game: installing a Nexus mod, uninstall/verify from the game menu.
-- Johan's "Wine couldn't set up the Windows environment" (empty message) wasn't reproduced; 0.2.0+ logs it.
-- Not yet tried for real: Play through Steam for Mac (Cyberpunk 2077, Dead Island 2 are installed on the dev Mac), "Install for Mac", and opening a Switch game in Astris.
+- Johan's "Wine couldn't set up the Windows environment" (code 11, empty log) was engine 1.0.5 calling `pipe2` on
+  macOS 26; engine 1.0.6 (MacHub 0.4.2) fixes it. Waiting for Johan to confirm on his Mac.
+- Verified by Mathieu (2026-10-20): Play through Steam for Mac (Cyberpunk 2077) and opening a Switch game in Astris
+  (Luigi's Mansion 3), BeamNG.drive 0.40 played (whether on Vulkan wasn't confirmed). Not yet tried: "Install for Mac", the automatic quit of Steam
+  for Mac and Astris after a game.
 - Screenshots of MacHub: capture its window only (`screencapture -l <window id>`), never the whole screen.
 - CI workflows (`runtime.yml`, `release.yml`) were never run. Japanese and Chinese translations are behind.

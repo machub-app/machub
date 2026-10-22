@@ -78,6 +78,16 @@ enum UpdateInstaller {
         let fm = FileManager.default
         let work = fm.temporaryDirectory.appending(path: "machub-update-\(UUID().uuidString)")
         try fm.createDirectory(at: work, withIntermediateDirectories: true)
+        do {
+            return try await stage(release, in: work, progress: progress)
+        } catch {
+            try? fm.removeItem(at: work)   // a failed update leaves nothing behind
+            throw error
+        }
+    }
+
+    private static func stage(_ release: AppRelease, in work: URL, progress: @escaping @Sendable (Double) -> Void) async throws -> URL {
+        let fm = FileManager.default
         let image = work.appending(path: "MacHub.dmg")
 
         let (bytes, response) = try await URLSession.shared.bytes(from: release.dmg)
@@ -137,10 +147,13 @@ enum UpdateInstaller {
     static func swapScript(old: URL, new: URL, pid: Int32) -> String {
         func quote(_ path: String) -> String { "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'" }
         let oldPath = quote(old.path), newPath = quote(new.path), backup = quote(old.path + ".previous")
+        // The staging folder (downloaded disk image, mount point) goes too, or every update leaves one behind.
+        let work = new.deletingLastPathComponent()
+        let cleanup = work.lastPathComponent.hasPrefix("machub-update-") ? "\nrm -rf \(quote(work.path))" : ""
         return """
         while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done
         rm -rf \(backup)
-        if mv \(oldPath) \(backup) && mv \(newPath) \(oldPath); then rm -rf \(backup); else [ -e \(oldPath) ] || mv \(backup) \(oldPath); fi
+        if mv \(oldPath) \(backup) && mv \(newPath) \(oldPath); then rm -rf \(backup); else [ -e \(oldPath) ] || mv \(backup) \(oldPath); fi\(cleanup)
         open \(oldPath)
         """
     }
