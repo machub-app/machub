@@ -34,6 +34,8 @@ final class LibraryStore {
         case cancelled
         case failed(String, log: String?)
 
+        var isRunningState: Bool { if case .running = self { true } else { false } }
+
         var isInProgress: Bool {
             switch self {
             case .preparing, .checkingBottle, .startingSteam, .startingProcess, .waitingForGame: true
@@ -74,6 +76,10 @@ final class LibraryStore {
     private(set) var steamDownloads: [Int: SteamApp] = [:]
     /// Installed games with an update pending or running, or being verified, by App ID.
     private(set) var steamUpdates: [Int: SteamApp] = [:]
+    /// Manifests of the games installed in MacHub's environments (build, last update), by App ID.
+    private(set) var steamManifests: [Int: SteamApp] = [:]
+    /// Steam's public build and the developer's announcements, per App ID, once a game page asked for them.
+    var gameUpdates: [Int: GameUpdates.Info] = [:]
     private(set) var steamSetup: SteamSetupState?
     private var downloadWatch: Task<Void, Never>?
     private var libraryCacheWatch: Task<Void, Never>?
@@ -84,6 +90,14 @@ final class LibraryStore {
     private(set) var pinnedTitles: [Title] = []
     /// Native Mac games MacHub manages mods for (today: Minecraft: Java Edition, when installed).
     private(set) var nativeTitles: [Title] = []
+    /// Nintendo Switch games from Astris, and nlib's details for them (by title ID).
+    var switchGames: [Astris.Game] = []
+    var switchInfo: [String: SwitchCatalog.Info] = [:]
+    /// Games in Steam for Mac's libraries (installed or downloading), by App ID.
+    var macSteamApps: [Int: SteamApp] = [:]
+    var macSteamWatch: Task<Void, Never>?
+    /// Games Steam for Mac was asked to install: followed until their manifest shows up.
+    var macInstallRequests: Set<Int> = []
     private(set) var featuredStore = SteamStore.Featured()
     private(set) var featuredState: StoreState = .idle
     private(set) var history: [String: Date] = LocalData.load([String: Date].self, from: "history.json") ?? [:]
@@ -121,7 +135,7 @@ final class LibraryStore {
     /// Steam games the user has: installed ∪ owned, merged per App ID.
     var library: [Title] {
         var byID: [String: Title] = [:]
-        for t in installedTitles + ownedTitles + nativeTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
+        for t in installedTitles + ownedTitles + nativeTitles + macSteamTitles + switchTitles + epicTitles { byID[t.id] = byID[t.id].map { $0.merged(with: t) } ?? t }
         return byID.values.map(enriched).sorted { lastPlayed($0) > lastPlayed($1) }
     }
 
@@ -154,7 +168,7 @@ final class LibraryStore {
     /// A title as the user has it: store/search entries pick up owned/installed state and cached details.
     func enriched(_ title: Title) -> Title {
         var t = title
-        for mine in (installedTitles + ownedTitles) where mine.id == title.id {
+        for mine in (installedTitles + ownedTitles + macSteamTitles + switchTitles) where mine.id == title.id {
             t = mine.merged(with: t)
         }
         if let id = t.steamAppID, let d = details[id] { t.apply(d) }
@@ -249,8 +263,9 @@ final class LibraryStore {
     /// The launch options a launch uses: the title's own, else highball-db's (e.g. BeamNG's `-gfx dx11`).
     func launchOptions(for title: Title) -> [String] {
         let own = settings(for: title)
-        if !own.argumentList.isEmpty || !own.useRecommended { return own.argumentList }
-        return recommendation(for: title)?.launchArgs ?? []
+        let base = !own.argumentList.isEmpty || !own.useRecommended ? own.argumentList : recommendation(for: title)?.launchArgs ?? []
+        let renderer = GameRenderers.renderers(appID: title.steamAppID).first { $0.id == own.gameRenderer }
+        return GameRenderers.apply(renderer, to: base)
     }
     private(set) var engineState: EngineState = .checking
     private(set) var prefixes: [InstalledPrefix] = []
@@ -455,10 +470,12 @@ final class LibraryStore {
         var installed: [Title] = []
         var downloads: [Int: SteamApp] = [:]
         var updates: [Int: SteamApp] = [:]
+        var manifests: [Int: SteamApp] = [:]
         for prefix in prefixes {
             guard let root = SteamLibrary.steamRoot(inPrefix: prefix.url) else { continue }
             for app in SteamLibrary.apps(steamRoot: root, prefix: prefix.url) {
                 if app.isInstalled {
+                    manifests[app.appID] = app
                     installed.append(Title(game: app.game, bottle: prefix.name,
                                            executables: ExecutableScanner.executables(in: URL(filePath: app.installPath))))
                     if app.needsUpdate || app.isUpdating || app.isValidating || app.isUninstalling { updates[app.appID] = app }
@@ -468,6 +485,7 @@ final class LibraryStore {
             }
         }
         embeddedInstalled = installed
+        steamManifests = manifests
         steamDownloads = downloads
         steamUpdates = updates
         pendingSteamActions = pendingSteamActions.filter { id in installed.contains { $0.steamAppID == id } }
@@ -485,11 +503,12 @@ final class LibraryStore {
         Task { await refreshOwned() }
     }
 
-    /// Every Steam for Windows whose library cache lists the account's games: the one in MacHub's environment and
-    /// the one in a Whisky bottle MacHub reuses.
+    /// Every Steam client on this Mac whose library cache lists the account's games: Steam for Windows in MacHub's
+    /// environment, the one in a Whisky bottle MacHub reuses, and Steam for Mac.
     var steamClientRoots: [URL] {
         [steamPrefix.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) },
-         whiskySteamBottle.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) }].compactMap { $0 }
+         whiskySteamBottle.flatMap { SteamLibrary.steamRoot(inPrefix: $0.url) },
+         MacSteam.app.map { _ in MacSteam.root }].compactMap { $0 }
     }
 
     /// While Steam for Windows waits for its first sign-in, look at its library cache every 15 s for 10 minutes.
@@ -665,6 +684,28 @@ final class LibraryStore {
         watchLibraryCache()
     }
 
+    static let quitSteamAfterGameKey = "steam.quitAfterGame"
+
+    /// Steam for Windows started for a game keeps eating memory and CPU once the game is gone. When MacHub started
+    /// it for this launch (it wasn't running before) and no other Steam game is running, quit it cleanly. A launch
+    /// that never started (Steam may be showing an update or a sign-in) or that the user stopped watching keeps Steam.
+    func quitSteamAfterGameIfUnneeded(_ id: Title.ID) async {
+        guard UserDefaults.standard.object(forKey: Self.quitSteamAfterGameKey) as? Bool ?? true,
+              launchSessions[id]?.steamAlreadyRunning == false, steamPrefix != nil else { return }
+        switch launchStates[id] {
+        case .closed?, .crashedAtStart?: break
+        default: return
+        }
+        let otherSteamGame = launchStates.contains { key, state in
+            key != id && (state.isInProgress || state.isRunningState) && launchSessions[key]?.route.isSteam == true
+        }
+        // Never in the middle of a download, update or verification.
+        refreshSteamGames()
+        let steamBusy = !steamDownloads.isEmpty || steamUpdates.values.contains { $0.isUpdating || $0.isValidating || $0.isUninstalling }
+        guard !otherSteamGame, !steamBusy else { return }
+        await stopSteam()
+    }
+
     /// Asks Steam to quit cleanly (it syncs cloud saves on the way out), then ends what's left in the prefix.
     func stopSteam() async {
         guard let runtime, let prefix = steamPrefix else { return }
@@ -722,6 +763,8 @@ final class LibraryStore {
 
     func refreshWhisky(customPath: String?) async {
         refreshNative()
+        refreshMacSteam()
+        refreshSwitch()
         let report = await DiagnosticsReport.make(customPath: customPath)
         self.report = report
         guard let install = whiskyInstall else {
@@ -970,6 +1013,7 @@ final class LibraryStore {
             }
         }
         if announced { await DiscordPresence.shared.stopped() }
+        if route.isSteam { await quitSteamAfterGameIfUnneeded(id) }
         var summary: PerformanceSummary?
         if engineSettings.metalHUD, let read = await PerformanceLog.read(since: sessionStart) {
             summary = read
@@ -1125,7 +1169,9 @@ final class LibraryStore {
         LocalData.save(imported, to: "software.json")
     }
 
-    private func recordLaunch(_ title: Title) {
+    func setLaunchState(_ state: LaunchState?, for id: Title.ID) { launchStates[id] = state }
+
+    func recordLaunch(_ title: Title) {
         history[title.id] = .now
         LocalData.save(history, to: "history.json")
     }

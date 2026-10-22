@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Settings, grouped by topic: a category column on the left, the category's options on the right.
 enum SettingsCategory: String, CaseIterable, Identifiable {
-    case general, steamAccount, epic, sound, steamWindows, engine, graphics, performance, input, environments, storage, mods, controllers, whisky, diagnostics
+    case general, steamAccount, epic, emulators, sound, steamWindows, engine, graphics, performance, input, environments, storage, mods, controllers, whisky, diagnostics
 
     var id: Self { self }
 
@@ -11,6 +11,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .general: "General"
         case .steamAccount: "Steam Account"
         case .epic: "Epic Games"
+        case .emulators: "Emulators"
         case .sound: "Sound"
         case .steamWindows: "Steam for Windows"
         case .engine: "Windows Engine"
@@ -31,6 +32,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .general: "gearshape"
         case .steamAccount: "person.crop.circle"
         case .epic: "bag"
+        case .emulators: "arcade.stick.console"
         case .sound: "speaker.wave.2"
         case .steamWindows: "arrow.down.app"
         case .engine: "cpu"
@@ -48,7 +50,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
 
     /// Groups in the category column.
     @MainActor static let groups: [(LocalizedStringKey, [SettingsCategory])] = [
-        ("MacHub", [.general, .steamAccount, .epic, .mods, .controllers, .sound]),
+        ("MacHub", [.general, .steamAccount, .epic, .emulators, .mods, .controllers, .sound]),
         ("Windows Games", [.engine, .steamWindows, .graphics, .performance, .input, .environments, .storage]),
         ("Advanced", [.whisky, .diagnostics]),
     ]
@@ -105,6 +107,7 @@ struct SettingsView: View {
         case .storage: StorageSettingsSection()
         case .mods: ModsSettingsSection()
         case .epic: EpicSettingsSection()
+        case .emulators: EmulatorSettingsSection()
         case .sound: SoundSettingsSection()
         case .controllers: ControllerSettingsSection()
         case .whisky: WhiskySettingsSections()
@@ -144,6 +147,14 @@ private struct GeneralSettingsSections: View {
         } footer: {
             Text("Steam for Windows and games keep running if MacHub quits without them. Quitting them closes Steam properly first (cloud saves sync), then ends anything left.")
         }
+        Section {
+            Toggle("Quit Steam for Mac or Astris when the game closes", isOn: Binding(
+                get: { LaunchersAfterGame.quitWhenGameCloses }, set: { LaunchersAfterGame.quitWhenGameCloses = $0 }))
+        } header: {
+            Text("Mac and Switch games")
+        } footer: {
+            Text("Only when MacHub opened them for the game: if Steam for Mac or Astris was already open, it stays open. Steam for Mac syncs your cloud saves before quitting.")
+        }
         UpdatesSection()
         if !DiscordPresence.clientID.isEmpty {
             Section {
@@ -159,7 +170,7 @@ private struct GeneralSettingsSections: View {
     }
 }
 
-/// Settings › General › Updates: the running version, a manual check and the daily automatic one.
+/// Settings › General › Updates: the running version, a manual check and the hourly automatic one.
 private struct UpdatesSection: View {
     @State private var updater = AppUpdater.shared
 
@@ -184,7 +195,7 @@ private struct UpdatesSection: View {
         } header: {
             Text("Updates")
         } footer: {
-            Text("MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at most once a day. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.")
+            Text("MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at launch, then every hour while it's open. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.")
         }
     }
 

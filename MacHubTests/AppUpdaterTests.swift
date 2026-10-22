@@ -88,3 +88,14 @@ struct RealUpdateTests {
         #expect(info["CFBundleShortVersionString"] as? String == release.version)
     }
 }
+
+struct UpdateScheduleTests {
+    @Test @MainActor func checksAtLaunchThenHourly() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        #expect(AppUpdater.isDue(lastCheck: nil, now: now))
+        #expect(!AppUpdater.isDue(lastCheck: now.addingTimeInterval(-59 * 60), now: now))
+        #expect(AppUpdater.isDue(lastCheck: now.addingTimeInterval(-60 * 60), now: now))
+        // A clock set back must not block checks forever.
+        #expect(AppUpdater.isDue(lastCheck: now.addingTimeInterval(3600), now: now))
+    }
+}

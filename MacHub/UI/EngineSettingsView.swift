@@ -482,6 +482,7 @@ struct DiagnosticsSettingsSection: View {
 /// Steam for Windows inside MacHub's engine: one button to set it up, then start or quit it.
 struct SteamEngineSection: View {
     @Environment(LibraryStore.self) private var store
+    @AppStorage(LibraryStore.quitSteamAfterGameKey) private var quitSteamAfterGame = true
 
     var body: some View {
         Section {
@@ -523,6 +524,11 @@ struct SteamEngineSection: View {
                     Button("Quit Steam") { Task { await store.stopSteam() } }
                         .disabled(isWorking)
                 }
+            }
+            if store.steamPrefix != nil {
+                Toggle("Quit Steam when the game closes", isOn: $quitSteamAfterGame)
+                Text("When MacHub started Steam for a game, it quits Steam once the game closes so it stops using memory and battery. Steam syncs your cloud saves on the way out, and it stays open during downloads.")
+                    .font(.callout).foregroundStyle(.secondary)
             }
             if !store.steamDownloads.isEmpty {
                 ForEach(store.steamDownloads.values.sorted { $0.name < $1.name }, id: \.appID) { app in

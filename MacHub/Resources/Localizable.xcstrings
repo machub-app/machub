@@ -343,6 +343,16 @@
         }
       }
     },
+    "A native macOS version exists on Steam: install Steam for Mac to get it. The Windows version stays in the … menu.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une version macOS native existe sur Steam : installe Steam pour Mac pour l'obtenir. La version Windows reste dans le menu « … »."
+          }
+        }
+      }
+    },
     "A native macOS version exists on Steam: use Steam for Mac rather than Whisky.": {
       "localizations": {
         "fr": {
@@ -371,6 +381,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Une version macOS native existe sur Steam : utilise Steam pour Mac plutôt que Wine."
+          }
+        }
+      }
+    },
+    "A native macOS version exists: Steam for Mac installs it. The Windows version stays in the … menu.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une version macOS native existe : Steam pour Mac l'installe. La version Windows reste dans le menu « … »."
           }
         }
       }
@@ -785,6 +805,16 @@
         }
       }
     },
+    "An update is available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une mise à jour est disponible"
+          }
+        }
+      }
+    },
     "An update is available. Steam applies it at the next launch, or choose Update Now in the … menu.": {
       "localizations": {
         "fr": {
@@ -939,6 +969,36 @@
         }
       }
     },
+    "Astris": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Astris"
+          }
+        }
+      }
+    },
+    "Astris installed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Astris installé"
+          }
+        }
+      }
+    },
+    "Astris knows this game, but its file wasn't found in Astris' game folders.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Astris connaît ce jeu, mais son fichier est introuvable dans les dossiers de jeux d'Astris."
+          }
+        }
+      }
+    },
     "Audio player": {
       "localizations": {
         "fr": {
@@ -967,6 +1027,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Code d'autorisation"
+          }
+        }
+      }
+    },
+    "Automatic": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatique"
           }
         }
       }
@@ -1059,6 +1129,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Retour à la fiche"
+          }
+        }
+      }
+    },
+    "BeamNG's Vulkan renderer, straight to Metal through MoltenVK. Not tested yet: if the game doesn't start or shows a black screen, choose Automatic again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rendu Vulkan de BeamNG, envoyé directement à Metal par MoltenVK. Pas encore testé : si le jeu ne démarre pas ou reste sur un écran noir, choisis de nouveau Automatique."
           }
         }
       }
@@ -1525,6 +1605,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vérification des rapports de compatibilité…"
+          }
+        }
+      }
+    },
+    "Checking for updates…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche de mises à jour…"
           }
         }
       }
@@ -2207,6 +2297,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法检查。"
+          }
+        }
+      }
+    },
+    "Couldn't check for updates": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de vérifier les mises à jour"
           }
         }
       }
@@ -2911,6 +3011,16 @@
         }
       }
     },
+    "DirectX 11": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DirectX 11"
+          }
+        }
+      }
+    },
     "DirectX 12 (D3DMetal)": {
       "localizations": {
         "fr": {
@@ -3181,6 +3291,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chaque environnement est une installation Windows séparée (un préfixe Wine) : réglages, sauvegardes et programmes installés restent à l'intérieur et ne se mélangent jamais avec un autre. En créer un prend environ une minute."
+          }
+        }
+      }
+    },
+    "Emulators": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Émulateurs"
           }
         }
       }
@@ -3629,6 +3749,16 @@
         }
       }
     },
+    "From the announcement of %@, the latest before this build was installed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D'après l'annonce du %@, la plus récente avant l'installation de cette build."
+          }
+        }
+      }
+    },
     "Full gamepad: two sticks and triggers": {
       "localizations": {
         "fr": {
@@ -3701,6 +3831,16 @@
         }
       }
     },
+    "Game Folders": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dossiers de jeux"
+          }
+        }
+      }
+    },
     "Game details are private": {
       "localizations": {
         "fr": {
@@ -3719,6 +3859,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "游戏详情为私密"
+          }
+        }
+      }
+    },
+    "Game file": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichier du jeu"
+          }
+        }
+      }
+    },
+    "Game file found": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichier du jeu trouvé"
+          }
+        }
+      }
+    },
+    "Game renderer": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rendu du jeu"
           }
         }
       }
@@ -4487,6 +4657,16 @@
         }
       }
     },
+    "Install for Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer pour Mac"
+          }
+        }
+      }
+    },
     "Install from File…": {
       "localizations": {
         "fr": {
@@ -4545,6 +4725,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installe le Minecraft Launcher depuis minecraft.net et joue une fois : MacHub gérera ensuite ses mods."
+          }
+        }
+      }
+    },
+    "Install the Windows Version in “%@”": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer la version Windows dans « %@ »"
           }
         }
       }
@@ -4623,6 +4813,16 @@
         }
       }
     },
+    "Installed (Mac)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installé (Mac)"
+          }
+        }
+      }
+    },
     "Installed Games": {
       "localizations": {
         "fr": {
@@ -4639,6 +4839,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Versions installées"
+          }
+        }
+      }
+    },
+    "Installed build": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build installée"
           }
         }
       }
@@ -4725,6 +4935,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已安装在容器“%@”中"
+          }
+        }
+      }
+    },
+    "Installed with Steam for Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installé avec Steam pour Mac"
           }
         }
       }
@@ -5067,6 +5287,26 @@
         }
       }
     },
+    "Latest announcement": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière annonce"
+          }
+        }
+      }
+    },
+    "Latest build on Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière build sur Steam"
+          }
+        }
+      }
+    },
     "Launch & Graphics": {
       "localizations": {
         "fr": {
@@ -5393,6 +5633,16 @@
         }
       }
     },
+    "Look Again": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chercher à nouveau"
+          }
+        }
+      }
+    },
     "Looking for what was installed…": {
       "localizations": {
         "fr": {
@@ -5441,6 +5691,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac"
+          }
+        }
+      }
+    },
+    "Mac and Switch games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeux Mac et Switch"
           }
         }
       }
@@ -5627,12 +5887,32 @@
         }
       }
     },
-    "MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at most once a day. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.": {
+    "MacHub lists the Switch games Astris knows and the game files in Astris' game folders, then opens them with Astris. It never provides games, firmware or console keys: use dumps of games you own.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHub cherche les nouvelles versions sur sa page GitHub (github.com/machub-app/machub) au plus une fois par jour. Chaque mise à jour est vérifiée avec son empreinte SHA-256 publiée, puis MacHub se remplace et se relance."
+            "value": "MacHub liste les jeux Switch connus d'Astris et les fichiers de jeux de ses dossiers, puis les ouvre avec Astris. Il ne fournit jamais de jeux, de firmware ni de clés de console : utilise les copies de jeux que tu possèdes."
+          }
+        }
+      }
+    },
+    "MacHub looks for new versions on its GitHub page (github.com/machub-app/machub) at launch, then every hour while it's open. An update is checked against its published SHA-256, then MacHub replaces itself and relaunches.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub cherche les nouvelles versions sur sa page GitHub (github.com/machub-app/machub) au lancement, puis toutes les heures tant qu'il est ouvert. Chaque mise à jour est vérifiée avec son empreinte SHA-256 publiée, puis MacHub se remplace et se relance."
+          }
+        }
+      }
+    },
+    "MacHub opens game files you already have with Astris. It doesn't provide games or console keys.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHub ouvre avec Astris les fichiers de jeux que tu as déjà. Il ne fournit ni jeux ni clés de console."
           }
         }
       }
@@ -6202,6 +6482,36 @@
         }
       }
     },
+    "Native Mac version, installed with Steam for Mac": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version Mac native, installée avec Steam pour Mac"
+          }
+        }
+      }
+    },
+    "Native Mac version, installed with Steam for Mac: it runs without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version Mac native, installée avec Steam pour Mac : elle tourne sans Wine."
+          }
+        }
+      }
+    },
+    "Native Mac version: Steam for Mac starts it, without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version Mac native : Steam pour Mac la lance, sans Wine."
+          }
+        }
+      }
+    },
     "Native button labels (SDL_GAMECONTROLLER_USE_BUTTON_LABELS=1)": {
       "localizations": {
         "fr": {
@@ -6230,6 +6540,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "原生 macOS 版本"
+          }
+        }
+      }
+    },
+    "Native macOS version: no Windows engine needed.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version macOS native : aucun moteur Windows nécessaire."
           }
         }
       }
@@ -6420,12 +6740,42 @@
         }
       }
     },
+    "Nintendo Switch": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nintendo Switch"
+          }
+        }
+      }
+    },
     "Nintendo Switch Pro Controller": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Manette Pro Nintendo Switch"
+          }
+        }
+      }
+    },
+    "Nintendo Switch game, played in the Astris emulator.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeu Nintendo Switch, lancé dans l'émulateur Astris."
+          }
+        }
+      }
+    },
+    "Nintendo Switch game: Astris isn't installed anymore.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeu Nintendo Switch : Astris n'est plus installé."
           }
         }
       }
@@ -6668,6 +7018,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pas encore d'adresse de téléchargement pour le moteur"
+          }
+        }
+      }
+    },
+    "No game folder found. Add one in Astris, or put your games in a folder named Game in your home folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun dossier de jeux trouvé. Ajoutes-en un dans Astris, ou range tes jeux dans un dossier nommé Game dans ton dossier personnel."
           }
         }
       }
@@ -7004,6 +7364,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "未连接。请在 Steam 官网登录：MacHub 永远不会看到你的密码，只会收到经 Steam 验证的公开 SteamID。"
+          }
+        }
+      }
+    },
+    "Not found in Astris' game folders. Add its folder in Astris.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introuvable dans les dossiers de jeux d'Astris. Ajoute son dossier dans Astris."
           }
         }
       }
@@ -7420,12 +7790,32 @@
         }
       }
     },
+    "Only when MacHub opened them for the game: if Steam for Mac or Astris was already open, it stays open. Steam for Mac syncs your cloud saves before quitting.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seulement quand MacHub les a ouverts pour le jeu : si Steam pour Mac ou Astris était déjà ouvert, il le reste. Steam pour Mac synchronise tes sauvegardes cloud avant de quitter."
+          }
+        }
+      }
+    },
     "Open .exe and .msi files with": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Ouvrir les fichiers .exe et .msi avec"
+          }
+        }
+      }
+    },
+    "Open Astris": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Astris"
           }
         }
       }
@@ -7684,6 +8074,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ouvre le panneau Contrôleurs de jeu de Wine (joy.cpl) dans cette bouteille. Il ne modifie rien."
+          }
+        }
+      }
+    },
+    "Opens the game in Astris.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre le jeu dans Astris."
           }
         }
       }
@@ -8254,6 +8654,16 @@
         }
       }
     },
+    "Published %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Publiée le %@"
+          }
+        }
+      }
+    },
     "Publisher": {
       "localizations": {
         "fr": {
@@ -8336,12 +8746,32 @@
         }
       }
     },
+    "Quit Steam for Mac or Astris when the game closes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter Steam pour Mac ou Astris à la fermeture du jeu"
+          }
+        }
+      }
+    },
     "Quit Steam for Windows to add this folder?": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Quitter Steam pour Windows pour ajouter ce dossier ?"
+          }
+        }
+      }
+    },
+    "Quit Steam when the game closes": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitter Steam à la fermeture du jeu"
           }
         }
       }
@@ -10396,6 +10826,16 @@
         }
       }
     },
+    "Starts with: %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancé avec : %@"
+          }
+        }
+      }
+    },
     "Status": {
       "localizations": {
         "fr": {
@@ -10511,6 +10951,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 账户设置"
+          }
+        }
+      }
+    },
+    "Steam applies it at the next launch, or right away with Update Now.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam l'applique au prochain lancement, ou tout de suite avec « Mettre à jour maintenant »."
           }
         }
       }
@@ -10675,6 +11125,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 未确认此次登录，请重试。"
+          }
+        }
+      }
+    },
+    "Steam for Mac downloads it. Update Now starts it right away.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam pour Mac la télécharge. « Mettre à jour maintenant » la lance tout de suite."
           }
         }
       }
@@ -10909,6 +11369,16 @@
         }
       }
     },
+    "Steam is updating this game": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam met ce jeu à jour"
+          }
+        }
+      }
+    },
     "Steam is updating this game. Play starts it once the update is done.": {
       "localizations": {
         "fr": {
@@ -11121,6 +11591,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Steam 出售此游戏的 Mac 版本：Mac 版 Steam 无需 Whisky 即可运行。"
+          }
+        }
+      }
+    },
+    "Steam sells a Mac build of this game: Steam for Mac runs it without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam vend une version Mac de ce jeu : Steam pour Mac la lance sans Wine."
+          }
+        }
+      }
+    },
+    "Steam sells a Mac build of this game: install Steam for Mac to run it without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steam vend une version Mac de ce jeu : installe Steam pour Mac pour la lancer sans Wine."
           }
         }
       }
@@ -11351,6 +11841,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "生存恐怖"
+          }
+        }
+      }
+    },
+    "Switch": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        }
+      }
+    },
+    "Switch games found": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeux Switch trouvés"
+          }
+        }
+      }
+    },
+    "Switch title ID": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Identifiant Switch"
           }
         }
       }
@@ -11591,6 +12111,16 @@
         }
       }
     },
+    "The Switch emulator Astris runs these games.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'émulateur Switch Astris fait tourner ces jeux."
+          }
+        }
+      }
+    },
     "The Windows environment “%@” no longer exists": {
       "localizations": {
         "fr": {
@@ -11751,6 +12281,16 @@
         }
       }
     },
+    "The folders added in Astris' library. Change them in Astris, then choose Look Again.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les dossiers ajoutés dans la bibliothèque d'Astris. Modifie-les dans Astris, puis choisis « Chercher à nouveau »."
+          }
+        }
+      }
+    },
     "The game has closed.": {
       "localizations": {
         "fr": {
@@ -11791,6 +12331,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "游戏已启动，但 %lld 秒后关闭：很可能在启动时崩溃。请查看前提条件和 Wine 日志。"
+          }
+        }
+      }
+    },
+    "The game's renderer from the launch options above or the community's recommendation.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rendu choisi par les options de lancement ci-dessus ou par la recommandation de la communauté."
           }
         }
       }
@@ -12103,6 +12653,16 @@
         }
       }
     },
+    "This game has a native Mac version: Steam for Mac downloads it, without Wine.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce jeu a une version Mac native : Steam pour Mac la télécharge, sans Wine."
+          }
+        }
+      }
+    },
     "This link is for a game MacHub doesn't manage mods for, or that isn't installed.": {
       "localizations": {
         "fr": {
@@ -12139,6 +12699,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fils d'exécution"
+          }
+        }
+      }
+    },
+    "Through MacHub's Direct3D layer (DXMT by default). Tested on this Mac.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Via la couche Direct3D de MacHub (DXMT par défaut). Testé sur ce Mac."
           }
         }
       }
@@ -12393,6 +12963,16 @@
         }
       }
     },
+    "Uninstall in Steam for Mac…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désinstaller dans Steam pour Mac…"
+          }
+        }
+      }
+    },
     "Uninstall…": {
       "localizations": {
         "fr": {
@@ -12477,6 +13057,16 @@
         }
       }
     },
+    "Up to date": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À jour"
+          }
+        }
+      }
+    },
     "Update": {
       "localizations": {
         "fr": {
@@ -12507,6 +13097,16 @@
         }
       }
     },
+    "Update available": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour disponible"
+          }
+        }
+      }
+    },
     "Update to %@": {
       "localizations": {
         "fr": {
@@ -12523,6 +13123,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mis à jour"
+          }
+        }
+      }
+    },
+    "Updated %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour le %@"
           }
         }
       }
@@ -12673,6 +13283,16 @@
         }
       }
     },
+    "Version named in the developer's announcements": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version citée dans les annonces du développeur"
+          }
+        }
+      }
+    },
     "Vibration": {
       "localizations": {
         "fr": {
@@ -12703,6 +13323,16 @@
         }
       }
     },
+    "View on Steam": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir sur Steam"
+          }
+        }
+      }
+    },
     "Volume of %@": {
       "localizations": {
         "fr": {
@@ -12719,6 +13349,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volume par application"
+          }
+        }
+      }
+    },
+    "Vulkan (MoltenVK)": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vulkan (MoltenVK)"
           }
         }
       }
@@ -12853,6 +13493,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quand MacHub se ferme"
+          }
+        }
+      }
+    },
+    "When MacHub started Steam for a game, it quits Steam once the game closes so it stops using memory and battery. Steam syncs your cloud saves on the way out, and it stays open during downloads.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand MacHub a démarré Steam pour un jeu, il quitte Steam une fois le jeu fermé, pour qu'il n'utilise plus de mémoire ni de batterie. Steam synchronise tes sauvegardes cloud en partant, et il reste ouvert pendant les téléchargements."
           }
         }
       }
@@ -13577,6 +14227,16 @@
         }
       }
     },
+    "Without a game file": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans fichier de jeu"
+          }
+        }
+      }
+    },
     "Without a key, MacHub reads your library from Steam for Windows on this Mac once you are signed in there (games shared through Steam Families included). A personal key from steamcommunity.com/dev/apikey (for the domain, “localhost” is fine) adds playtime and the games Steam for Windows hasn't shown yet. MacHub keeps it in the macOS Keychain only and never writes it to files or logs.": {
       "localizations": {
         "fr": {
@@ -13763,6 +14423,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "你的游戏库为空"
+          }
+        }
+      }
+    },
+    "Your own games": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tes propres jeux"
           }
         }
       }
