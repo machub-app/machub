@@ -39,5 +39,12 @@ for root in roots:
                 if sym not in exported:
                     problems.setdefault((sym, lib, "weak" if "weak" in line else "strong"), []).append(os.path.relpath(p, root))
 print(f"{files} Mach-O files checked, {len(exported)} SDK symbols")
+# dyld_stub_binder lives in dyld itself, not in a .tbd; _OBJC_EHTYPE_$_NSException is emitted by the compiler.
+known = {"dyld_stub_binder", "_OBJC_EHTYPE_$_NSException"}
+real = 0
 for (sym, lib, kind), ps in sorted(problems.items()):
-    print(f"MISSING {sym} ({lib}, {kind}) in {len(ps)}: {', '.join(ps[:4])}")
+    note = " (known false positive)" if sym in known else ""
+    real += sym not in known
+    print(f"MISSING {sym} ({lib}, {kind}) in {len(ps)}: {', '.join(ps[:4])}{note}")
+# Exit 1 when something real is missing, so build-runtime.sh can refuse to package the engine.
+sys.exit(1 if real else 0)

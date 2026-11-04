@@ -323,6 +323,25 @@ enum SteamLibrary {
         return root
     }
 
+    /// What changes on disk when Steam installs, updates, downloads or removes a game: each manifest's name, date and
+    /// size, and the folders under `steamapps/downloading`. Cheap to read; compared every few seconds.
+    static func signature(steamRoot: URL, prefix: URL, fileManager: FileManager = .default) -> [String] {
+        libraryFolders(steamRoot: steamRoot, prefix: prefix, fileManager: fileManager).flatMap { library -> [String] in
+            let steamapps = library.appending(path: "steamapps")
+            let keys: [URLResourceKey] = [.contentModificationDateKey, .fileSizeKey]
+            let manifests = ((try? fileManager.contentsOfDirectory(at: steamapps, includingPropertiesForKeys: keys)) ?? [])
+                .filter { $0.lastPathComponent.hasPrefix("appmanifest_") && $0.pathExtension == "acf" }
+                .map { url -> String in
+                    let values = try? url.resourceValues(forKeys: Set(keys))
+                    return "\(url.path)|\(values?.contentModificationDate?.timeIntervalSince1970 ?? 0)|\(values?.fileSize ?? 0)"
+                }
+            let downloading = ((try? fileManager.contentsOfDirectory(atPath: steamapps.appending(path: "downloading").path)) ?? [])
+                .map { "\(steamapps.path)/downloading/\($0)" }
+            return manifests + downloading
+        }
+        .sorted()
+    }
+
     static func apps(steamRoot: URL, prefix: URL, fileManager: FileManager = .default) -> [SteamApp] {
         var seen = Set<Int>()
         return libraryFolders(steamRoot: steamRoot, prefix: prefix).flatMap { library -> [SteamApp] in

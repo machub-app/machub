@@ -224,7 +224,9 @@ private struct StepList: View {
     private func note(_ step: LaunchTimeline.Step) -> LocalizedStringKey? {
         switch step {
         case .checkBottle: if let bottle = session.title.bottle { "Bottle “\(bottle)”" } else { nil }
-        case .startSteam: "Steam wasn't running in this bottle. Its first start can take a minute."
+        case .startSteam: session.steamRestarted
+            ? "Steam stopped answering requests. MacHub restarted it; it takes a minute to come back."
+            : "Steam wasn't running in this bottle. Its first start can take a minute."
         case .waitForGame: "Steam received the request. MacHub is watching for the game's own process."
         case .handOff: "Wine is opening the program."
         default: nil

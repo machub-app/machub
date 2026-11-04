@@ -100,11 +100,78 @@ enum ProcessWatch {
         for pid in pids where kill(pid, 0) == 0 { kill(pid, SIGKILL) }
     }
 
+    /// The real path of a folder as the kernel reports binaries (/private/var, not /var), ending with "/".
+    static func kernelPath(_ url: URL) -> String {
+        (realpath(url.path, nil).map { resolved in defer { free(resolved) }; return String(cString: resolved) } ?? url.path)
+            .trimmingSuffix("/") + "/"
+    }
+
+    static func binaryPath(of pid: Int32) -> String? {
+        var buffer = [CChar](repeating: 0, count: 4096)
+        guard proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 else { return nil }
+        return String(cString: buffer)
+    }
+
+    /// A process's environment variables (KERN_PROCARGS2). Readable for the user's own processes only; nil otherwise.
+    static func environment(of pid: Int32) -> [String: String]? {
+        var mib: [Int32] = [CTL_KERN, KERN_PROCARGS2, pid]
+        var size = 0
+        guard sysctl(&mib, 3, nil, &size, nil, 0) == 0, size > 4 else { return nil }
+        var buffer = [UInt8](repeating: 0, count: size)
+        guard sysctl(&mib, 3, &buffer, &size, nil, 0) == 0 else { return nil }
+        return parseProcArgs(Array(buffer.prefix(size)))
+    }
+
+    /// KERN_PROCARGS2 layout: argc (Int32), the executable path, padding NULs, argc arguments, then the environment.
+    static func parseProcArgs(_ bytes: [UInt8]) -> [String: String] {
+        guard bytes.count > 4 else { return [:] }
+        let argc = Int(bytes.withUnsafeBytes { $0.loadUnaligned(as: Int32.self) })
+        let strings = bytes[4...].split(separator: 0, omittingEmptySubsequences: true).map { String(decoding: $0, as: UTF8.self) }
+        var environment: [String: String] = [:]
+        for entry in strings.dropFirst(1 + argc) {
+            guard let equals = entry.firstIndex(of: "=") else { continue }
+            environment[String(entry[..<equals])] = String(entry[entry.index(after: equals)...])
+        }
+        return environment
+    }
+
+    /// Every process of one Windows environment: Wine binaries from `engineRoot` (the Windows programs and their
+    /// wineserver) whose WINEPREFIX is that environment. Other bottles and other engines are never included.
+    static func processes(inPrefix prefix: URL, engineRoot: URL, allPIDs: () -> [Int32] = allPIDs,
+                          binaryPath: (Int32) -> String? = binaryPath(of:),
+                          environment: (Int32) -> [String: String]? = environment(of:)) -> [Int32] {
+        let root = kernelPath(engineRoot)
+        let wanted = URL(filePath: prefix.path).standardizedFileURL.path.trimmingSuffix("/")
+        return allPIDs().filter { pid in
+            guard pid > 0, pid != getpid(), binaryPath(pid)?.hasPrefix(root) == true,
+                  let value = environment(pid)?["WINEPREFIX"] else { return false }
+            return URL(filePath: value).standardizedFileURL.path.trimmingSuffix("/") == wanted
+        }
+    }
+
+    static func allPIDs() -> [Int32] {
+        var count = proc_listallpids(nil, 0)
+        guard count > 0 else { return [] }
+        var pids = [Int32](repeating: 0, count: Int(count) * 2)
+        count = proc_listallpids(&pids, Int32(pids.count * MemoryLayout<Int32>.size))
+        return Array(pids.prefix(Int(max(count, 0))))
+    }
+
+    /// Whether Steam for Windows runs on one engine. Every Steam shows up in `ps` as `C:\…\steam.exe`, whichever
+    /// engine runs it; the Wine binary behind the process (Whisky's libraries or MacHub's runtimes) tells them apart.
+    /// Without this, Whisky's Steam made MacHub believe its own Steam was already started (2026-10-20).
+    static func isSteamRunning(in psOutput: String, engineRoot: URL, binaryPath: (Int32) -> String? = binaryPath(of:)) -> Bool {
+        let root = kernelPath(engineRoot)
+        return matches(in: psOutput, target: .executable(LaunchPlan.steamExecutable)).contains { match in
+            binaryPath(match.pid)?.hasPrefix(root) == true
+        }
+    }
+
     /// Every process running a binary from MacHub's runtimes (Wine itself, its wineserver, every Windows program).
     /// Wine programs show their Windows path in `ps`, so their binary path (proc_pidpath) is what identifies them.
     static func runtimeProcesses(under root: URL) -> [(pid: Int32, isServer: Bool)] {
         // realpath, not resolvingSymlinksInPath(): Foundation turns /private/var into /var, the kernel reports /private/var.
-        let prefix = (realpath(root.path, nil).map { defer { free($0) }; return String(cString: $0) } ?? root.path)
+        let prefix = (realpath(root.path, nil).map { resolved in defer { free(resolved) }; return String(cString: resolved) } ?? root.path)
             .trimmingSuffix("/") + "/"
         var count = proc_listallpids(nil, 0)
         guard count > 0 else { return [] }
@@ -129,6 +196,33 @@ enum ProcessWatch {
         let processes = runtimeProcesses(under: root)
         guard !processes.isEmpty, !processes.contains(where: \.isServer) else { return }
         await terminate(processes.map(\.pid).filter { parentPID(of: $0) != ownPID }, grace: .seconds(2))
+    }
+
+    /// When a process started (seconds since 1970), from the kernel.
+    static func startTime(of pid: Int32) -> TimeInterval? {
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size else { return nil }
+        return TimeInterval(info.pbi_start_tvsec) + TimeInterval(info.pbi_start_tvusec) / 1_000_000
+    }
+
+    /// Windows programs of one environment that outlived their wineserver: with no server, they can't answer, quit
+    /// or be reached by `wineserver -k`. A program always connects to a server that is already running, so one that
+    /// started before the environment's current wineserver (or with no wineserver at all) is an orphan.
+    static func orphans(inPrefix prefix: URL, engineRoot: URL, allPIDs: () -> [Int32] = allPIDs,
+                        binaryPath: (Int32) -> String? = binaryPath(of:),
+                        environment: (Int32) -> [String: String]? = environment(of:),
+                        startTime: (Int32) -> TimeInterval? = startTime(of:)) -> [Int32] {
+        let members = processes(inPrefix: prefix, engineRoot: engineRoot, allPIDs: allPIDs, binaryPath: binaryPath,
+                                environment: environment)
+        let servers = members.filter { binaryPath($0)?.hasSuffix("/wineserver") == true }
+        let serverStart = servers.compactMap(startTime).min()
+        return members.filter { pid in
+            guard !servers.contains(pid) else { return false }
+            guard let serverStart else { return true }
+            guard let started = startTime(pid) else { return false }
+            return started < serverStart
+        }
     }
 
     static func parentPID(of pid: Int32) -> Int32? {
