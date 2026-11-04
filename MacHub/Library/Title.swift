@@ -57,11 +57,17 @@ struct Title: Identifiable, Hashable, Sendable {
     var macAvailable: Bool?
     /// A game that runs natively on the Mac through its own launcher (Minecraft: Java Edition).
     var nativeApp: URL?
+    /// Installed through Steam for Mac (native build): path of its install folder there.
+    var macInstall: String?
+    /// Nintendo Switch game played in Astris: its title ID (16 hex digits).
+    var switchTitleID: String?
+    /// The Switch game's file that Astris opens; nil when Astris knows the game but the file wasn't found.
+    var switchFile: URL?
     /// Epic Games Store app name (Legendary's `app_name`): the game comes from the user's Epic library.
     var epicAppName: String?
 
     var availability: Availability {
-        if install != nil { .installed } else if owned != nil { .owned } else { .store }
+        if install != nil || macInstall != nil || switchFile != nil { .installed } else if owned != nil { .owned } else { .store }
     }
 
     var bottle: String? { install?.bottle }
@@ -94,6 +100,27 @@ struct Title: Identifiable, Hashable, Sendable {
     }
 
     static func epicID(_ appName: String) -> String { "epic:\(appName)" }
+
+    static func switchID(_ titleID: String) -> String { "switch:\(titleID.uppercased())" }
+
+    /// A Switch game Astris knows or that sits in its game folders, with nlib's details when they're loaded.
+    init(switch game: Astris.Game, info: SwitchCatalog.Info?) {
+        self.init(id: Self.switchID(game.titleID), name: info?.name ?? game.name, kind: .game, steamAppID: nil)
+        switchTitleID = game.titleID
+        switchFile = game.file
+        owned = Owned(playtimeMinutes: Int(game.playtime / 60), lastPlayed: game.lastPlayed)
+        if let info {
+            summary = info.summary
+            publisher = info.publisher
+            developer = info.developer ?? info.publisher
+            releaseYear = info.releaseYear
+            genres = info.genres
+            capsuleURL = info.icon
+            backgroundURL = info.banner
+        } else {
+            capsuleURL = SwitchCatalog.url(game.titleID).appending(path: "icon")
+        }
+    }
 
     /// A game from the user's Epic library; installed when Legendary has it on disk.
     init(epic game: Legendary.Game, install: Install?) {
@@ -133,6 +160,10 @@ struct Title: Identifiable, Hashable, Sendable {
         t.capsuleURL = t.capsuleURL ?? other.capsuleURL
         t.backgroundURL = t.backgroundURL ?? other.backgroundURL
         t.macAvailable = t.macAvailable ?? other.macAvailable
+        t.macInstall = t.macInstall ?? other.macInstall
+        if let mine = t.owned, let theirs = other.owned, (theirs.lastPlayed ?? .distantPast) > (mine.lastPlayed ?? .distantPast) {
+            t.owned?.lastPlayed = theirs.lastPlayed
+        }
         if t.name.hasPrefix("App "), !other.name.hasPrefix("App ") { t.name = other.name }
         return t
     }
@@ -144,7 +175,7 @@ struct Title: Identifiable, Hashable, Sendable {
         genres = details.genres.isEmpty ? genres : details.genres
         developer = details.developers.first ?? developer
         publisher = details.publishers.first ?? publisher
-        macAvailable = details.mac
+        macAvailable = details.mac || macInstall != nil
         capsuleURL = details.headerImage ?? capsuleURL
         backgroundURL = details.background ?? backgroundURL
         if let year = details.releaseDate.flatMap({ $0.firstMatch(of: /\b(19|20)\d{2}\b/) }).map({ Int($0.0)! }) {

@@ -68,11 +68,12 @@ struct RootView: View {
                 await updater.check()
                 await updater.install()
             } else {
-                await updater.checkIfDue()
+                await updater.watchForUpdates()
             }
         }
         .task(id: customPath) {
             await store.refresh(customPath: customPath)
+            openLibraryTitleFromLaunchArgument()
             #if DEBUG
             playFromLaunchArgument()
             if let i = CommandLine.arguments.firstIndex(of: "--open"), i + 1 < CommandLine.arguments.count,
@@ -241,7 +242,15 @@ struct RootView: View {
     #endif
 
     /// Deep link for screenshots and checks, also in release builds (it only navigates):
-    /// `--open discover|library|software|settings|title:<steam id>|search:<text>`.
+    /// `--open discover|library|software|settings|title:<steam id>|title:<title id>|search:<text>`.
+    /// `--open title:<library id>` (e.g. `title:switch:0100F2C0115B6000`), once the library has loaded.
+    private func openLibraryTitleFromLaunchArgument() {
+        let args = CommandLine.arguments
+        guard let i = args.firstIndex(of: "--open"), i + 1 < args.count, args[i + 1].hasPrefix("title:"), path.isEmpty,
+              let title = store.library.first(where: { $0.id == args[i + 1].dropFirst(6) }) else { return }
+        path.append(title)
+    }
+
     private func openFromLaunchArgument() {
         let args = CommandLine.arguments
         guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return }

@@ -21,6 +21,7 @@ struct TitleDetailView: View {
                 HStack(alignment: .top, spacing: 48) {
                     VStack(alignment: .leading, spacing: 28) {
                         about
+                        GameVersionPanel(title: title)
                         RequirementsPanel(title: title, details: details, detailsLoaded: detailsLoaded)
                         ModsEntry(title: title)
                         if title.install != nil, !title.isDemo {
@@ -160,6 +161,8 @@ private struct InfoPanel: View {
             row("Source", title.isDemo ? Text("Demo data") : nil)
             row("Bottle", title.bottle.map { Text(verbatim: $0) })
             row("Steam App ID", title.steamAppID.map { Text(verbatim: String($0)) })
+            row("Switch title ID", title.switchTitleID.map { Text(verbatim: $0) })
+            row("Game file", title.switchFile.map { Text(verbatim: $0.path) }, monospaced: true)
             row("Price on Steam", details?.isFree == true ? Text("Free") : details?.price.map { Text(verbatim: $0) })
             row("Metacritic", details?.metacritic.map { Text(verbatim: String($0)) })
             row("Playtime", title.owned.map { Text("\($0.playtimeMinutes / 60) h \($0.playtimeMinutes % 60) min") })
@@ -214,12 +217,23 @@ private struct RequirementsPanel: View {
             VStack(alignment: .leading, spacing: 0) {
                 if title.isDemo {
                     item(.info, "Demo title", "Sample content, not connected to Steam.")
+                } else if title.switchTitleID != nil {
+                    item(Astris.app != nil ? .ok : .missing, "Astris installed", Astris.app.map { $0.path } ?? "The Switch emulator Astris runs these games.")
+                    item(title.switchFile != nil ? .ok : .missing, "Game file found",
+                         title.switchFile?.lastPathComponent ?? "Not found in Astris' game folders. Add its folder in Astris.")
+                    item(.info, "Your own games", "MacHub opens game files you already have with Astris. It doesn't provide games or console keys.")
                 } else {
                     if title.kind == .game {
                         item(details != nil ? .ok : (detailsLoaded ? .missing : .unknown), "Listed on the Steam store",
                              details == nil && detailsLoaded ? "No store page returned for your region." : nil)
                         ownedItem
                     }
+                    if let path = title.macInstall {
+                        item(.ok, "Installed with Steam for Mac", path)
+                        item(.ok, "Runs on Mac", "Native macOS version: no Windows engine needed.")
+                    }
+                }
+                if !title.isDemo, title.macInstall == nil, title.switchTitleID == nil {
                     item(title.install != nil ? .ok : .missing, "Installed in a Windows environment",
                          title.bottle.map { "Environment “\($0)”" })
                     if title.install != nil {
@@ -235,7 +249,9 @@ private struct RequirementsPanel: View {
                     }
                     item(.unknown, "Runs on Mac", "Not verified.")
                     if details?.mac == true {
-                        item(.info, "Native macOS version", "Steam sells a Mac build of this game: Steam for Mac runs it without Wine.")
+                        item(.info, "Native macOS version", MacSteam.app == nil
+                             ? "Steam sells a Mac build of this game: install Steam for Mac to run it without Wine."
+                             : "Steam sells a Mac build of this game: Steam for Mac runs it without Wine.")
                     }
                 }
             }
@@ -432,6 +448,25 @@ private struct TitleGraphicsPanel: View {
                         }
                     }
                     .toggleStyle(.switch)
+                }
+                let renderers = GameRenderers.renderers(appID: title.steamAppID)
+                if !renderers.isEmpty {
+                    let chosen = renderers.first { $0.id == store.settings(for: title).gameRenderer }
+                    Picker("Game renderer", selection: Binding(
+                        get: { chosen?.id ?? "" },
+                        set: { new in
+                            var settings = store.settings(for: title)
+                            settings.gameRenderer = new.isEmpty ? nil : new
+                            store.updateSettings(settings, for: title)
+                        })) {
+                        Text("Automatic").tag("")
+                        ForEach(renderers) { Text(LocalizedStringKey($0.label)).tag($0.id) }
+                    }
+                    .frame(maxWidth: 380)
+                    Text(LocalizedStringKey(chosen?.detail ?? "The game's renderer from the launch options above or the community's recommendation."))
+                        .font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text("Starts with: \(store.launchOptions(for: title).joined(separator: " "))")
+                        .font(.caption.monospaced()).foregroundStyle(Theme.textSecondary)
                 }
                 Picker("Direct3D", selection: Binding(
                     get: { store.settings(for: title).graphics },

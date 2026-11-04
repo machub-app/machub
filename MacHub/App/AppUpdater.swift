@@ -78,6 +78,16 @@ enum UpdateInstaller {
         let fm = FileManager.default
         let work = fm.temporaryDirectory.appending(path: "machub-update-\(UUID().uuidString)")
         try fm.createDirectory(at: work, withIntermediateDirectories: true)
+        do {
+            return try await stage(release, in: work, progress: progress)
+        } catch {
+            try? fm.removeItem(at: work)   // a failed update leaves nothing behind
+            throw error
+        }
+    }
+
+    private static func stage(_ release: AppRelease, in work: URL, progress: @escaping @Sendable (Double) -> Void) async throws -> URL {
+        let fm = FileManager.default
         let image = work.appending(path: "MacHub.dmg")
 
         let (bytes, response) = try await URLSession.shared.bytes(from: release.dmg)
@@ -137,10 +147,13 @@ enum UpdateInstaller {
     static func swapScript(old: URL, new: URL, pid: Int32) -> String {
         func quote(_ path: String) -> String { "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'" }
         let oldPath = quote(old.path), newPath = quote(new.path), backup = quote(old.path + ".previous")
+        // The staging folder (downloaded disk image, mount point) goes too, or every update leaves one behind.
+        let work = new.deletingLastPathComponent()
+        let cleanup = work.lastPathComponent.hasPrefix("machub-update-") ? "\nrm -rf \(quote(work.path))" : ""
         return """
         while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done
         rm -rf \(backup)
-        if mv \(oldPath) \(backup) && mv \(newPath) \(oldPath); then rm -rf \(backup); else [ -e \(oldPath) ] || mv \(backup) \(oldPath); fi
+        if mv \(oldPath) \(backup) && mv \(newPath) \(oldPath); then rm -rf \(backup); else [ -e \(oldPath) ] || mv \(backup) \(oldPath); fi\(cleanup)
         open \(oldPath)
         """
     }
@@ -157,7 +170,7 @@ enum UpdateInstaller {
     }
 }
 
-/// Checks for a new MacHub at launch (at most once a day, unless turned off) and installs it on request.
+/// Checks for a new MacHub at launch and every hour (unless turned off) and installs it on request.
 @MainActor @Observable
 final class AppUpdater {
     static let shared = AppUpdater()
@@ -191,15 +204,37 @@ final class AppUpdater {
         }
     }
 
+    /// Automatic checks: at launch, then every hour while MacHub stays open, so the sidebar card shows up by itself.
+    static let checkInterval: TimeInterval = 3600
+
+    static func isDue(lastCheck: Date?, now: Date = .now) -> Bool {
+        guard let lastCheck else { return true }
+        return now.timeIntervalSince(lastCheck) >= checkInterval || now < lastCheck
+    }
+
     func checkIfDue() async {
-        guard automatic else { return }
-        if let lastCheck, Date.now.timeIntervalSince(lastCheck) < 24 * 3600, offered == nil { return }
+        guard automatic, Self.isDue(lastCheck: lastCheck) else { return }
         await check(quietly: true)
     }
 
+    /// Runs for the app's lifetime (a `.task` on the window): checks now if due, then once an hour.
+    func watchForUpdates() async {
+        await checkIfDue()
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(Self.checkInterval))
+            guard !Task.isCancelled else { return }
+            await checkIfDue()
+        }
+    }
+
     func check(quietly: Bool = false) async {
-        if case .downloading = state { return }
-        state = .checking
+        switch state {
+        case .downloading, .installing, .checking: return
+        default: break
+        }
+        let previous = state
+        // A quiet re-check keeps the card on screen instead of flashing "Checking…".
+        if !quietly || offered == nil { state = .checking }
         do {
             let newest = try await AppUpdates.fetchNewest()
             UserDefaults.standard.set(Date.now, forKey: AppUpdates.lastCheckKey)
@@ -210,7 +245,7 @@ final class AppUpdater {
             }
         } catch {
             // A failed automatic check (offline…) stays silent; a manual one says why.
-            state = quietly ? .idle : .failed(String(localized: "Couldn't reach GitHub. Check your connection and try again."))
+            state = quietly ? previous : .failed(String(localized: "Couldn't reach GitHub. Check your connection and try again."))
         }
     }
 
