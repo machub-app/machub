@@ -37,8 +37,28 @@ import Testing
         #expect(!D3D12Compat.importsD3D12(dir.appending(path: "launcher.exe")))
     }
 
-    @Test func overridesOnlyTheGivenExecutable() {
-        #expect(D3D12Compat.regArguments(executable: "BeamNG.drive.x64.exe", dll: "d3d12") ==
-                ["add", "HKCU\\Software\\Wine\\AppDefaults\\BeamNG.drive.x64.exe\\DllOverrides", "/v", "d3d12", "/d", "builtin", "/f"])
+    // Shape of the keys in Johan's bottle (user.reg, 2026-10-21).
+    @Test func recognisesTheOverrideAlreadyInTheRegistry() {
+        let complete = """
+        [Software\\\\Wine\\\\AppDefaults\\\\BeamNG.drive.x64.exe\\\\DllOverrides] 1792588796
+        #time=1dd615edd98c3ae
+        "d3d12"="builtin"
+        "d3d12core"="builtin"
+
+        [Software\\\\Wine\\\\DllOverrides] 1792588700
+        "d3d12"=""
+        """
+        #expect(D3D12Compat.hasOverride(userReg: complete, executable: "BeamNG.drive.x64.exe"))
+        #expect(!D3D12Compat.hasOverride(userReg: complete, executable: "Other.exe"))
+        let half = complete.replacingOccurrences(of: "\"d3d12core\"=\"builtin\"\n", with: "")
+        #expect(!D3D12Compat.hasOverride(userReg: half, executable: "BeamNG.drive.x64.exe"), "both DLLs are needed")
+    }
+
+    @Test func oneRegistryFileForEveryExecutable() {
+        let file = D3D12Compat.registryFile(executables: ["BeamNG.drive.x64.exe", "BeamNG.drive.arm64.exe"])
+        #expect(file.hasPrefix("Windows Registry Editor Version 5.00"))
+        #expect(file.contains("[HKEY_CURRENT_USER\\Software\\Wine\\AppDefaults\\BeamNG.drive.x64.exe\\DllOverrides]"))
+        #expect(file.components(separatedBy: "\"d3d12\"=\"builtin\"").count == 3)
+        #expect(file.components(separatedBy: "\"d3d12core\"=\"builtin\"").count == 3)
     }
 }

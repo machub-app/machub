@@ -5,6 +5,8 @@ All notable changes to MacHub. Versions follow [Semantic Versioning](https://sem
 ## [Unreleased]
 
 ### Fixed
+- A game launched after Steam for Windows had stayed open in a Whisky bottle for days spun for 3 minutes, then failed: Steam's web helper and the bottle's wineserver were stuck at high CPU and ignored every request, and `wineserver -k` couldn't stop them. MacHub now stops that bottle's Wine processes itself when Steam doesn't quit on request (matched by their `WINEPREFIX`, never another bottle's), clears programs a dead wineserver left behind before each launch, and quits the Steam of a Whisky bottle after the game it started, like MacHub's own Steam since 0.5.0.
+- The DirectX 12 setting for games such as BeamNG.drive is written once, in one call, instead of four Wine calls at every launch (up to a minute).
 - BeamNG.drive 0.40 wouldn't start in a Whisky bottle: its executable imports DirectX 12, which Whisky's recommended graphics mode (DXMT) disables, so Windows refused to load it (code c0000135). For an executable that imports `d3d12.dll`, MacHub now lets that executable only load it (Wine's per-app setting, which wins over Whisky's); other games keep falling back to Direct3D 11.
 - Games installed, updated or removed in a Whisky bottle (from MacHub or from Steam's own window) only showed after restarting MacHub. MacHub now reads every environment's Steam manifests, Whisky's bottles included, and follows them while it runs: the library changes within seconds.
 - A game wouldn't start when Steam for Windows had stopped taking launch requests (after a game closed, Steam stayed open but ignored them). MacHub notices that Steam logged nothing within 25 seconds, restarts it in that environment and launches the game again.

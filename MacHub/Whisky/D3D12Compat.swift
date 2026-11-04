@@ -45,8 +45,27 @@ enum D3D12Compat {
         return names
     }
 
-    /// `reg add` arguments for one executable and DLL.
-    static func regArguments(executable: String, dll: String) -> [String] {
-        ["add", "HKCU\\Software\\Wine\\AppDefaults\\\(executable)\\DllOverrides", "/v", dll, "/d", "builtin", "/f"]
+    /// Whether the bottle's user.reg already lets this executable load d3d12 (AppDefaults\<exe>\DllOverrides).
+    /// user.reg can lag behind the live registry by a few seconds; a missed key only costs one more import.
+    static func hasOverride(userReg: String, executable: String) -> Bool {
+        let header = "[Software\\\\Wine\\\\AppDefaults\\\\\(executable)\\\\DllOverrides]".lowercased()
+        let lines = userReg.lowercased().split(separator: "\n", omittingEmptySubsequences: false)
+        guard let start = lines.firstIndex(where: { $0.hasPrefix(header) }) else { return false }
+        var found = Set<String>()
+        for line in lines[(start + 1)...] {
+            if line.hasPrefix("[") { break }
+            for dll in dlls where line.hasPrefix("\"\(dll)\"=\"builtin\"") { found.insert(dll) }
+        }
+        return found.count == dlls.count
+    }
+
+    /// A .reg file setting d3d12 and d3d12core to builtin for each executable, for one `reg import`.
+    static func registryFile(executables: [String]) -> String {
+        var text = "Windows Registry Editor Version 5.00\r\n"
+        for exe in executables {
+            text += "\r\n[HKEY_CURRENT_USER\\Software\\Wine\\AppDefaults\\\(exe)\\DllOverrides]\r\n"
+            for dll in dlls { text += "\"\(dll)\"=\"builtin\"\r\n" }
+        }
+        return text
     }
 }

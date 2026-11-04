@@ -739,15 +739,18 @@ final class LibraryStore {
     func allowD3D12IfImported(install: Title.Install, bottle: BottleInfo, engine: CompatibilityEngine) async {
         let folder = URL(filePath: install.path)
         let needing = install.executables.map { folder.appending(path: $0) }.filter(D3D12Compat.importsD3D12)
+            .map(\.lastPathComponent)
         guard !needing.isEmpty else { return }
-        // Written at every launch: `reg add /f` is idempotent, and user.reg on disk lags behind the live registry,
-        // so reading it could skip a key that was just removed.
-        for exe in needing {
-            for dll in D3D12Compat.dlls {
-                _ = try? await engine.run(#"C:\windows\system32\reg.exe"#, bottle: bottle.name ?? "",
-                                          arguments: D3D12Compat.regArguments(executable: exe.lastPathComponent, dll: dll), timeout: 60)
-            }
-        }
+        let userReg = (try? String(contentsOf: bottle.url.appending(path: "user.reg"), encoding: .utf8)) ?? ""
+        let missing = needing.filter { !D3D12Compat.hasOverride(userReg: userReg, executable: $0) }
+        guard !missing.isEmpty else { return }
+        // One `reg import` for every key: each Wine call costs seconds (15 s each when the bottle's wineserver had to
+        // start, 2026-11-04), and BeamNG has several executables.
+        let file = FileManager.default.temporaryDirectory.appending(path: "machub-d3d12-\(UUID().uuidString).reg")
+        defer { try? FileManager.default.removeItem(at: file) }
+        guard (try? D3D12Compat.registryFile(executables: missing).write(to: file, atomically: true, encoding: .utf8)) != nil else { return }
+        _ = try? await engine.run(#"C:\windows\system32\reg.exe"#, bottle: bottle.name ?? "",
+                                  arguments: ["import", "Z:" + file.path.replacingOccurrences(of: "/", with: "\\")], timeout: 60)
     }
 
     /// The folder holding the Wine that runs a bottle: MacHub's runtimes, or Whisky's libraries.
@@ -768,13 +771,19 @@ final class LibraryStore {
             try? await Task.sleep(for: .seconds(2))
             if !ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: root) { return }
         }
-        if let embedded = engine as? EmbeddedWineEngine {
-            try? await embedded.stopAll(in: name)
-        } else {
-            let wineserver = root.appending(path: "Wine/bin/wineserver")
-            _ = try? await ProcessRunner.run(wineserver, ["-k"], timeout: 30, environment: ["WINEPREFIX": environment.url.path])
-        }
+        if let embedded = engine as? EmbeddedWineEngine { try? await embedded.stopAll(in: name) }
         try? await Task.sleep(for: .seconds(2))
+        if ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: root) { await forceStop(environment) }
+    }
+
+    /// Ends every Wine process of one environment, wineserver included: SIGTERM, then SIGKILL after 3 s.
+    /// `wineserver -k` isn't enough: after days, Steam's web helper and the bottle's wineserver were stuck at 86 % and
+    /// 52 % CPU and `wineserver -k` returned 1 at once, leaving Steam deaf to every launch (Johan's Mac, 2026-11-04).
+    /// Processes are matched by their WINEPREFIX and the engine's binaries, so other bottles are never touched.
+    func forceStop(_ environment: BottleInfo) async {
+        guard let name = environment.name else { return }
+        let pids = ProcessWatch.processes(inPrefix: environment.url, engineRoot: engineRoot(forBottle: name))
+        await ProcessWatch.terminate(pids)
     }
 
     static let quitSteamAfterGameKey = "steam.quitAfterGame"
@@ -784,7 +793,9 @@ final class LibraryStore {
     /// that never started (Steam may be showing an update or a sign-in) or that the user stopped watching keeps Steam.
     func quitSteamAfterGameIfUnneeded(_ id: Title.ID) async {
         guard UserDefaults.standard.object(forKey: Self.quitSteamAfterGameKey) as? Bool ?? true,
-              launchSessions[id]?.steamAlreadyRunning == false, steamPrefix != nil else { return }
+              launchSessions[id]?.steamAlreadyRunning == false,
+              let bottleName = launchSessions[id]?.title.bottle,
+              let environment = registeredBottles.first(where: { $0.name == bottleName }) else { return }
         switch launchStates[id] {
         case .closed?, .crashedAtStart?: break
         default: return
@@ -796,10 +807,28 @@ final class LibraryStore {
         refreshSteamGames()
         let steamBusy = !steamDownloads.isEmpty || steamUpdates.values.contains { $0.isUpdating || $0.isValidating || $0.isUninstalling }
         guard !otherSteamGame, !steamBusy else { return }
-        await stopSteam()
+        if environment.engine == .embedded {
+            await stopSteam()
+        } else {
+            await quitSteam(in: environment)
+        }
     }
 
     /// Asks Steam to quit cleanly (it syncs cloud saves on the way out), then ends what's left in the prefix.
+    /// Quits the Steam of a Whisky bottle the way stopSteam does for MacHub's: `-shutdown` (cloud saves sync), then
+    /// a forced stop if it is still there after 30 s. A Steam left open for days ends up stuck (see forceStop).
+    func quitSteam(in environment: BottleInfo) async {
+        guard let name = environment.name, let engine = engine(forBottle: name) else { return }
+        let root = engineRoot(forBottle: name)
+        Task.detached { _ = try? await engine.run(SteamSetup.steamExe, bottle: name, arguments: ["-shutdown"], timeout: 60) }
+        let deadline = ContinuousClock.now + .seconds(30)
+        while ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .seconds(2))
+            if !ProcessWatch.isSteamRunning(in: await ProcessWatch.snapshot(), engineRoot: root) { return }
+        }
+        await forceStop(environment)
+    }
+
     func stopSteam() async {
         guard let runtime, let prefix = steamPrefix else { return }
         let engine = EmbeddedWineEngine(runtime: runtime)
@@ -984,6 +1013,12 @@ final class LibraryStore {
             .steam(appID: appID)
         } else {
             .program(path: title.installPath ?? "")
+        }
+        // Programs a dead wineserver left behind keep Steam's files and ports, and an orphaned Steam would count as
+        // "already running", so MacHub wouldn't quit Steam after the game (seen 2026-11-04). Cleared first.
+        if let bottle = title.bottle, let environment = registeredBottles.first(where: { $0.name == bottle }) {
+            let orphans = ProcessWatch.orphans(inPrefix: environment.url, engineRoot: engineRoot(forBottle: bottle))
+            if !orphans.isEmpty { await ProcessWatch.terminate(orphans) }
         }
         let steamRunning: Bool
         if case .steam = route, let bottle = title.bottle {
